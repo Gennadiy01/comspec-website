@@ -15,7 +15,7 @@ const Header = () => {
         <div className="header-main">
           <Link to="/" className="logo-link">
             <img 
-              src="/images/logo.svg" 
+              src={process.env.PUBLIC_URL + '/images/logo.svg'} 
               alt="COMSPEC" 
               className="logo"
             />

@@ -6,12 +6,3 @@ cd/d "D:\Нове підприємство\MG\Сайт\Новий сайт 2025"
 запустити проект 
 npm start
 
-
-"homepage": "https://gennadiy01.github.io/comspec-website",
-це видалений рядок в package.json
-{
-  "name": "comspec-website",
-  "version": "0.1.0",
-  "private": true,
-  //"homepage": "https://gennadiy01.github.io/comspec-website",
-  "dependencies": {
