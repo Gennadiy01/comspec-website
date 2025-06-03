@@ -153,23 +153,24 @@ const SearchModal = ({ isOpen, onClose }) => {
   };
 
   // Обробка натискання Escape
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      searchInputRef.current?.focus();
+/* eslint-disable react-hooks/exhaustive-deps */
+useEffect(() => {
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      handleClose();
     }
+  };
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, handleClose]);
+  if (isOpen) {
+    document.addEventListener('keydown', handleEscape);
+    searchInputRef.current?.focus();
+  }
 
+  return () => {
+    document.removeEventListener('keydown', handleEscape);
+  };
+}, [isOpen]);
+/* eslint-enable react-hooks/exhaustive-deps */
   if (!isOpen) return null;
 
   return (
