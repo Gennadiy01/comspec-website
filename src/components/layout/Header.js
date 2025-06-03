@@ -153,6 +153,7 @@ const SearchModal = ({ isOpen, onClose }) => {
   };
 
   // Обробка натискання Escape
+ /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -168,7 +169,7 @@ const SearchModal = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen]); // Тільки isOpen в залежностях, handleClose стабільний
 
   if (!isOpen) return null;
 
