@@ -450,6 +450,32 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+//правила адаптивності
+/* Додайте до вашого основного CSS файлу */
+@media (max-width: 768px) {
+  .header-main {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-section {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .header-contacts {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+}
+
 // ТИМЧАСОВІ СТИЛІ ДЛЯ ДІАГНОСТИКИ - ДОДАЙТЕ В main.scss
 /*.header-main {
   border: 2px solid red !important; // межа основного блоку
