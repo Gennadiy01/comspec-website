@@ -7,3 +7,38 @@ cd/d "D:\Нове підприємство\MG\Сайт\Новий сайт 2025"
 npm start
 
 
+Показати детальну структуру проекту 
+dir && echo "--- SRC FOLDER ---" && dir src\ 2>nul || echo "No src folder" && echo "--- COMPONENTS ---" && dir src\components\ 2>nul || echo "No components folder"
+
+Бекап Header
+copy src\components\layout\Header.js src\components\layout\Header.js.backup
+
+Бекап main.scss.
+copy src\styles\main.scss src\styles\main.scss.backup
+
+Збереження, Коміт, Деплой
+
+# Перейдіть в папку проекту
+cd "D:\Нове підприємство\MG\Сайт\Новий сайт 2025"
+
+# Перевірте статус змін
+git status
+
+# Додайте файли до індексу
+git add src/components/layout/Header.js
+git add src/styles/main.scss
+
+# Або додайте всі зміни
+git add .
+
+Коміт
+git commit -m "feat: адаптивна мобільна навігація з бургер-меню"
+
+# Відправте зміни на віддалений репозиторій
+git push origin main
+
+# Запустіть деплой (згідно з вашим package.json) - не потрібний
+npm run deploy
+
+перевірити результатт
+https://gennadiy01.github.io/comspec-website

@@ -2,6 +2,80 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../../styles/search.css';
 
+// Додаємо стилі для полоси прокрутки
+const scrollbarStyles = `
+  .search-modal-body {
+    /* Webkit браузери (Chrome, Safari, Edge) */
+    scrollbar-width: auto;
+    scrollbar-color: #008080 #f8fafc;
+  }
+  
+  .search-modal-body::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .search-modal-body::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 6px;
+    margin: 8px 0;
+  }
+  
+  .search-modal-body::-webkit-scrollbar-thumb {
+    background: #008080;
+    border-radius: 6px;
+    border: 2px solid #f8fafc;
+    min-height: 30px;
+  }
+  
+  .search-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #006666;
+  }
+  
+  .search-modal-body::-webkit-scrollbar-corner {
+    background: #f8fafc;
+  }
+  
+  /* Для мобільних пристроїв */
+  @media (max-width: 768px) {
+    .search-modal-body::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .search-modal-body::-webkit-scrollbar-thumb {
+      background: #008080;
+      border: 3px solid #f8fafc;
+      border-radius: 7px;
+      min-height: 40px;
+    }
+    
+    .search-modal-body::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 7px;
+      margin: 10px 0;
+    }
+  }
+  
+  /* Для планшетів */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .search-modal-body::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+  }
+`;
+
+// Додаємо стилі в head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = scrollbarStyles;
+  if (!document.head.querySelector('style[data-scrollbar="search-modal"]')) {
+    styleElement.setAttribute('data-scrollbar', 'search-modal');
+    document.head.appendChild(styleElement);
+  }
+}
+
 // Тимчасові дані для пошуку (потім замініть на реальні дані з вашого API)
 const siteData = [
   {
@@ -94,6 +168,13 @@ const SearchModal = ({ isOpen, onClose }) => {
   const [hasSearched, setHasSearched] = useState(false);
   const searchInputRef = useRef(null);
 
+  // Ініціалізація компонента - фокус на input при відкритті
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isOpen]);
+
   // Функція пошуку
   const performSearch = (query) => {
     if (!query.trim()) {
@@ -152,8 +233,7 @@ const SearchModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Обробка натискання Escape
- /* eslint-disable react-hooks/exhaustive-deps */
+  // Обробка натискання Escape та фокус
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -163,13 +243,16 @@ const SearchModal = ({ isOpen, onClose }) => {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      searchInputRef.current?.focus();
+      // Затримка для фокуса після відкриття модального вікна
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]); // Тільки isOpen в залежностях, handleClose стабільний
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -202,7 +285,7 @@ const SearchModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Тіло модального вікна */}
-        <div className="search-modal-body">
+        <div className="search-modal-body search-modal-scrollbar">{/* Додали клас для полоси прокрутки */}
           {/* Стан завантаження */}
           {isSearching && (
             <div className="search-loading">
@@ -473,8 +556,6 @@ const Header = () => {
                 Статті
               </Link>
             </nav>
-            
-            {/* Контакти в мобільному меню - видалені, оскільки тепер завжди внизу */}
           </div>
         </div>
       </header>

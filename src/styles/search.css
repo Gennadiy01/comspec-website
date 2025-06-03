@@ -310,3 +310,19 @@ mark {
     min-width: 2.5rem;
   }
 }
+
+/* СТИЛІ ДЛЯ ПОЛОСИ ПРОКРУТКИ В МОДАЛЬНОМУ ВІКНІ ПОШУКУ */
+/* Стилі для полоси прокрутки - цільовий на елементи з inline стилем scrollbar-color */
+div[style*="scrollbar-color"]::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+div[style*="scrollbar-color"]::-webkit-scrollbar-track {
+  background: #f8fafc !important;
+  border-radius: 4px !important;
+}
+
+div[style*="scrollbar-color"]::-webkit-scrollbar-thumb {
+  background: #008080 !important;
+  border-radius: 4px !important;
+}
