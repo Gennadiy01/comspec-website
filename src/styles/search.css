@@ -177,52 +177,84 @@
   font-size: 14px;
 }
 
+/* ОСНОВНІ СТИЛІ ДЛЯ КАРТОЧОК РЕЗУЛЬТАТІВ */
 .search-result-item {
   padding: 20px;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
   margin-bottom: 16px;
-  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+/* РОБИМО ВСЮ КАРТОЧКУ КЛІКАБЕЛЬНОЮ */
+.search-result-clickable {
+  display: block !important;
+  text-decoration: none !important;
+  color: inherit !important;
   cursor: pointer;
 }
 
-.search-result-item:hover {
+.search-result-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 128, 128, 0.15);
   border-color: #008080;
-  box-shadow: 0 4px 12px rgba(0, 128, 128, 0.1);
+}
+
+.search-result-clickable:hover .search-result-title {
+  color: #008080;
+}
+
+.search-result-clickable:hover .search-result-link {
+  color: #006666;
+  font-weight: 600;
 }
 
 .search-result-category {
-  font-size: 12px;
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e6f3f3;
   color: #008080;
+  border-radius: 20px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
 
 .search-result-title {
-  font-size: 18px;
-  color: #333f4f;
-  margin-bottom: 8px;
+  font-size: 1.125rem;
   font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
 }
 
 .search-result-content {
-  color: #6c757d;
-  margin-bottom: 12px;
+  color: #4a5568;
   line-height: 1.6;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
 }
 
 .search-result-link {
   color: #008080;
-  text-decoration: none;
   font-weight: 500;
-  font-size: 14px;
-  transition: color 0.3s ease;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.search-result-link:hover {
-  color: #FFA500;
+/* Стилі для виділення знайденого тексту */
+.search-result-item mark {
+  background-color: #fff4e6;
+  color: #d69e2e;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 600;
 }
 
 .search-suggestions {
@@ -260,14 +292,6 @@
   border-color: #008080;
 }
 
-mark {
-  background: #FFA500;
-  color: #fff;
-  font-weight: bold;
-  padding: 2px 4px;
-  border-radius: 3px;
-}
-
 /* Анімації */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -301,6 +325,20 @@ mark {
   .search-button {
     margin-left: auto; /* Розташовує кнопку справа */
   }
+
+  /* Відключаємо hover ефекти на мобільних */
+  .search-result-clickable:hover {
+    transform: none;
+  }
+  
+  .search-result-clickable:active {
+    transform: scale(0.98);
+    background-color: #f7fafc;
+  }
+  
+  .search-result-item {
+    padding: 16px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -309,20 +347,4 @@ mark {
     width: auto;
     min-width: 2.5rem;
   }
-}
-
-/* СТИЛІ ДЛЯ ПОЛОСИ ПРОКРУТКИ В МОДАЛЬНОМУ ВІКНІ ПОШУКУ */
-/* Стилі для полоси прокрутки - цільовий на елементи з inline стилем scrollbar-color */
-div[style*="scrollbar-color"]::-webkit-scrollbar {
-  width: 8px !important;
-}
-
-div[style*="scrollbar-color"]::-webkit-scrollbar-track {
-  background: #f8fafc !important;
-  border-radius: 4px !important;
-}
-
-div[style*="scrollbar-color"]::-webkit-scrollbar-thumb {
-  background: #008080 !important;
-  border-radius: 4px !important;
 }

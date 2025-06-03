@@ -285,7 +285,7 @@ const SearchModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Тіло модального вікна */}
-        <div className="search-modal-body search-modal-scrollbar">{/* Додали клас для полоси прокрутки */}
+        <div className="search-modal-body">{/* Видалили клас search-modal-scrollbar */}
           {/* Стан завантаження */}
           {isSearching && (
             <div className="search-loading">
@@ -316,7 +316,12 @@ const SearchModal = ({ isOpen, onClose }) => {
               </div>
               
               {searchResults.map((result) => (
-                <div key={result.id} className="search-result-item">
+                <Link 
+                  key={result.id}
+                  to={result.url} 
+                  className="search-result-item search-result-clickable"
+                  onClick={handleClose}
+                >
                   <div className="search-result-category">
                     {result.category}
                   </div>
@@ -329,14 +334,10 @@ const SearchModal = ({ isOpen, onClose }) => {
                     {highlightText(result.content, searchQuery)}
                   </p>
                   
-                  <Link 
-                    to={result.url} 
-                    className="search-result-link"
-                    onClick={handleClose}
-                  >
+                  <div className="search-result-link">
                     Перейти до сторінки →
-                  </Link>
-                </div>
+                  </div>
+                </Link>
               ))}
             </div>
           )}
