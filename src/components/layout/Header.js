@@ -384,6 +384,10 @@ const Header = () => {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+    // Прибираємо фокус з кнопки бургер-меню
+    if (document.activeElement && document.activeElement.classList.contains('burger-menu')) {
+      document.activeElement.blur();
+    }
   };
 
   return (
@@ -459,7 +463,16 @@ const Header = () => {
                 <button 
                   className={`burger-menu ${isMobileMenuOpen ? 'active' : ''}`}
                   aria-label="Відкрити меню"
-                  onClick={toggleMobileMenu}
+                  onClick={(e) => {
+                    if (isMobileMenuOpen) {
+                      // Якщо меню відкрите, закриваємо його і прибираємо фокус
+                      closeMobileMenu();
+                      e.currentTarget.blur();
+                    } else {
+                      // Якщо меню закрите, відкриваємо його
+                      toggleMobileMenu();
+                    }
+                  }}
                 >
                   <span className="burger-line"></span>
                   <span className="burger-line"></span>

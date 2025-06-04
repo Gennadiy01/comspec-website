@@ -480,7 +480,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   transition: all 0.3s ease;
   
-  &:hover {
+ &:hover:not(:focus):not(.active) {
     background-color: rgba($accent-color, 0.1);
   }
   
@@ -802,8 +802,23 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1000;
 }
 
-// Покращення доступності
+// Покращення доступності та виправлення фокусу
 .burger-menu:focus {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+}
+
+// Прибираємо фокус з кнопки, коли меню закрите
+.burger-menu:not(.active):focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Для браузерів, що підтримують :focus-visible
+.burger-menu:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.burger-menu:focus-visible {
   outline: 2px solid $accent-color;
   outline-offset: 2px;
 }
