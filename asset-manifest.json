@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/comspec-website/static/css/main.48fc1f21.css",
-    "main.js": "/comspec-website/static/js/main.b043bc56.js",
+    "main.css": "/comspec-website/static/css/main.18b56bb8.css",
+    "main.js": "/comspec-website/static/js/main.66e6887c.js",
     "index.html": "/comspec-website/index.html",
-    "main.48fc1f21.css.map": "/comspec-website/static/css/main.48fc1f21.css.map",
-    "main.b043bc56.js.map": "/comspec-website/static/js/main.b043bc56.js.map"
+    "main.18b56bb8.css.map": "/comspec-website/static/css/main.18b56bb8.css.map",
+    "main.66e6887c.js.map": "/comspec-website/static/js/main.66e6887c.js.map"
   },
   "entrypoints": [
-    "static/css/main.48fc1f21.css",
-    "static/js/main.b043bc56.js"
+    "static/css/main.18b56bb8.css",
+    "static/js/main.66e6887c.js"
   ]
 }
