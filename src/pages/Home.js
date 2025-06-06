@@ -133,7 +133,7 @@ const Home = () => {
       {/* Products Section */}
       <section className="section">
         <div className="container">
-          <h2 className="section-title">Основні продукти</h2>
+          <h2 className="section-title">Наша продукція</h2>
           <div className="grid grid-4">
             {products.map((product, index) => (
               <div key={index} className="card">
