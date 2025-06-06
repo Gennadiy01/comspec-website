@@ -16,7 +16,7 @@ const Home = () => {
     },
     {
       title: 'Пісок',
-      description: 'Карьерний та річковий пісок для різних видів робіт',
+      description: 'Річковий та кар\'єрний та  пісок для різних видів робіт',
       icon: (
         <svg className="card-icon" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>

@@ -320,11 +320,11 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   &.grid-3 {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   &.grid-4 {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
   }
 }
 
@@ -335,6 +335,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+   min-width: 280px;
   
   &:hover {
     transform: translateY(-5px);
@@ -355,7 +356,7 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   p {
-    color: #6c757d;
+    color: #333f4f;
     margin-bottom: 1.5rem;
   }
 }
@@ -430,6 +431,50 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+// Стилі для логотипу в футері
+.footer {
+  // Клікабельний логотип в футері
+  .footer-logo-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+  }
+  
+  .footer-logo {
+    height: 1.1rem; // В 2 рази менший, ніж у хедері (2.2rem ÷ 2 = 1.1rem)
+    width: auto;
+    display: block;
+    transition: all 0.3s ease;
+  }
+  
+  // Додаткові стилі для покращення вигляду
+  .footer-section {
+    &:first-child {
+      p {
+        margin-top: 0.5rem; // Відступ після логотипу
+      }
+    }
+  }
+}
+
+// Адаптивність для мобільних пристроїв
+@media (max-width: 768px) {
+  .footer {
+    .footer-logo {
+      height: 1rem; // Трохи менший на мобільних
+    }
+    
+    .footer-logo-link {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   .header-content {
@@ -458,6 +503,27 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 2rem;
   }
 }
+
+// Медіаправила для grid-3
+@media (max-width: 1000px) {
+  .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Медіаправила для grid-4
+@media (max-width: 1200px) and (min-width: 801px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 //=================================================
 // Зміна кольру заголовків H1, H2 в світлих секціях
 //=================================================
@@ -616,10 +682,10 @@ h1, h2, h3, h4, h5, h6 {
       padding: 1.5rem 0.5rem !important; // 24px вертикально, 8px горизонтально
     }
     
-    // Контакты остаются видимыми на всех размерах экранов
+    // Контакти залишаються на всіх розмірах екранів
     .header-contacts {
       display: flex !important;
-      flex-direction: row !important; // Принудительно в один ряд
+      flex-direction: row !important; // Примусово в один рядок
       justify-content: space-between !important; // Телефон ліворуч, соцмережі праворуч
       align-items: center !important;
       padding: 0.75rem 0.5rem !important; // 12px вертикально, 8px горизонтально

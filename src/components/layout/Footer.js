@@ -7,19 +7,20 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-section">
-            <img 
-              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjMTQxYzFjIi8+Cjx0ZXh0IHg9IjEwIiB5PSIzNSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzAwODA4MCI+Q09NU1BFQzwvdGV4dD4KPC9zdmc+" 
-              alt="COMSPEC" 
-              className="logo"
-              style={{height: '40px', marginBottom: '1rem'}}
-            />
+            <Link to="/" className="footer-logo-link">
+              <img 
+                src={process.env.PUBLIC_URL + '/images/logo.svg'}  
+                alt="COMSPEC" 
+                className="footer-logo"
+              />
+            </Link>
             <p>Високоякісні будівельні матеріали з доставкою по всій Україні</p>
           </div>
           
           <div className="footer-section">
             <h3>Контакти</h3>
             <p>Телефон: <a href="tel:+380739272700">073 927 27 00</a></p>
-            <p>Email: <a href="mailto:info@comspec.ua">info@comspec.ua</a></p>
+            <p>Email: <a href="mailto:info@comspec.ua">comspec@comspec.ua</a></p>
             <p>Сайт: <a href="https://comspec.ua">comspec.ua</a></p>
           </div>
           

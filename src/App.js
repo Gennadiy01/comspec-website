@@ -10,11 +10,13 @@ import Contacts from './pages/Contacts';
 import Articles from './pages/Articles';
 import RetailLocations from './pages/RetailLocations';
 import Certificates from './pages/Certificates';
+import ScrollToTop from './components/ScrollToTop';
 import './styles/main.scss';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop /> {/* Додано компонент ScrollToTop відразу після Router */}
       <div className="App">
         <Header />
         <main>
