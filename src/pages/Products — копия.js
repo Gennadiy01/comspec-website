@@ -1,22 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Products = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const location = useLocation();
-
-  // Обробка URL параметрів при завантаженні компонента
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const categoryParam = urlParams.get('category');
-    
-    if (categoryParam && ['gravel', 'sand', 'asphalt', 'concrete'].includes(categoryParam)) {
-      setActiveCategory(categoryParam);
-    } else {
-      setActiveCategory('all');
-    }
-  }, [location.search]);
 
   const products = [
     {
@@ -39,15 +26,6 @@ const Products = () => {
     },
     {
       id: 3,
-      title: 'Щебінь вапняковий 10-20',
-      category: 'gravel',
-      price: '750 грн/тонна',
-      description: 'Вапняковий щебінь для дорожнього будівництва',
-      properties: ['Економний', 'Середньої міцності', 'Фракція 10-20 мм'],
-      image: '/images/gravel-limestone.jpg'
-    },
-    {
-      id: 4,
       title: 'Пісок річковий митий',
       category: 'sand',
       price: '420 грн/тонна',
@@ -56,7 +34,7 @@ const Products = () => {
       image: '/images/sand-river.jpg'
     },
     {
-      id: 5,
+      id: 4,
       title: 'Пісок кар\'єрний',
       category: 'sand',
       price: '380 грн/тонна',
@@ -65,16 +43,7 @@ const Products = () => {
       image: '/images/sand-quarry.jpg'
     },
     {
-      id: 6,
-      title: 'Пісок будівельний',
-      category: 'sand',
-      price: '400 грн/тонна',
-      description: 'Універсальний будівельний пісок',
-      properties: ['Сертифікований', 'Універсальний', 'Фракція 0-3 мм'],
-      image: '/images/sand-construction.jpg'
-    },
-    {
-      id: 7,
+      id: 5,
       title: 'Асфальт гарячий',
       category: 'asphalt',
       price: '1200 грн/тонна',
@@ -83,40 +52,13 @@ const Products = () => {
       image: '/images/asphalt-hot.jpg'
     },
     {
-      id: 8,
-      title: 'Асфальт холодний',
-      category: 'asphalt',
-      price: '1100 грн/тонна',
-      description: 'Холодна асфальтобетонна суміш для ремонтних робіт',
-      properties: ['Тип Б', 'Холодний', 'Для ремонту'],
-      image: '/images/asphalt-cold.jpg'
-    },
-    {
-      id: 9,
+      id: 6,
       title: 'Бетон М200',
       category: 'concrete',
       price: '1800 грн/м³',
       description: 'Товарний бетон марки М200 для загального будівництва',
       properties: ['Марка М200', 'B15', 'Морозостійкий F100'],
       image: '/images/concrete-m200.jpg'
-    },
-    {
-      id: 10,
-      title: 'Бетон М300',
-      category: 'concrete',
-      price: '2000 грн/м³',
-      description: 'Товарний бетон марки М300 для відповідальних конструкцій',
-      properties: ['Марка М300', 'B22.5', 'Морозостійкий F150'],
-      image: '/images/concrete-m300.jpg'
-    },
-    {
-      id: 11,
-      title: 'Бетон М400',
-      category: 'concrete',
-      price: '2200 грн/м³',
-      description: 'Високоміцний бетон для спеціальних конструкцій',
-      properties: ['Марка М400', 'B30', 'Морозостійкий F200'],
-      image: '/images/concrete-m400.jpg'
     }
   ];
 
@@ -134,44 +76,11 @@ const Products = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // Функція для отримання назви активної категорії
-  const getActiveCategoryName = () => {
-    const category = categories.find(cat => cat.id === activeCategory);
-    return category ? category.name : 'Всі категорії';
-  };
-
-  // Обробник зміни категорії з оновленням URL
-  const handleCategoryChange = (categoryId) => {
-    setActiveCategory(categoryId);
-    
-    // Оновлюємо URL без перезавантаження сторінки
-    const newUrl = categoryId === 'all' 
-      ? '/products' 
-      : `/products?category=${categoryId}`;
-    
-    window.history.pushState(null, '', newUrl);
-  };
-
   return (
     <div className="products-page">
       <section className="section">
         <div className="container">
           <h1 className="section-title">Продукція</h1>
-          
-          {/* Показуємо обрану категорію */}
-          {activeCategory !== 'all' && (
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '1.5rem',
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#e6f3f3',
-              borderRadius: '8px',
-              color: '#008080',
-              fontWeight: '600'
-            }}>
-              Обрана категорія: {getActiveCategoryName()}
-            </div>
-          )}
           
           {/* Filters */}
           <div className="filters" style={{marginBottom: '2rem'}}>
@@ -180,14 +89,8 @@ const Products = () => {
                 <button
                   key={category.id}
                   className={`btn ${activeCategory === category.id ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => handleCategoryChange(category.id)}
-                  style={{
-                    marginRight: '0.5rem', 
-                    marginBottom: '0.5rem',
-                    backgroundColor: activeCategory === category.id ? '#008080' : 'transparent',
-                    color: activeCategory === category.id ? '#ffffff' : '#008080',
-                    borderColor: '#008080'
-                  }}
+                  onClick={() => setActiveCategory(category.id)}
+                  style={{marginRight: '0.5rem', marginBottom: '0.5rem'}}
                 >
                   {category.name}
                 </button>
@@ -281,19 +184,6 @@ const Products = () => {
             <div style={{textAlign: 'center', padding: '3rem', color: '#6c757d'}}>
               <h3>Продукцію не знайдено</h3>
               <p>Спробуйте змінити фільтри або пошукову фразу</p>
-            </div>
-          )}
-
-          {/* Повернення до всіх категорій */}
-          {activeCategory !== 'all' && (
-            <div style={{textAlign: 'center', marginTop: '2rem'}}>
-              <button 
-                onClick={() => handleCategoryChange('all')}
-                className="btn btn-primary"
-                style={{padding: '0.75rem 2rem'}}
-              >
-                Показати всі продукти
-              </button>
             </div>
           )}
         </div>

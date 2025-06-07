@@ -74,7 +74,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-
 // Header
 .header {
   background: $darker-color;
@@ -172,7 +171,6 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: space-between;
     padding: 1rem 8px; 
     min-height: 60px; // вдвічі менша висота
-    // background: rgba($white, 0.05); // видалили окремий фон
   }
   
   .phone-section {
@@ -199,7 +197,7 @@ h1, h2, h3, h4, h5, h6 {
       color: $white;
       font-weight: 600;
       text-decoration: none;
-      font-size: 1.1rem;
+      font-size: 1.1rem; // Залишаємо розмір 1.1rem для всіх екранів
       transition: color 0.3s ease;
     }
     
@@ -250,12 +248,20 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 }
+
 // Hero Section
 .hero {
   background: linear-gradient(135deg, $darker-color 0%, $dark-color 100%);
   color: $white;
   padding: 6rem 0;
   text-align: center;
+  min-height: calc(100vh - 120px); // Додати
+  display: flex; // Додати
+  align-items: center; // Додати
+
+   .btn {
+    min-width: 150px; //Змына ширини  кнопки в hero секції
+  }
   
   h1 {
     font-size: 3.5rem;
@@ -300,6 +306,9 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 2.5rem;
   margin-bottom: 3rem;
 }
+.section.dark .card h3 {
+  color: $primary-color; // Основний бірюзовий колір
+}
 
 // Grid
 .grid {
@@ -311,11 +320,11 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   &.grid-3 {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
   &.grid-4 {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
   }
 }
 
@@ -326,6 +335,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+   min-width: 280px;
   
   &:hover {
     transform: translateY(-5px);
@@ -346,10 +356,97 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   p {
-    color: #6c757d;
+    color: #333f4f;
     margin-bottom: 1.5rem;
   }
 }
+//------------------------------------
+// Стилі для PNG іконок з точними кольорами
+.card-icon {
+  width: 60px !important;
+  height: 60px !important;
+  margin-bottom: 1rem !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  
+  stroke: none !important;
+  stroke-width: 0 !important;
+  
+  max-width: 60px;
+  max-height: 60px;
+  background: transparent;
+  
+  // Точний фільтр для #333f4f (темно-сірий)
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(23%) 
+    sepia(12%) 
+    saturate(1024%) 
+    hue-rotate(177deg) 
+    brightness(95%) 
+    contrast(91%);
+  
+  transition: all 0.3s ease;
+}
+
+// ЗБІЛЬШЕНІ іконки для секції "Наша продукція" в 1.5 рази
+.section .card .card-icon {
+  width: 90px !important;
+  height: 90px !important;
+  max-width: 90px;
+  max-height: 90px;
+}
+
+// Ефекти при наведенні з точним фільтром для #008080
+.card:hover .card-icon {
+  transform: scale(1.05);
+  
+  // ТОЧНИЙ фільтр для #008080 (бірюзовий)
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(45%) 
+    sepia(85%) 
+    saturate(1800%) 
+    hue-rotate(148deg)  // Зменшено з 180° до 165° для більш зеленого відтінку
+    brightness(80%) 
+    contrast(95%);
+}
+// Адаптивність
+@media (max-width: 768px) {
+  .card-icon {
+    width: 50px !important;
+    height: 50px !important;
+    max-width: 50px;
+    max-height: 50px;
+  }
+  
+  .section .card .card-icon {
+    width: 75px !important;
+    height: 75px !important;
+    max-width: 75px;
+    max-height: 75px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-icon {
+    width: 45px !important;
+    height: 45px !important;
+    max-width: 45px;
+    max-height: 45px;
+  }
+  
+  .section .card .card-icon {
+    width: 68px !important;
+    height: 68px !important;
+    max-width: 68px;
+    max-height: 68px;
+  }
+}
+//-------------------------------------------
 
 // Forms
 .form-group {
@@ -421,6 +518,50 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+// Стилі для логотипу в футері
+.footer {
+  // Клікабельний логотип в футері
+  .footer-logo-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+  }
+  
+  .footer-logo {
+    height: 1.1rem; // В 2 рази менший, ніж у хедері (2.2rem ÷ 2 = 1.1rem)
+    width: auto;
+    display: block;
+    transition: all 0.3s ease;
+  }
+  
+  // Додаткові стилі для покращення вигляду
+  .footer-section {
+    &:first-child {
+      p {
+        margin-top: 0.5rem; // Відступ після логотипу
+      }
+    }
+  }
+}
+
+// Адаптивність для мобільних пристроїв
+@media (max-width: 768px) {
+  .footer {
+    .footer-logo {
+      height: 1rem; // Трохи менший на мобільних
+    }
+    
+    .footer-logo-link {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   .header-content {
@@ -450,37 +591,55 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-//правила адаптивності
-/* Додайте до вашого основного CSS файлу */
-@media (max-width: 768px) {
-  .header-main {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nav-section {
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .nav {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .header-contacts {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
+// Медіаправила для grid-3
+@media (max-width: 1000px) {
+  .grid-3 {
+    grid-template-columns: 1fr !important;
   }
 }
+
+// Медіаправила для grid-4
+@media (max-width: 1200px) and (min-width: 801px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+//=================================================
+// Зміна кольру заголовків H1, H2 в світлих секціях
+//=================================================
+// Заголовки h1, h2 у секціях зі світлим фоном мають сірий колір #6c757d
+.section:not(.dark) h1,
+.section:not(.dark) h2,
+.section.gray h1,
+.section.gray h2 {
+  color: #141c1c;
+}
+
+// Hero секція (має темний фон, тому залишаємо білий)
+.hero h1 {
+  color: $white; // Залишаємо білий для темного фону
+}
+
+// Заголовки в картках (білий фон)
+.card h1,
+.card h2 {
+  color: #141c1c;
+}
+
+
 
 // ==========================================
 // МОБИЛЬНАЯ НАВИГАЦИЯ И АДАПТИВНОСТЬ
 // ==========================================
 
-// Мобильные элементы управления
+// Мобільні елементи управління
 .mobile-controls {
   display: flex;
   align-items: center;
@@ -507,7 +666,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   transition: all 0.3s ease;
   
-  &:hover {
+ &:hover:not(:focus):not(.active) {
     background-color: rgba($accent-color, 0.1);
   }
   
@@ -601,9 +760,50 @@ h1, h2, h3, h4, h5, h6 {
       display: none;
     }
     
-    // Контакты остаются видимыми на всех размерах экранов
+    // Забезпечуємо один рядок для мобільної версії
+    .header-main {
+      flex-direction: row !important; // Примусово в один рядок
+      justify-content: space-between !important; // Логотип ліворуч, управління праворуч
+      align-items: center !important;
+      gap: 1rem !important;
+      padding: 1.5rem 0.5rem !important; // 24px вертикально, 8px горизонтально
+    }
+    
+    // Контакти залишаються на всіх розмірах екранів
     .header-contacts {
       display: flex !important;
+      flex-direction: row !important; // Примусово в один рядок
+      justify-content: space-between !important; // Телефон ліворуч, соцмережі праворуч
+      align-items: center !important;
+      padding: 0.75rem 0.5rem !important; // 12px вертикально, 8px горизонтально
+      
+      .phone-section {
+        margin-bottom: 0 !important; // Убираем отступ снизу
+        gap: 0.5rem !important; // Уменьшаем расстояние между иконкой и телефоном
+        
+        .phone-icon {
+          width: 1.25rem !important;
+          height: 1.25rem !important;
+        }
+      }
+      
+      .social-icons {
+        gap: 0.75rem !important; // Оригінальна відстань між іконками соцмереж
+        
+        .social-link {
+          padding: 0.5rem !important; // Оригінальний padding
+          
+          // Полностью скрываем текст на мобильных
+          span {
+            display: none !important;
+          }
+          
+          .social-icon {
+            width: 1.5rem !important; // Увеличиваем размер иконок
+            height: 1.5rem !important;
+          }
+        }
+      }
     }
     
     .mobile-controls {
@@ -623,6 +823,12 @@ h1, h2, h3, h4, h5, h6 {
     .nav-section {
       width: auto;
       margin-left: auto;
+      flex-shrink: 0; // Не даємо стискатися
+    }
+    
+    // Логотип також не стискається
+    .logo-link {
+      flex-shrink: 0;
     }
   }
 }
@@ -651,12 +857,15 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
   .header {
     .header-main {
-      padding: 1rem 0.5rem;
+      padding: 1rem 0.5rem !important; // 16px вертикально, 8px горизонтально
+      gap: 1rem !important; // Стандартний gap
+      justify-content: space-between !important; // Притиснуто до країв
     }
     
     // Дополнительные стили для лучшего выравнивания на маленьких экранах
     .nav-section {
       gap: 0.75rem;
+      margin-left: auto; // Повертаємо притискання праворуч
     }
     
     .mobile-controls {
@@ -672,21 +881,22 @@ h1, h2, h3, h4, h5, h6 {
       }
     }
     
-    // Стили для контактов на планшетах/мобильных
+    // Стили для контактов на планшетах/мобільных - притиснуті до країв
     .header-contacts {
-      padding: 0.75rem 0.5rem;
+      padding: 0.75rem 0.5rem !important; // 12px вертикально, 8px горизонтально
+      flex-direction: row !important; // Принудительно в один ряд
+      justify-content: space-between !important; // Притиснуто: телефон ліворуч, соцмережі праворуч
+      align-items: center !important;
       
       .phone-section {
-        .phone {
-          font-size: 1rem;
-        }
+        margin-bottom: 0 !important;
       }
       
       .social-icons {
-        gap: 1.5rem;
+        gap: 1rem !important; // Оригінальна відстань між іконками
         
         .social-link {
-          padding: 0.5rem;
+          padding: 0.5rem !important; // Оригінальний padding
           
           span {
             font-size: 0.9rem;
@@ -712,11 +922,13 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 480px) {
   .header {
     .container {
-      padding: 0 1rem;
+      padding: 0 1rem; // Стандартний падінг контейнера
     }
     
     .header-main {
-      padding: 0.75rem 0;
+      padding: 0.75rem 0.5rem !important; // 12px вертикально, 8px горизонтально
+      gap: 1rem !important; // Стандартний gap
+      justify-content: space-between !important; // Притиснуто до країв
     }
     
     .logo {
@@ -725,32 +937,25 @@ h1, h2, h3, h4, h5, h6 {
     
     .mobile-controls {
       gap: 0.5rem;
+      flex-shrink: 0 !important; // Не стискаємо мобільні елементи
     }
     
-    .search-button,
     .burger-menu {
       width: 2rem;
       height: 2rem;
-      
-      .search-icon {
-        width: 1rem;
-        height: 1rem;
-      }
       
       .burger-line {
         width: 1.25rem;
       }
     }
     
-    // Дополнительные стили для очень маленьких экранов
+    // Контакти для дуже маленьких екранів
     .header-contacts {
-      padding: 0.5rem;
+      padding: 0.5rem !important; // 8px вертикально і горизонтально
+      flex-direction: row !important;
+      justify-content: space-between !important; // Притиснуто: телефон ліворуч, соцмережі праворуч
       
       .phone-section {
-        .phone {
-          font-size: 0.9rem;
-        }
-        
         .phone-icon {
           width: 1rem;
           height: 1rem;
@@ -758,10 +963,10 @@ h1, h2, h3, h4, h5, h6 {
       }
       
       .social-icons {
-        gap: 0.75rem;
+        gap: 0.75rem !important; // Оригінальна відстань між іконками
         
         .social-link {
-          padding: 0.375rem;
+          padding: 0.375rem !important; // Стандартний padding
           
           .social-icon {
             width: 1.25rem;
@@ -783,8 +988,23 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1000;
 }
 
-// Покращення доступності
+// Покращення доступності та виправлення фокусу
 .burger-menu:focus {
+  outline: 2px solid $accent-color;
+  outline-offset: 2px;
+}
+
+// Прибираємо фокус з кнопки, коли меню закрите
+.burger-menu:not(.active):focus:not(:focus-visible) {
+  outline: none;
+}
+
+// Для браузерів, що підтримують :focus-visible
+.burger-menu:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.burger-menu:focus-visible {
   outline: 2px solid $accent-color;
   outline-offset: 2px;
 }
@@ -800,167 +1020,3 @@ h1, h2, h3, h4, h5, h6 {
     height: 0.0625rem; // 1px на Retina дисплеях
   }
 }
-
-// ДОДАТКОВІ СТИЛІ ДЛЯ МОБІЛЬНИХ КОНТАКТІВ - ДОДАЙТЕ В КІНЕЦЬ main.scss
-
-// Планшетна версія (768px - 1023px) - контакти в один рядок, але з підписами
-@media screen and (min-width: 768px) and (max-width: 1023px) {
-  .header .container .header-contacts {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.75rem 0.5rem !important;
-    
-    .phone-section {
-      display: flex !important;
-      align-items: center !important;
-      gap: 0.5rem !important;
-      margin-bottom: 0 !important;
-      padding: 0.25rem !important;
-      
-      .phone-icon {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-      }
-      
-      .phone {
-        font-size: 1rem !important;
-      }
-    }
-    
-    .social-icons {
-      display: flex !important;
-      gap: 1rem !important;
-      
-      .social-link {
-        display: flex !important;
-        align-items: center !important;
-        padding: 0.5rem !important;
-        gap: 0.5rem !important;
-        
-        .social-icon {
-          width: 1.25rem !important;
-          height: 1.25rem !important;
-        }
-        
-        // На планшетах підписи ЗАЛИШАЮТЬСЯ
-        span {
-          display: block !important;
-          font-size: 0.9rem !important;
-        }
-      }
-    }
-  }
-}
-
-// Мобільна версія (менше 768px) - контакти в один рядок БЕЗ підписів
-@media screen and (max-width: 767px) {
-  .header .container .header-contacts {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.75rem 0.5rem !important;
-    
-    .phone-section {
-      display: flex !important;
-      align-items: center !important;
-      gap: 0.5rem !important;
-      margin-bottom: 0 !important;
-      padding: 0.25rem !important;
-      
-      .phone-icon {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-      }
-      
-      .phone {
-        font-size: 1rem !important;
-        color: white !important;
-        text-decoration: none !important;
-      }
-    }
-    
-    .social-icons {
-      display: flex !important;
-      gap: 0.75rem !important;
-      
-      .social-link {
-        display: flex !important;
-        align-items: center !important;
-        padding: 0.25rem !important;
-        
-        .social-icon {
-          width: 1.5rem !important;
-          height: 1.5rem !important;
-        }
-        
-        // На мобільних підписи ХОВАЮТЬСЯ
-        span {
-          display: none !important;
-        }
-      }
-    }
-  }
-}
-
-// Для дуже маленьких екранів (менше 480px)
-@media screen and (max-width: 480px) {
-  .header .container .header-contacts {
-    padding: 0.5rem !important;
-    
-    .phone-section {
-      .phone-icon {
-        width: 1rem !important;
-        height: 1rem !important;
-      }
-      
-      .phone {
-        font-size: 0.9rem !important;
-      }
-    }
-    
-    .social-icons {
-      gap: 0.5rem !important;
-      
-      .social-link {
-        padding: 0.25rem !important;
-        
-        .social-icon {
-          width: 1.25rem !important;
-          height: 1.25rem !important;
-        }
-      }
-    }
-  }
-}
-// ТИМЧАСОВІ СТИЛІ ДЛЯ ДІАГНОСТИКИ - ДОДАЙТЕ В main.scss
-/*.header-main {
-  border: 2px solid red !important; // межа основного блоку
-}
-
-.header-contacts {
-  border: 2px solid blue !important; // межа нижнього блоку
-}
-
-.container {
-  border: 2px solid green !important; // межа контейнера
-}
-
-.logo-link {
-  border: 1px solid yellow !important; // логотип
-}
-
-.phone-section {
-  border: 1px solid orange !important; // телефон
-}
-
-.social-icons {
-  border: 1px solid purple !important; // соцмережі
-}
-
-.nav-section {
-  border: 1px solid pink !important; // навігація + пошук
-}
-  */

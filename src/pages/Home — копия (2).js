@@ -18,26 +18,22 @@ const Home = () => {
     {
       title: 'Щебінь',
       description: 'Високоякісний щебінь різних фракцій для будівництва',
-      icon: gravelIcon,
-      category: 'gravel'
+      icon: gravelIcon
     },
     {
       title: 'Пісок',
       description: 'Річковий та кар\'єрний та пісок для різних видів робіт',
-      icon: sandIcon,
-      category: 'sand'
+      icon: sandIcon
     },
     {
       title: 'Асфальт',
       description: 'Асфальтобетонні суміші для дорожнього покриття',
-      icon: asphaltIcon,
-      category: 'asphalt'
+      icon: asphaltIcon
     },
     {
       title: 'Бетон',
       description: 'Готові бетонні суміші різних марок міцності',
-      icon: concreteIcon,
-      category: 'concrete'
+      icon: concreteIcon
     }
   ];
 
@@ -60,22 +56,22 @@ const Home = () => {
     {
       title: 'Експертиза для Вашого успіху',
       description: 'Багаторічний досвід у галузі видобутку та постачання',
-      icon: expertiseIcon
+      icon: expertiseIcon // Замінено на PNG
     },
     {
       title: 'Гарантія якості',
       description: 'Вся продукція сертифікована та відповідає стандартам',
-      icon: qualityIcon
+      icon: qualityIcon // Замінено на PNG
     },
     {
       title: 'Прозорі ціни',
       description: 'Чесне ціноутворення без прихованих платежів',
-      icon: priceIcon
+      icon: priceIcon // Замінено на PNG
     },
     {
       title: 'Швидка доставка',
       description: 'Оперативна доставка в зручний для вас час',
-      icon: deliveryIcon
+      icon: deliveryIcon // Замінено на PNG
     }
   ];
 
@@ -100,25 +96,12 @@ const Home = () => {
           <div className="grid grid-4">
             {products.map((product, index) => (
               <div key={index} className="card">
-                {/* Клікабельна іконка тільки для продукції */}
-                <Link to={`/products?category=${product.category}`}>
-                  <img 
-                    src={product.icon} 
-                    alt={product.title}
-                    className="card-icon clickable-icon"
-                  />
-                </Link>
-                
-                {/* Клікабельна назва тільки для продукції */}
-                <Link 
-                  to={`/products?category=${product.category}`}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <h3 className="clickable-title" style={{ cursor: 'pointer' }}>
-                    {product.title}
-                  </h3>
-                </Link>
-                
+                <img 
+                  src={product.icon} 
+                  alt={product.title}
+                  className="card-icon"
+                />
+                <h3>{product.title}</h3>
                 <p>{product.description}</p>
                 <Link to="/contacts" className="btn btn-accent">Замовити</Link>
               </div>
@@ -145,7 +128,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Benefits Section - оновлено з PNG іконками */}
       <section className="section">
         <div className="container">
           <h2 className="section-title">Переваги</h2>

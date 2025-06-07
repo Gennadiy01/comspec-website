@@ -1020,3 +1020,303 @@ h1, h2, h3, h4, h5, h6 {
     height: 0.0625rem; // 1px на Retina дисплеях
   }
 }
+
+//==============================================================
+//Додаткові стилі для продукції
+// Додаткові стилі для покращення функціоналу переходів
+
+// Додаткові стилі для покращення функціоналу переходів
+
+// Стилі для клікабельних елементів ТІЛЬКИ в секції "Наша продукція"
+.section:not(.dark):not(.gray) .card {
+  // Клікабельна назва продукту тільки в секції продукції
+  .clickable-title {
+    transition: color 0.3s ease;
+    
+    &:hover {
+      color: $accent-color !important;
+    }
+  }
+  
+  // Клікабельна іконка продукту тільки в секції продукції
+  .clickable-icon {
+    cursor: pointer;
+    // Відключаємо стандартний hover ефект для клікабельних іконок
+    &:hover {
+      transform: scale(1.1) !important;
+      // Тільки акцентний колір при наведенні на клікабельну іконку
+      filter: 
+        brightness(0) 
+        saturate(100%) 
+        invert(60%) 
+        sepia(85%) 
+        saturate(2000%) 
+        hue-rotate(15deg) 
+        brightness(100%) 
+        contrast(100%) !important;
+    }
+  }
+}
+
+// Відключаємо загальний hover ефект для клікабельних іконок
+.section:not(.dark):not(.gray) .card:hover .clickable-icon {
+  // Скасовуємо стандартний hover ефект для клікабельних іконок
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(23%) 
+    sepia(12%) 
+    saturate(1024%) 
+    hue-rotate(177deg) 
+    brightness(95%) 
+    contrast(91%) !important;
+  
+  // Ефект буде тільки при прямому наведенні на іконку
+  &:hover {
+    filter: 
+      brightness(0) 
+      saturate(100%) 
+      invert(60%) 
+      sepia(85%) 
+      saturate(2000%) 
+      hue-rotate(15deg) 
+      brightness(100%) 
+      contrast(100%) !important;
+  }
+}
+
+// Стилі для кнопок фільтрів
+.btn-outline {
+  border-color: $primary-color;
+  color: $primary-color;
+  background-color: transparent;
+  
+  &:hover {
+    background-color: $primary-color;
+    color: $white;
+  }
+}
+
+// Стилі для індикатора обраної категорії
+.category-indicator {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: rgba($primary-color, 0.1);
+  border-radius: 8px;
+  color: $primary-color;
+  font-weight: 600;
+  border: 1px solid rgba($primary-color, 0.2);
+}
+
+// Покращення стилів для пошукового поля
+.search-filter input {
+  &:focus {
+    border-color: $primary-color !important;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+}
+
+// Анімації для фільтрів
+.filters {
+  .category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+    }
+  }
+  
+  .search-filter {
+    display: flex;
+    justify-content: center;
+    
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Стилі для повідомлення про відсутність результатів
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  
+  h3 {
+    color: $dark-color;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+  }
+}
+
+// Покращення стилів для кнопки "Показати всі продукти"
+.show-all-button {
+  text-align: center;
+  margin-top: 2rem;
+  
+  .btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($primary-color, 0.3);
+    }
+  }
+}
+
+// Стилі для властивостей продукту
+.properties {
+  margin-bottom: 1.5rem;
+  
+  span {
+    display: inline-block;
+    background: $light-gray;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    fontSize: 0.875rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: $dark-color;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba($primary-color, 0.1);
+      color: $primary-color;
+    }
+  }
+}
+
+// Стилі для ціни продукту
+.price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $primary-color;
+  margin-bottom: 1rem;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba($primary-color, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba($primary-color, 0.1);
+}
+
+// Покращення дій в картці
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  
+  .btn {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    font-size: 0.9rem;
+    
+    &.btn-accent {
+      font-weight: 600;
+    }
+  }
+}
+
+// Responsive покращення
+@media (max-width: 768px) {
+  .category-indicator {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .filters {
+    .category-filters {
+      gap: 0.25rem;
+      
+      .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+    
+    .search-filter input {
+      width: 100%;
+      max-width: none;
+    }
+  }
+  
+  .card-actions {
+    flex-direction: column;
+    
+    .btn {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}
+
+// Анімації появи карток
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease forwards;
+  
+  // Затримка анімації для кожної картки
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+  &:nth-child(5) { animation-delay: 0.5s; }
+  &:nth-child(6) { animation-delay: 0.6s; }
+}
+
+// Стилі для фото товару placeholder
+.product-image-placeholder {
+  height: 200px;
+  background-color: $light-gray;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '📦';
+    font-size: 3rem;
+    opacity: 0.3;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  &:hover {
+    background-color: rgba($primary-color, 0.05);
+    color: $primary-color;
+  }
+}
+//==============кінець додаткових стилів для продукції =======================
