@@ -302,6 +302,30 @@
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
 }
 
+/* Стилі для клікабельного телефону */
+.phone-link {
+  color: #008080;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.phone-link:hover {
+  color: #006666;
+  background-color: #e6f3f3;
+  border-bottom-color: #008080;
+  text-decoration: none;
+  transform: scale(1.02);
+}
+
+.phone-link:active {
+  transform: scale(0.98);
+}
+
 /* Анімації */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -376,6 +400,30 @@
     margin-right: 35px;
   }
   
+  .order-modal-subtitle {
+    line-height: 1.6;
+  }
+  
+  .phone-link {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 4px 0;
+    background-color: #008080;
+    color: white !important;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 128, 128, 0.2);
+  }
+  
+  .phone-link:hover {
+    background-color: #006666 !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 128, 128, 0.3);
+  }
+  
   .radio-group {
     flex-direction: column;
     gap: 12px;
@@ -391,6 +439,41 @@
     min-width: auto;
   }
   
+  /* Виправлення для мобільних select'ів */
+  .form-select {
+    -webkit-appearance: listbox !important;
+    -moz-appearance: listbox !important;
+    appearance: listbox !important;
+    background-color: #ffffff !important;
+    border: 2px solid #008080 !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    color: #333 !important;
+    min-height: 48px !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+  
+  .form-select:focus {
+    border-color: #006666 !important;
+    outline: 2px solid rgba(0, 128, 128, 0.2) !important;
+    outline-offset: 2px !important;
+  }
+  
+  .form-select option {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    padding: 8px 12px !important;
+    font-size: 16px !important;
+  }
+  
+  .form-select.native-mobile {
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    appearance: menulist !important;
+  }
+  
   /* Збільшуємо розмір полоси прокрутки на мобільних */
   .order-modal-body::-webkit-scrollbar {
     width: 14px;
@@ -400,6 +483,22 @@
     border: 3px solid #f8fafc;
     border-radius: 7px;
     min-height: 40px;
+  }
+}
+
+/* Додаткові стилі для покращення відображення на Android */
+@media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 1) {
+  .form-select {
+    background: #ffffff !important;
+    border: 2px solid #008080 !important;
+    border-radius: 6px !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+  }
+  
+  .form-select::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
   }
 }
 
@@ -423,58 +522,5 @@
   .conditional-field {
     padding: 12px;
     margin-top: 12px;
-  }
-}
-
-
-/* Додати в кінець файлу order-modal.css */
-
-.phone-link {
-  color: #008080;
-  text-decoration: none;
-  font-weight: 600;
-  border-bottom: 1px solid transparent;
-  transition: all 0.3s ease;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.phone-link:hover {
-  color: #006666;
-  background-color: #e6f3f3;
-  border-bottom-color: #008080;
-  text-decoration: none;
-  transform: scale(1.02);
-}
-
-.phone-link:active {
-  transform: scale(0.98);
-}
-
-/* Для мобільних пристроїв - робимо телефон більш помітним */
-@media (max-width: 768px) {
-  .order-modal-subtitle {
-    line-height: 1.6;
-  }
-  
-  .phone-link {
-    display: inline-block;
-    padding: 6px 12px;
-    margin: 4px 0;
-    background-color: #008080;
-    color: white !important;
-    border-radius: 6px;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 128, 128, 0.2);
-  }
-  
-  .phone-link:hover {
-    background-color: #006666 !important;
-    color: white !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 128, 128, 0.3);
   }
 }

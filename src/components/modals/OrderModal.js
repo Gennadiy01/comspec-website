@@ -99,7 +99,7 @@ const OrderModal = () => {
     setShowSuccess(false);
     closeOrderModal();
   };
-
+  
   // Обробка натискання Escape
   useEffect(() => {
     const handleEscape = (e) => {
@@ -116,6 +116,42 @@ const OrderModal = () => {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, isSubmitting]);
+
+  // Детекція проблемних мобільних браузерів
+  useEffect(() => {
+    const detectMobileBrowser = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isProblematicBrowser = /miuibrowser|samsungbrowser|ucbrowser|oppo|vivo/i.test(userAgent);
+      
+      if (isMobile || isProblematicBrowser) {
+        // Додаємо клас для принудового використання нативних select
+        const selects = document.querySelectorAll('.form-select');
+        selects.forEach(select => {
+          select.classList.add('native-mobile');
+          
+          // Додаткове виправлення для Android
+          if (/android/i.test(userAgent)) {
+            select.style.cssText += `
+              -webkit-appearance: listbox !important;
+              appearance: listbox !important;
+              background-color: #ffffff !important;
+              border: 2px solid #008080 !important;
+              color: #333333 !important;
+              font-size: 16px !important;
+              padding: 12px !important;
+              min-height: 48px !important;
+            `;
+          }
+        });
+      }
+    };
+
+    if (isOpen) {
+      // Виконуємо детекцію після відкриття модалки
+      setTimeout(detectMobileBrowser, 100);
+    }
+  }, [isOpen]);
 
   // Обробка зміни полів форми
   const handleInputChange = (e) => {
