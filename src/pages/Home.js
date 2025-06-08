@@ -146,7 +146,7 @@ const Home = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="section">
+      <section className="section benefits-section">
         <div className="container">
           <h2 className="section-title">Переваги</h2>
           <div className="grid grid-4">

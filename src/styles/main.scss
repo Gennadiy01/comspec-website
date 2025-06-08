@@ -423,6 +423,7 @@ h1, h2, h3, h4, h5, h6 {
   
   .clickable-icon {
     cursor: pointer;
+    transition: all 0.3s ease, filter 0.3s ease;
     
     &:hover {
       transform: scale(1.1) !important;
@@ -438,7 +439,32 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 }
-
+// Ховер ефект для секції переваг
+.section.benefits-section .card:hover .card-icon {
+  transform: scale(1.05) !important;
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(45%) 
+    sepia(85%) 
+    saturate(1800%) 
+    hue-rotate(148deg) 
+    brightness(80%) 
+    contrast(95%) !important;
+}
+// Прибираємо hover ефекти тільки для іконок у світлих секціях крім продукції та переваг
+.section:not(.dark):not(.gray):not(.products-section):not(.benefits-section) .card:hover .card-icon {
+  transform: none !important;
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(23%) 
+    sepia(12%) 
+    saturate(1024%) 
+    hue-rotate(177deg) 
+    brightness(95%) 
+    contrast(91%) !important;
+}
 // Відключаємо загальний hover ефект для клікабельних іконок у секції продукції
 .section.products-section .card:hover .clickable-icon {
   filter: 
@@ -462,20 +488,6 @@ h1, h2, h3, h4, h5, h6 {
       brightness(100%) 
       contrast(100%) !important;
   }
-}
-
-// Прибираємо hover ефекти тільки для іконок у всіх світлих секціях крім продукції
-.section:not(.dark):not(.gray):not(.products-section) .card:hover .card-icon {
-  transform: none !important;
-  filter: 
-    brightness(0) 
-    saturate(100%) 
-    invert(23%) 
-    sepia(12%) 
-    saturate(1024%) 
-    hue-rotate(177deg) 
-    brightness(95%) 
-    contrast(91%) !important;
 }
 
 // Адаптивність іконок
