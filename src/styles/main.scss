@@ -371,6 +371,16 @@ h1, h2, h3, h4, h5, h6 {
     color: #333f4f;
     margin-bottom: 1.5rem;
   }
+
+  ul {
+    color: #333f4f;
+    margin-bottom: 1.5rem; // Така ж відстань як у параграфів
+    padding-left: 1.5rem; // Відступ для маркерів списку
+    
+    li {
+      margin-bottom: 0.5rem; // Відстань між пунктами списку
+    }
+  }
 }
 
 // Стилі для PNG іконок з точними кольорами
