@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useOrderModal } from '../context/OrderModalContext';
 
 const Products = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
-  const { openOrderModal } = useOrderModal();
 
   // Обробка URL параметрів при завантаженні компонента
   useEffect(() => {
@@ -163,15 +161,6 @@ const Products = () => {
     window.history.pushState(null, '', newUrl);
   };
 
-  // Функція обробки замовлення
-  const handleOrderClick = (product) => {
-    openOrderModal({
-      product: product.category,
-      preSelectedProduct: product.title,
-      source: 'product-page'
-    });
-  };
-
   return (
     <div className="products-page">
       <section className="section">
@@ -284,12 +273,7 @@ const Products = () => {
                   gap: '0.5rem',
                   flexWrap: 'wrap'
                 }}>
-                  <button 
-                    className="btn btn-accent"
-                    onClick={() => handleOrderClick(product)}
-                  >
-                    Замовити
-                  </button>
+                  <Link to="/contacts" className="btn btn-accent">Замовити</Link>
                   <Link 
                     to={`/certificates/${product.category}`} 
                     className="btn btn-primary"

@@ -1,5 +1,7 @@
+// src/pages/Home.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useOrderModal } from '../context/OrderModalContext';
 
 // Імпорт зображень з src/assets для секції Продукція
 import gravelIcon from '../assets/icons/gravel.png';
@@ -14,6 +16,8 @@ import priceIcon from '../assets/icons/price.png';
 import deliveryIcon from '../assets/icons/delivery.png';
 
 const Home = () => {
+  const { openOrderModal } = useOrderModal();
+
   const products = [
     {
       title: 'Щебінь',
@@ -87,7 +91,14 @@ const Home = () => {
           <h1>Час будувати разом!</h1>
           <p>Високоякісні будівельні матеріали з доставкою по всій Україні</p>
           <div className="hero-buttons">
-            <Link to="/contacts" className="btn btn-accent">Замовити</Link>
+            <button 
+              className="btn btn-accent"
+              onClick={() => openOrderModal({ 
+                source: 'hero-section'
+              })}
+            >
+              Замовити
+            </button>
             <Link to="/products" className="btn btn-primary">Каталог</Link>
           </div>
         </div>
@@ -120,7 +131,15 @@ const Home = () => {
                 </Link>
                 
                 <p>{product.description}</p>
-                <Link to="/contacts" className="btn btn-accent">Замовити</Link>
+                <button 
+                  className="btn btn-accent"
+                  onClick={() => openOrderModal({ 
+                    product: product.category,
+                    source: 'product-card'
+                  })}
+                >
+                  Замовити
+                </button>
               </div>
             ))}
           </div>
@@ -178,7 +197,14 @@ const Home = () => {
                 <li>Постійна підтримка</li>
                 <li>Гнучка система оплати</li>
               </ul>
-              <Link to="/contacts" className="btn btn-primary">Отримати пропозицію</Link>
+              <button 
+                className="btn btn-primary"
+                onClick={() => openOrderModal({ 
+                  source: 'companies-section'
+                })}
+              >
+                Отримати пропозицію
+              </button>
             </div>
             <div className="card">
               <h3>Для приватних осіб</h3>
