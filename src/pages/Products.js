@@ -29,6 +29,15 @@ const Products = () => {
       image: '/images/gravel-5-20.jpg'
     },
     {
+      id: 12,
+      title: 'Щебінь гранітний 5-10',
+      category: 'gravel',
+      price: '350 грн/тонна',
+      description: 'Високоміцний щебінь для будівництва доріг та фундаментів',
+      properties: ['Морозостійкий', 'Високої міцності', 'Фракція 5-10 мм'],
+      image: '/images/products/gravel-5-10.jpg'
+    },
+    {
       id: 2,
       title: 'Щебінь гранітний 20-40',
       category: 'gravel',

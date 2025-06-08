@@ -94,7 +94,7 @@ const Home = () => {
       </section>
 
       {/* Products Section */}
-      <section className="section">
+      <section className="section products-section">
         <div className="container">
           <h2 className="section-title">Наша продукція</h2>
           <div className="grid grid-4">

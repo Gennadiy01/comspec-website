@@ -72,17 +72,6 @@ h1, h2, h3, h4, h5, h6 {
       color: $white;
     }
   }
-  
-  &.btn-outline {
-    border-color: $primary-color;
-    color: $primary-color;
-    background-color: transparent;
-    
-    &:hover {
-      background-color: $primary-color;
-      color: $white;
-    }
-  }
 }
 
 // Header
@@ -317,7 +306,6 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 2.5rem;
   margin-bottom: 3rem;
 }
-
 .section.dark .card h3 {
   color: $primary-color; // Основний бірюзовий колір
 }
@@ -372,7 +360,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1.5rem;
   }
 }
-
+//------------------------------------
 // Стилі для PNG іконок з точними кольорами
 .card-icon {
   width: 60px !important;
@@ -411,74 +399,22 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 90px;
 }
 
-// Стилі для клікабельних елементів ТІЛЬКИ в секції "Наша продукція"
-.section.products-section .card {
-  .clickable-title {
-    transition: color 0.3s ease;
-    
-    &:hover {
-      color: $accent-color !important;
-    }
-  }
+// Ефекти при наведенні з точним фільтром для #008080
+.card:hover .card-icon {
+  transform: scale(1.05);
   
-  .clickable-icon {
-    cursor: pointer;
-    
-    &:hover {
-      transform: scale(1.1) !important;
-      filter: 
-        brightness(0) 
-        saturate(100%) 
-        invert(60%) 
-        sepia(85%) 
-        saturate(2000%) 
-        hue-rotate(15deg) 
-        brightness(100%) 
-        contrast(100%) !important;
-    }
-  }
-}
-
-// Відключаємо загальний hover ефект для клікабельних іконок у секції продукції
-.section.products-section .card:hover .clickable-icon {
+  // ТОЧНИЙ фільтр для #008080 (бірюзовий)
   filter: 
     brightness(0) 
     saturate(100%) 
-    invert(23%) 
-    sepia(12%) 
-    saturate(1024%) 
-    hue-rotate(177deg) 
-    brightness(95%) 
-    contrast(91%) !important;
-  
-  &:hover {
-    filter: 
-      brightness(0) 
-      saturate(100%) 
-      invert(60%) 
-      sepia(85%) 
-      saturate(2000%) 
-      hue-rotate(15deg) 
-      brightness(100%) 
-      contrast(100%) !important;
-  }
+    invert(45%) 
+    sepia(85%) 
+    saturate(1800%) 
+    hue-rotate(148deg)  // Зменшено з 180° до 165° для більш зеленого відтінку
+    brightness(80%) 
+    contrast(95%);
 }
-
-// Прибираємо hover ефекти тільки для іконок у всіх світлих секціях крім продукції
-.section:not(.dark):not(.gray):not(.products-section) .card:hover .card-icon {
-  transform: none !important;
-  filter: 
-    brightness(0) 
-    saturate(100%) 
-    invert(23%) 
-    sepia(12%) 
-    saturate(1024%) 
-    hue-rotate(177deg) 
-    brightness(95%) 
-    contrast(91%) !important;
-}
-
-// Адаптивність іконок
+// Адаптивність
 @media (max-width: 768px) {
   .card-icon {
     width: 50px !important;
@@ -510,6 +446,7 @@ h1, h2, h3, h4, h5, h6 {
     max-height: 68px;
   }
 }
+//-------------------------------------------
 
 // Forms
 .form-group {
@@ -579,7 +516,10 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
     color: rgba(255,255,255,0.6);
   }
-  
+}
+
+// Стилі для логотипу в футері
+.footer {
   // Клікабельний логотип в футері
   .footer-logo-link {
     display: inline-block;
@@ -622,7 +562,59 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+// Responsive
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav {
+    gap: 1rem;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .section {
+    padding: 3rem 0;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+// Медіаправила для grid-3
+@media (max-width: 1000px) {
+  .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Медіаправила для grid-4
+@media (max-width: 1200px) and (min-width: 801px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+//=================================================
 // Зміна кольру заголовків H1, H2 в світлих секціях
+//=================================================
+// Заголовки h1, h2 у секціях зі світлим фоном мають сірий колір #6c757d
 .section:not(.dark) h1,
 .section:not(.dark) h2,
 .section.gray h1,
@@ -640,6 +632,8 @@ h1, h2, h3, h4, h5, h6 {
 .card h2 {
   color: #141c1c;
 }
+
+
 
 // ==========================================
 // МОБИЛЬНАЯ НАВИГАЦИЯ И АДАПТИВНОСТЬ
@@ -759,7 +753,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Адаптивність для різних розмірів екранів - Частина 1
+// Адаптивність для різних розмірів екранів
 @media (max-width: 1023px) {
   .header {
     .desktop-nav {
@@ -859,8 +853,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Адаптивність для різних розмірів екранів - Частина 2
-
 // Додаткові стилі для планшетів
 @media (max-width: 768px) {
   .header {
@@ -889,7 +881,7 @@ h1, h2, h3, h4, h5, h6 {
       }
     }
     
-    // Стили для контактов на планшетах/мобільних - притиснуті до країв
+    // Стили для контактов на планшетах/мобільных - притиснуті до країв
     .header-contacts {
       padding: 0.75rem 0.5rem !important; // 12px вертикально, 8px горизонтально
       flex-direction: row !important; // Принудительно в один ряд
@@ -912,6 +904,17 @@ h1, h2, h3, h4, h5, h6 {
         }
       }
     }
+  }
+}
+
+// Анімації і плавні переходи
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-menu {
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .burger-line {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -975,66 +978,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Анімації і плавні переходи
-@media (prefers-reduced-motion: no-preference) {
-  .mobile-menu {
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .burger-line {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-// Responsive базові стилі
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .nav {
-    gap: 1rem;
-  }
-  
-  .hero h1 {
-    font-size: 2.5rem;
-  }
-  
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .section {
-    padding: 3rem 0;
-  }
-  
-  .section-title {
-    font-size: 2rem;
-  }
-}
-
-// Медіаправила для grid-3
-@media (max-width: 1000px) {
-  .grid-3 {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-// Медіаправила для grid-4
-@media (max-width: 1200px) and (min-width: 801px) {
-  .grid-4 {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-
-@media (max-width: 800px) {
-  .grid-4 {
-    grid-template-columns: 1fr !important;
-  }
-}
-
 // Фіксація проблем з z-index
 .mobile-menu {
   position: relative;
@@ -1080,7 +1023,79 @@ h1, h2, h3, h4, h5, h6 {
 
 //==============================================================
 //Додаткові стилі для продукції
-//==============================================================
+// Додаткові стилі для покращення функціоналу переходів
+
+// Додаткові стилі для покращення функціоналу переходів
+
+// Стилі для клікабельних елементів ТІЛЬКИ в секції "Наша продукція"
+.section:not(.dark):not(.gray) .card {
+  // Клікабельна назва продукту тільки в секції продукції
+  .clickable-title {
+    transition: color 0.3s ease;
+    
+    &:hover {
+      color: $accent-color !important;
+    }
+  }
+  
+  // Клікабельна іконка продукту тільки в секції продукції
+  .clickable-icon {
+    cursor: pointer;
+    // Відключаємо стандартний hover ефект для клікабельних іконок
+    &:hover {
+      transform: scale(1.1) !important;
+      // Тільки акцентний колір при наведенні на клікабельну іконку
+      filter: 
+        brightness(0) 
+        saturate(100%) 
+        invert(60%) 
+        sepia(85%) 
+        saturate(2000%) 
+        hue-rotate(15deg) 
+        brightness(100%) 
+        contrast(100%) !important;
+    }
+  }
+}
+
+// Відключаємо загальний hover ефект для клікабельних іконок
+.section:not(.dark):not(.gray) .card:hover .clickable-icon {
+  // Скасовуємо стандартний hover ефект для клікабельних іконок
+  filter: 
+    brightness(0) 
+    saturate(100%) 
+    invert(23%) 
+    sepia(12%) 
+    saturate(1024%) 
+    hue-rotate(177deg) 
+    brightness(95%) 
+    contrast(91%) !important;
+  
+  // Ефект буде тільки при прямому наведенні на іконку
+  &:hover {
+    filter: 
+      brightness(0) 
+      saturate(100%) 
+      invert(60%) 
+      sepia(85%) 
+      saturate(2000%) 
+      hue-rotate(15deg) 
+      brightness(100%) 
+      contrast(100%) !important;
+  }
+}
+
+// Стилі для кнопок фільтрів
+.btn-outline {
+  border-color: $primary-color;
+  color: $primary-color;
+  background-color: transparent;
+  
+  &:hover {
+    background-color: $primary-color;
+    color: $white;
+  }
+}
 
 // Стилі для індикатора обраної категорії
 .category-indicator {
@@ -1170,7 +1185,7 @@ h1, h2, h3, h4, h5, h6 {
     background: $light-gray;
     padding: 0.25rem 0.5rem;
     border-radius: 12px;
-    font-size: 0.875rem;
+    fontSize: 0.875rem;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
     color: $dark-color;
@@ -1216,7 +1231,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Responsive покращення для продукції
+// Responsive покращення
 @media (max-width: 768px) {
   .category-indicator {
     font-size: 0.9rem;
@@ -1246,6 +1261,18 @@ h1, h2, h3, h4, h5, h6 {
       width: 100%;
       min-width: auto;
     }
+  }
+}
+
+// Анімації появи карток
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1280,5 +1307,4 @@ h1, h2, h3, h4, h5, h6 {
     color: $primary-color;
   }
 }
-
 //==============кінець додаткових стилів для продукції =======================
