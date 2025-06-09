@@ -485,10 +485,10 @@ const OrderModal = () => {
                       disabled={isSubmitting}
                     >
                       <option value="">Оберіть пункт навантаження</option>
-                      {getAvailableLoadingPoints().map(point => (
-                        <option key={point.id} value={point.id}>
-                          {point.name} - {point.location}
-                        </option>
+                     {getAvailableLoadingPoints().map((point, index) => (
+                      <option key={point.id} value={point.id}>
+                       • {point.name} | {point.location}
+                     </option>
                       ))}
                     </select>
                     {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
