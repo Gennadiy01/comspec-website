@@ -404,25 +404,32 @@
     line-height: 1.6;
   }
   
+  @media (max-width: 768px) {
   .phone-link {
-    display: inline-block;
-    padding: 6px 12px;
-    margin: 4px 0;
-    background-color: #008080;
-    color: white !important;
-    border-radius: 6px;
-    font-weight: 600;
+    color: #008080;
     text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    display: inline;
+    margin: 0;
+    background-color: transparent;  /* ← Прозорий фон */
     border: none;
-    box-shadow: 0 2px 4px rgba(0, 128, 128, 0.2);
+    box-shadow: none;
   }
   
   .phone-link:hover {
-    background-color: #006666 !important;
-    color: white !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 128, 128, 0.3);
+    color: #006666;
+    background-color: #e6f3f3;  /* ← Тільки при hover */
+    border-bottom-color: #008080;
+    text-decoration: none;
+    transform: scale(1.02);
+    box-shadow: none;
   }
+}
   
   .radio-group {
     flex-direction: column;
@@ -574,20 +581,6 @@
   }
 }
 
-/* Альтернативний варіант - CSS маркери через псевдоелементи */
-.form-select option:not(:first-child)::before {
-  content: "📍 " !important;
-  margin-right: 8px !important;
-  color: #008080 !important;
-}
-
-/* Або текстові маркери */
-.form-select.with-markers option:not(:first-child)::before {
-  content: "• " !important;
-  margin-right: 8px !important;
-  color: #008080 !important;
-  font-weight: bold !important;
-}
 
 /* Стилі для покращення читабельності */
 .form-select {
@@ -607,5 +600,88 @@
     word-wrap: break-word !important;
     height: auto !important;
     min-height: 48px !important;
+  }
+}
+
+/* ==========================================
+   МОБІЛЬНА ОПТИМІЗАЦІЯ SELECT
+   ========================================== */
+
+/* Базові стилі для мобільно-оптимізованого select */
+.form-select-mobile-optimized {
+  line-height: 1.5 !important;
+}
+
+.form-select-mobile-optimized option {
+  padding: 10px 12px !important;
+  line-height: 1.4 !important;
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border-bottom: 1px solid #f5f5f5 !important;
+}
+
+/* Перший option (placeholder) */
+.form-select-mobile-optimized option:first-child {
+  font-style: italic !important;
+  color: #888888 !important;
+  border-bottom: 2px solid #e9ecef !important;
+}
+
+/* Останній option без нижньої межі */
+.form-select-mobile-optimized option:last-child {
+  border-bottom: none !important;
+}
+
+/* Hover ефект для option */
+.form-select-mobile-optimized option:hover {
+  background-color: #e6f3f3 !important;
+  color: #008080 !important;
+}
+
+/* Мобільна оптимізація */
+@media (max-width: 768px) {
+  .form-select-mobile-optimized {
+    font-size: 15px !important; /* Базовий розмір для мобільних */
+    line-height: 1.4 !important;
+  }
+  
+  .form-select-mobile-optimized option {
+    font-size: 14px !important; /* Зменшений текст для options */
+    padding: 12px 14px !important;
+    min-height: 46px !important; /* Мінімальна висота для зручного натискання */
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    height: auto !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  .form-select-mobile-optimized option:first-child {
+    font-size: 15px !important; /* Placeholder трохи більший */
+  }
+}
+
+/* Ще більше зменшуємо текст для дуже маленьких екранів */
+@media (max-width: 480px) {
+  .form-select-mobile-optimized {
+    font-size: 14px !important;
+  }
+  
+  .form-select-mobile-optimized option {
+    font-size: 13px !important;
+    padding: 10px 12px !important;
+    min-height: 44px !important;
+  }
+  
+  .form-select-mobile-optimized option:first-child {
+    font-size: 14px !important;
+  }
+}
+
+/* Покращення для планшетів */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .form-select-mobile-optimized option {
+    font-size: 15px !important;
+    padding: 11px 13px !important;
   }
 }

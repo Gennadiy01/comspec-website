@@ -473,28 +473,28 @@ const OrderModal = () => {
                 </div>
               )}
 
-              {formData.deliveryType === 'pickup' && formData.product && (
-                <div className="conditional-field">
-                  <div className="form-group">
-                    <label className="form-label">Пункт навантаження</label>
-                    <select
-                      name="loadingPoint"
-                      value={formData.loadingPoint}
-                      onChange={handleInputChange}
-                      className={`form-select ${errors.loadingPoint ? 'error' : ''}`}
-                      disabled={isSubmitting}
-                    >
-                      <option value="">Оберіть пункт навантаження</option>
-                     {getAvailableLoadingPoints().map((point, index) => (
+             {formData.deliveryType === 'pickup' && formData.product && (
+              <div className="conditional-field">
+                <div className="form-group">
+                  <label className="form-label">Пункт навантаження</label>
+                  <select
+                    name="loadingPoint"
+                    value={formData.loadingPoint}
+                    onChange={handleInputChange}
+                    className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
+                    disabled={isSubmitting}
+                  >
+                    <option value="">Оберіть пункт навантаження</option>
+                    {getAvailableLoadingPoints().map((point, index) => (
                       <option key={point.id} value={point.id}>
-                       • {point.name} | {point.location}
-                     </option>
-                      ))}
-                    </select>
-                    {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
-                  </div>
+                        ⬤ {point.name} | {point.location}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
                 </div>
-              )}
+              </div>
+            )}
 
               {/* Підказка якщо обрано самовивіз, але не обрано товар */}
               {formData.deliveryType === 'pickup' && !formData.product && (
