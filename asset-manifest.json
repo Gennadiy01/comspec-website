@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/comspec-website/static/css/main.1306d95e.css",
-    "main.js": "/comspec-website/static/js/main.fd77091d.js",
+    "main.js": "/comspec-website/static/js/main.0f5a57a6.js",
     "static/media/concrete.png": "/comspec-website/static/media/concrete.75bd6f4c2dcd7d4442d9.png",
     "static/media/delivery.png": "/comspec-website/static/media/delivery.00a109a063409c9950b4.png",
     "static/media/quality.png": "/comspec-website/static/media/quality.51343393d215f934310e.png",
@@ -12,10 +12,10 @@
     "static/media/sand.png": "/comspec-website/static/media/sand.69b8055ee335db73b663.png",
     "index.html": "/comspec-website/index.html",
     "main.1306d95e.css.map": "/comspec-website/static/css/main.1306d95e.css.map",
-    "main.fd77091d.js.map": "/comspec-website/static/js/main.fd77091d.js.map"
+    "main.0f5a57a6.js.map": "/comspec-website/static/js/main.0f5a57a6.js.map"
   },
   "entrypoints": [
     "static/css/main.1306d95e.css",
-    "static/js/main.fd77091d.js"
+    "static/js/main.0f5a57a6.js"
   ]
 }
