@@ -1,5 +1,5 @@
 // src/components/modals/OrderModal.js
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useOrderModal } from '../../context/OrderModalContext';
 import AddressSearch from '../forms/AddressSearch';
 import { findNearestLoadingPoint } from '../../data/loadingPoints';
@@ -63,13 +63,6 @@ const OrderModal = () => {
   const [deliveryValidation, setDeliveryValidation] = useState(null);
   
   const firstInputRef = useRef(null);
-
-  // Мемоізуємо список критичних помилок
-  const criticalErrors = useMemo(() => {
-    return Object.keys(errors).filter(key => 
-      key !== 'nameWarning' && errors[key]
-    );
-  }, [errors]);
 
   // Ініціалізація форми при відкритті модального вікна
   useEffect(() => {
@@ -178,13 +171,12 @@ const OrderModal = () => {
       [name]: value
     }));
     
-    // Очищаємо помилку при введенні (видаляємо з об'єкта повністю)
+    // Очищаємо помилку при введенні
     if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
 
@@ -217,13 +209,12 @@ const OrderModal = () => {
       name: filteredValue
     }));
     
-    // Очищаємо критичну помилку при введенні
+    // Очищаємо помилку при введенні
     if (errors.name) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.name;
-        return newErrors;
-      });
+      setErrors(prev => ({
+        ...prev,
+        name: ''
+      }));
     }
   };
 
@@ -234,14 +225,9 @@ const OrderModal = () => {
     setAddressData(data);
     setDeliveryValidation(data.validation);
     
-    // Очищаємо помилку адреси при вибор, поскільки адреса тепер заповнена
-    if (errors.address) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.address;
-        return newErrors;
-      });
-    }
+    // ВИПРАВЛЕННЯ: НЕ переключаємо автоматично на самовивіз
+    // Залишаємо вибір користувачеві
+    // Тільки показуємо повідомлення про недоступність доставки
     
     // Додаємо лог для відлагодження
     if (data.validation) {
@@ -302,16 +288,8 @@ const OrderModal = () => {
       newErrors.loadingPoint = 'Оберіть пункт навантаження для самовивозу';
     }
 
-    // Зберігаємо попередження про ім'я якщо воно є
-    if (errors.nameWarning) {
-      newErrors.nameWarning = errors.nameWarning;
-    }
-
     setErrors(newErrors);
-    
-    // Повертаємо true тільки якщо немає критичних помилок (виключаємо попередження)
-    const criticalErrorKeys = Object.keys(newErrors).filter(key => key !== 'nameWarning');
-    return criticalErrorKeys.length === 0;
+    return Object.keys(newErrors).length === 0;
   };
 
   // Відправка форми
@@ -534,6 +512,8 @@ const OrderModal = () => {
                       placeholder="Введіть адресу доставки..."
                     />
                     {errors.address && <div className="form-error">{errors.address}</div>}
+                    
+                    {/* Примітка: повідомлення про валідацію показується тільки в AddressSearch компоненті */}
                   </div>
                 </div>
               )}
@@ -599,8 +579,8 @@ const OrderModal = () => {
                 />
               </div>
 
-              {/* Загальна помилка валідації - показуємо тільки якщо є критичні помилки */}
-              {criticalErrors.length > 0 && !isSubmitting && (
+              {/* Загальна помилка валідації */}
+              {Object.keys(errors).length > 0 && !isSubmitting && (
                 <div style={{
                   padding: '12px 16px',
                   backgroundColor: 'rgba(220, 53, 69, 0.08)',

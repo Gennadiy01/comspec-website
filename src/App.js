@@ -23,6 +23,7 @@ function App() {
         <ScrollToTop />
         <div className="App">
           <Header />
+                    
           <main>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -35,7 +36,9 @@ function App() {
               <Route path="/certificates/:category" element={<Certificates />} />
             </Routes>
           </main>
+          
           <Footer />
+          
           {/* Глобальне модальне вікно замовлення */}
           <OrderModal />
         </div>

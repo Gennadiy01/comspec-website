@@ -1,8 +1,6 @@
 // src/components/modals/OrderModal.js
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useOrderModal } from '../../context/OrderModalContext';
-import AddressSearch from '../forms/AddressSearch';
-import { findNearestLoadingPoint } from '../../data/loadingPoints';
 import '../../styles/order-modal.css';
 
 // Дані продукції з контексту проекту COMSPEC
@@ -58,18 +56,7 @@ const OrderModal = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  // Нові стани для пошуку адреси
-  const [addressData, setAddressData] = useState(null);
-  const [deliveryValidation, setDeliveryValidation] = useState(null);
-  
   const firstInputRef = useRef(null);
-
-  // Мемоізуємо список критичних помилок
-  const criticalErrors = useMemo(() => {
-    return Object.keys(errors).filter(key => 
-      key !== 'nameWarning' && errors[key]
-    );
-  }, [errors]);
 
   // Ініціалізація форми при відкритті модального вікна
   useEffect(() => {
@@ -91,8 +78,6 @@ const OrderModal = () => {
       setErrors({});
       setIsSubmitting(false);
       setShowSuccess(false);
-      setAddressData(null);
-      setDeliveryValidation(null);
     }
   }, [isOpen, orderData.preSelectedProduct]);
 
@@ -112,8 +97,6 @@ const OrderModal = () => {
     setErrors({});
     setIsSubmitting(false);
     setShowSuccess(false);
-    setAddressData(null);
-    setDeliveryValidation(null);
     closeOrderModal();
   };
   
@@ -132,7 +115,7 @@ const OrderModal = () => {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, isSubmitting, handleClose]);
+  }, [isOpen, isSubmitting]);
 
   // Детекція проблемних мобільних браузерів
   useEffect(() => {
@@ -178,13 +161,12 @@ const OrderModal = () => {
       [name]: value
     }));
     
-    // Очищаємо помилку при введенні (видаляємо з об'єкта повністю)
+    // Очищаємо помилку при введенні
     if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
 
@@ -217,39 +199,12 @@ const OrderModal = () => {
       name: filteredValue
     }));
     
-    // Очищаємо критичну помилку при введенні
+    // Очищаємо помилку при введенні
     if (errors.name) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.name;
-        return newErrors;
-      });
-    }
-  };
-
-  // ВИПРАВЛЕНИЙ хендлер для вибору адреси
-  const handleAddressSelect = (data) => {
-    console.log('Вибрано адресу:', data);
-    
-    setAddressData(data);
-    setDeliveryValidation(data.validation);
-    
-    // Очищаємо помилку адреси при вибор, поскільки адреса тепер заповнена
-    if (errors.address) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.address;
-        return newErrors;
-      });
-    }
-    
-    // Додаємо лог для відлагодження
-    if (data.validation) {
-      console.log('Результат валідації доставки:', {
-        region: data.validation.region,
-        available: data.validation.available,
-        message: data.validation.message
-      });
+      setErrors(prev => ({
+        ...prev,
+        name: ''
+      }));
     }
   };
 
@@ -286,32 +241,13 @@ const OrderModal = () => {
       newErrors.email = 'Введіть коректний email адрес';
     }
 
-    // Валідація адреси доставки
-    if (formData.deliveryType === 'delivery') {
-      if (!formData.address.trim()) {
-        newErrors.address = 'Введіть адресу доставки';
-      } else if (deliveryValidation && !deliveryValidation.available) {
-        // ВИПРАВЛЕННЯ: Показуємо попередження, але дозволяємо подавати заявку
-        // Менеджер зможе обговорити альтернативи з клієнтом
-        newErrors.address = `Увага: ${deliveryValidation.note || 'Доставка може бути обмежена в цей регіон'}`;
-      }
-    }
-
     // Валідація пункту навантаження для самовивозу ТІЛЬКИ якщо обрано товар
     if (formData.deliveryType === 'pickup' && formData.product && !formData.loadingPoint) {
       newErrors.loadingPoint = 'Оберіть пункт навантаження для самовивозу';
     }
 
-    // Зберігаємо попередження про ім'я якщо воно є
-    if (errors.nameWarning) {
-      newErrors.nameWarning = errors.nameWarning;
-    }
-
     setErrors(newErrors);
-    
-    // Повертаємо true тільки якщо немає критичних помилок (виключаємо попередження)
-    const criticalErrorKeys = Object.keys(newErrors).filter(key => key !== 'nameWarning');
-    return criticalErrorKeys.length === 0;
+    return Object.keys(newErrors).length === 0;
   };
 
   // Відправка форми
@@ -340,8 +276,6 @@ const OrderModal = () => {
       
       console.log('Дані замовлення:', {
         ...formData,
-        addressData,
-        deliveryValidation,
         source: orderData.source,
         timestamp: new Date().toISOString()
       });
@@ -525,13 +459,14 @@ const OrderModal = () => {
                 <div className="conditional-field">
                   <div className="form-group">
                     <label className="form-label">Адреса доставки</label>
-                    <AddressSearch
+                    <input
+                      type="text"
+                      name="address"
                       value={formData.address}
-                      onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                      onAddressSelect={handleAddressSelect}
-                      error={errors.address}
+                      onChange={handleInputChange}
+                      className={`form-input ${errors.address ? 'error' : ''}`}
+                      placeholder="Введіть адресу доставки (необов'язково)"
                       disabled={isSubmitting}
-                      placeholder="Введіть адресу доставки..."
                     />
                     {errors.address && <div className="form-error">{errors.address}</div>}
                   </div>
@@ -566,9 +501,9 @@ const OrderModal = () => {
                 <div className="conditional-field">
                   <div style={{
                     padding: '12px 16px',
-                    backgroundColor: 'rgba(255, 165, 0, 0.08)',
-                    border: '1px solid rgba(255, 165, 0, 0.3)',
-                    borderRadius: '8px',
+                    backgroundColor: '#fff4e6',
+                    border: '1px solid #FFA500',
+                    borderRadius: '6px',
                     color: '#856404',
                     fontSize: '0.9rem',
                     display: 'flex',
@@ -599,21 +534,21 @@ const OrderModal = () => {
                 />
               </div>
 
-              {/* Загальна помилка валідації - показуємо тільки якщо є критичні помилки */}
-              {criticalErrors.length > 0 && !isSubmitting && (
+              {/* Загальна помилка валідації */}
+              {Object.keys(errors).length > 0 && !isSubmitting && (
                 <div style={{
                   padding: '12px 16px',
-                  backgroundColor: 'rgba(220, 53, 69, 0.08)',
-                  border: '1px solid rgba(220, 53, 69, 0.3)',
-                  borderRadius: '8px',
-                  color: '#721c24',
+                  backgroundColor: '#fff2f2',
+                  border: '1px solid #ff6b6b',
+                  borderRadius: '6px',
+                  color: '#d63031',
                   fontSize: '0.9rem',
                   marginBottom: '16px',
                   display: 'flex',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
                   gap: '8px'
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#dc3545', flexShrink: 0, marginTop: '2px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#ff6b6b', flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                     <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
                     <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
@@ -626,7 +561,6 @@ const OrderModal = () => {
                       {errors.name && <li>Перевірте поле "Ім'я"</li>}
                       {errors.phone && <li>Перевірте поле "Телефон"</li>}
                       {errors.email && <li>Перевірте поле "Email"</li>}
-                      {errors.address && <li>Перевірте адресу доставки</li>}
                       {errors.loadingPoint && <li>Оберіть пункт навантаження</li>}
                       {errors.submit && <li>{errors.submit}</li>}
                     </ul>

@@ -1,0 +1,295 @@
+/* src/styles/address-search.css */
+
+/* Основний контейнер */
+.address-search {
+  position: relative;
+  width: 100%;
+}
+
+/* Обгортка для поля вводу */
+.address-search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Поле вводу адреси */
+.address-search-input {
+  width: 100%;
+  padding: 15px 20px;
+  padding-right: 50px; /* Місце для спінера */
+  border: 1px solid var(--gray-300, #dee2e6);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Open Sans', sans-serif;
+  background-color: var(--gray-100, #f8f9fa);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.address-search-input:focus {
+  border-color: var(--primary-color, #008080);
+  background-color: var(--white, #ffffff);
+  box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
+}
+
+.address-search-input.error {
+  border-color: var(--error-color, #dc3545);
+  background-color: #fff5f5;
+}
+
+.address-search-input.warning {
+  border-color: var(--accent-color, #FFA500);
+  background-color: #fff8f0;
+}
+
+.address-search-input:disabled {
+  background-color: var(--gray-200, #e9ecef);
+  color: var(--gray-500, #adb5bd);
+  cursor: not-allowed;
+}
+
+/* Спінер завантаження */
+.address-search-loading {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300, #dee2e6);
+  border-top-color: var(--primary-color, #008080);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dropdown з результатами пошуку */
+.address-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--white, #ffffff);
+  border: 1px solid var(--gray-300, #dee2e6);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Опція в dropdown */
+.address-search-option {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--gray-200, #e9ecef);
+}
+
+.address-search-option:last-child {
+  border-bottom: none;
+}
+
+.address-search-option:hover,
+.address-search-option.selected {
+  background-color: var(--primary-light, #e6f3f3);
+}
+
+.address-search-option.selected {
+  background-color: var(--primary-color, #008080);
+  color: var(--white, #ffffff);
+}
+
+/* Текст в опції */
+.address-main {
+  font-weight: 500;
+  color: var(--gray-800, #343a40);
+  margin-bottom: 2px;
+}
+
+.address-secondary {
+  font-size: 0.85rem;
+  color: var(--gray-600, #6c757d);
+}
+
+.address-search-option.selected .address-main,
+.address-search-option.selected .address-secondary {
+  color: var(--white, #ffffff);
+}
+
+/* Результат валідації */
+.address-validation-result {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  animation: slideDown 0.3s ease;
+}
+
+.address-validation-result.success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.address-validation-result.error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.validation-message {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.validation-note {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Повідомлення про помилку */
+.address-search-error {
+  margin-top: 5px;
+  color: var(--error-color, #dc3545);
+  font-size: 0.9rem;
+  padding: 5px 0;
+}
+
+/* Завантаження API */
+.address-search-loading-api {
+  margin-top: 5px;
+  color: var(--gray-600, #6c757d);
+  font-size: 0.9rem;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+}
+
+/* Анімації */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивність для мобільних */
+@media (max-width: 768px) {
+  .address-search-input {
+    font-size: 16px; /* Запобігає зуму на iOS */
+    padding: 14px 18px;
+    padding-right: 45px;
+  }
+  
+  .address-search-dropdown {
+    max-height: 150px;
+  }
+  
+  .address-search-option {
+    padding: 14px 16px;
+  }
+  
+  .address-main {
+    font-size: 0.95rem;
+  }
+  
+  .address-secondary {
+    font-size: 0.8rem;
+  }
+  
+  .address-validation-result {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  
+  .validation-note {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .address-search-input {
+    font-size: 14px;
+    padding: 12px 16px;
+    padding-right: 40px;
+  }
+  
+  .spinner {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .address-search-loading {
+    right: 12px;
+  }
+  
+  .address-search-option {
+    padding: 12px 14px;
+  }
+  
+  .address-main {
+    font-size: 0.9rem;
+  }
+  
+  .address-secondary {
+    font-size: 0.75rem;
+  }
+}
+
+/* Скроллбар для dropdown */
+.address-search-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.address-search-dropdown::-webkit-scrollbar-track {
+  background: var(--gray-100, #f8f9fa);
+}
+
+.address-search-dropdown::-webkit-scrollbar-thumb {
+  background: var(--gray-400, #ced4da);
+  border-radius: 3px;
+}
+
+.address-search-dropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500, #adb5bd);
+}
+
+/* Фокус стилі для доступності */
+.address-search-option:focus {
+  outline: 2px solid var(--primary-color, #008080);
+  outline-offset: -2px;
+}
+
+/* Тримання стилів COMSPEC */
+:root {
+  --primary-color: #008080;
+  --primary-light: #e6f3f3;
+  --secondary-color: #333f4f;
+  --accent-color: #FFA500;
+  --accent-light: #fff4e6;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --white: #FFFFFF;
+  --error-color: #dc3545;
+}
