@@ -18,7 +18,6 @@ const AddressSearch = ({
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [lastValidatedValue, setLastValidatedValue] = useState(''); // Додано для запобігання дублювання
 
   const inputRef = useRef(null);
   const geocoder = useRef(null);
@@ -104,19 +103,10 @@ const AddressSearch = ({
     };
   }, []);
 
-  // ВИПРАВЛЕНИЙ useEffect для пошуку - тепер не тригериться після вибору адреси
   useEffect(() => {
-    // Не виконуємо пошук якщо адреса вже була валідована або якщо dropdown закритий після вибору
-    if (!value || value.length < 3 || !isLoaded || !googleRef.current || value === lastValidatedValue) {
-      // Примусово закриваємо dropdown якщо value відповідає валідованому значенню
-      if (value === lastValidatedValue && isDropdownOpen) {
-        setIsDropdownOpen(false);
-        setPredictions([]);
-        setSelectedIndex(-1);
-      } else if (value !== lastValidatedValue) {
-        setPredictions([]);
-        setIsDropdownOpen(false);
-      }
+    if (!value || value.length < 3 || !isLoaded || !googleRef.current) {
+      setPredictions([]);
+      setIsDropdownOpen(false);
       return;
     }
 
@@ -157,7 +147,7 @@ const AddressSearch = ({
     }, 300);
 
     return () => clearTimeout(searchTimeout);
-  }, [value, isLoaded, lastValidatedValue, isDropdownOpen]);
+  }, [value, isLoaded]);
 
   // ВИПРАВЛЕНА функція валідації зони доставки
   const validateDeliveryZone = async (placeId) => {
@@ -289,27 +279,14 @@ const AddressSearch = ({
     }
   };
 
-  // ВИПРАВЛЕНИЙ handlePredictionSelect
   const handlePredictionSelect = async (prediction) => {
     try {
       const selectedAddress = prediction.description;
-      
-      // ВАЖЛИВО: спочатку закриваємо dropdown і очищаємо все
+      onChange(selectedAddress);
       setIsDropdownOpen(false);
       setPredictions([]);
       setSelectedIndex(-1);
-      
-      // Встановлюємо адресу та запам'ятовуємо її як валідовану
-      onChange(selectedAddress);
-      setLastValidatedValue(selectedAddress);
-      
-      // Примусово приховуємо dropdown через невеликий timeout для надійності
-      setTimeout(() => {
-        setIsDropdownOpen(false);
-        setPredictions([]);
-      }, 50);
-      
-      // Тепер валідуємо адресу
+
       const validation = await validateDeliveryZone(prediction.place_id);
       setValidationResult(validation);
 
@@ -324,28 +301,6 @@ const AddressSearch = ({
       }
     } catch (error) {
       console.error('Помилка вибору адреси:', error);
-      // У випадку помилки також закриваємо dropdown
-      setIsDropdownOpen(false);
-      setPredictions([]);
-      setSelectedIndex(-1);
-    }
-  };
-
-  // ДОДАНО: обробка зміни value для скидання валідації при редагуванні
-  const handleInputChange = (newValue) => {
-    onChange(newValue);
-    
-    // Якщо користувач редагує адресу після валідації - скидаємо результат
-    if (newValue !== lastValidatedValue && validationResult) {
-      setValidationResult(null);
-      setLastValidatedValue('');
-    }
-    
-    // Якщо користувач редагує валідовану адресу - закриваємо dropdown
-    if (newValue !== lastValidatedValue && lastValidatedValue) {
-      setIsDropdownOpen(false);
-      setPredictions([]);
-      setSelectedIndex(-1);
     }
   };
 
@@ -383,29 +338,13 @@ const AddressSearch = ({
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-        setPredictions([]);
         setSelectedIndex(-1);
       }
     };
 
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        setIsDropdownOpen(false);
-        setPredictions([]);
-        setSelectedIndex(-1);
-      }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isDropdownOpen]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (loadError) {
     return (
@@ -422,7 +361,7 @@ const AddressSearch = ({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || !isLoaded}
