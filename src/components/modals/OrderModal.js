@@ -234,14 +234,7 @@ const OrderModal = () => {
     setAddressData(data);
     setDeliveryValidation(data.validation);
     
-    // Очищаємо помилку адреси при вибор, поскільки адреса тепер заповнена
-    if (errors.address) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.address;
-        return newErrors;
-      });
-    }
+    // Адреса більше не є обов'язковою, тому не очищаємо помилки
     
     // Додаємо лог для відлагодження
     if (data.validation) {
@@ -286,21 +279,9 @@ const OrderModal = () => {
       newErrors.email = 'Введіть коректний email адрес';
     }
 
-    // Валідація адреси доставки
-    if (formData.deliveryType === 'delivery') {
-      if (!formData.address.trim()) {
-        newErrors.address = 'Введіть адресу доставки';
-      } else if (deliveryValidation && !deliveryValidation.available) {
-        // ВИПРАВЛЕННЯ: Показуємо попередження, але дозволяємо подавати заявку
-        // Менеджер зможе обговорити альтернативи з клієнтом
-        newErrors.address = `Увага: ${deliveryValidation.note || 'Доставка може бути обмежена в цей регіон'}`;
-      }
-    }
-
-    // Валідація пункту навантаження для самовивозу ТІЛЬКИ якщо обрано товар
-    if (formData.deliveryType === 'pickup' && formData.product && !formData.loadingPoint) {
-      newErrors.loadingPoint = 'Оберіть пункт навантаження для самовивозу';
-    }
+    // ВИДАЛЕНО: Валідація адреси доставки та пункту навантаження
+    // Поля "Адреса доставки" та "Пункт навантаження" тепер НЕ обов'язкові
+    // Клієнт може подати заявку без цих полів, менеджер уточнить деталі по телефону
 
     // Зберігаємо попередження про ім'я якщо воно є
     if (errors.nameWarning) {
@@ -531,9 +512,19 @@ const OrderModal = () => {
                       onAddressSelect={handleAddressSelect}
                       error={errors.address}
                       disabled={isSubmitting}
-                      placeholder="Введіть адресу доставки..."
+                      placeholder="Введіть адресу доставки (необов'язково)..."
                     />
                     {errors.address && <div className="form-error">{errors.address}</div>}
+                    
+                    {/* Інформативне повідомлення */}
+                    <div style={{
+                      fontSize: '0.825rem',
+                      color: '#6c757d',
+                      marginTop: '6px',
+                      fontStyle: 'italic'
+                    }}>
+                      Адресу можна не вказувати — менеджер уточнить деталі доставки по телефону
+                    </div>
                   </div>
                 </div>
               )}
@@ -549,7 +540,7 @@ const OrderModal = () => {
                     className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
                     disabled={isSubmitting}
                   >
-                    <option value="">Оберіть пункт навантаження</option>
+                    <option value="">Не обрано</option>
                     {getAvailableLoadingPoints().map((point, index) => (
                       <option key={point.id} value={point.id}>
                         ⬤ {point.name} | {point.location}
@@ -557,6 +548,16 @@ const OrderModal = () => {
                     ))}
                   </select>
                   {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
+                  
+                  {/* Інформативне повідомлення */}
+                  <div style={{
+                    fontSize: '0.825rem',
+                    color: '#6c757d',
+                    marginTop: '6px',
+                    fontStyle: 'italic'
+                  }}>
+                    Пункт навантаження можна не обирати — менеджер допоможе обрати найзручніший
+                  </div>
                 </div>
               </div>
             )}
@@ -626,8 +627,6 @@ const OrderModal = () => {
                       {errors.name && <li>Перевірте поле "Ім'я"</li>}
                       {errors.phone && <li>Перевірте поле "Телефон"</li>}
                       {errors.email && <li>Перевірте поле "Email"</li>}
-                      {errors.address && <li>Перевірте адресу доставки</li>}
-                      {errors.loadingPoint && <li>Оберіть пункт навантаження</li>}
                       {errors.submit && <li>{errors.submit}</li>}
                     </ul>
                   </div>
