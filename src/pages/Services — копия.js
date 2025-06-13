@@ -1,17 +1,7 @@
 import React from 'react';
-import { useOrderModal } from '../context/OrderModalContext';
+import { Link } from 'react-router-dom';
 
 const Services = () => {
-  const { openOrderModal } = useOrderModal();
-
-  // Функція для відкриття модального вікна з консультацією
-  const handleConsultationClick = (serviceType) => {
-    openOrderModal({
-      source: 'services-page',
-      serviceType: serviceType // передаємо тип послуги для аналітики
-    });
-  };
-
   const deliveryServices = [
     {
       title: 'Доставка залізницею',
@@ -140,12 +130,7 @@ const Services = () => {
                   ))}
                 </ul>
                 
-                <button 
-                  className="btn btn-accent"
-                  onClick={() => handleConsultationClick('delivery')}
-                >
-                  Замовити консультацію
-                </button>
+                <Link to="/contacts" className="btn btn-accent">Замовити</Link>
               </div>
             ))}
           </div>
@@ -176,12 +161,7 @@ const Services = () => {
                 <p>{service.description}</p>
                 <p><strong>Обладнання:</strong> {service.equipment}</p>
                 
-                <button 
-                  className="btn btn-accent"
-                  onClick={() => handleConsultationClick('equipment')}
-                >
-                  Замовити консультацію
-                </button>
+                <Link to="/contacts" className="btn btn-accent">Замовити</Link>
               </div>
             ))}
           </div>
@@ -218,12 +198,7 @@ const Services = () => {
                   ))}
                 </ul>
                 
-                <button 
-                  className="btn btn-accent"
-                  onClick={() => handleConsultationClick('mining')}
-                >
-                  Замовити консультацію
-                </button>
+                <Link to="/contacts" className="btn btn-accent">Замовити</Link>
               </div>
             ))}
           </div>
@@ -237,35 +212,32 @@ const Services = () => {
             <div>
               <h3>Чому обирають наші послуги?</h3>
               <ul>
-                <li>✓ Власний парк сучасної техніки</li>
-                <li>✓ Кваліфіковані спеціалісти</li>
-                <li>✓ Дотримання термінів</li>
-                <li>✓ Конкурентні ціни</li>
-                <li>✓ Повний пакет документів</li>
-                <li>✓ Гарантія якості робіт</li>
+                <li>✅ Власний парк сучасної техніки</li>
+                <li>✅ Кваліфіковані спеціалісти</li>
+                <li>✅ Дотримання термінів</li>
+                <li>✅ Конкурентні ціни</li>
+                <li>✅ Повний пакет документів</li>
+                <li>✅ Гарантія якості робіт</li>
               </ul>
             </div>
             
             <div>
               <h3>Додаткові послуги</h3>
               <ul>
-                <li>- Консультації спеціалістів</li>
-                <li>- Розрахунок потреби в матеріалах</li>
-                <li>- Логістичне планування</li>
-                <li>- Оформлення документації</li>
-                <li>- Контроль якості</li>
-                <li>- Технічна підтримка</li>
+                <li>📋 Консультації спеціалістів</li>
+                <li>📊 Розрахунок потреби в матеріалах</li>
+                <li>🚛 Логістичне планування</li>
+                <li>📄 Оформлення документації</li>
+                <li>🔍 Контроль якості</li>
+                <li>📞 Технічна підтримка</li>
               </ul>
             </div>
           </div>
           
           <div style={{textAlign: 'center', marginTop: '2rem'}}>
-            <button 
-              className="btn btn-primary"
-              onClick={() => handleConsultationClick('general')}
-            >
+            <Link to="/contacts" className="btn btn-primary">
               Отримати консультацію
-            </button>
+            </Link>
           </div>
         </div>
       </section>

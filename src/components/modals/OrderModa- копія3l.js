@@ -42,9 +42,6 @@ const loadingPoints = {
 const OrderModal = () => {
   const { isOpen, orderData, closeOrderModal } = useOrderModal();
   
-  // ВАЖЛИВО: Визначаємо режим модального вікна
-  const isConsultationMode = orderData?.source === 'services-page';
-  
   // Стани форми
   const [formData, setFormData] = useState({
     name: '',
@@ -61,7 +58,7 @@ const OrderModal = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  // ВАЖЛИВО: Стани для пошуку адреси - мають бути завжди присутні
+  // Нові стани для пошуку адреси
   const [addressData, setAddressData] = useState(null);
   const [deliveryValidation, setDeliveryValidation] = useState(null);
   
@@ -74,21 +71,11 @@ const OrderModal = () => {
     );
   }, [errors]);
 
-  // Динамічні тексти залежно від режиму
-  const modalTitle = isConsultationMode ? 'Замовити консультацію' : 'Замовити матеріали';
-  const modalSubtitle = isConsultationMode 
-    ? 'Заповніть форму і ми зв\'яжемося з вами для обговорення деталей' 
-    : 'Заповніть форму і ми зв\'яжемося з вами протягом 15 хвилин або просто зателефонуйте 073 9 27 27 00';
-  const submitButtonText = isConsultationMode ? 'Надіслати заявку' : 'Надіслати замовлення';
-  const messagePlaceholder = isConsultationMode 
-    ? 'Опишіть послуги, які вас цікавлять...' 
-    : 'Уточніть бажану фракцію щебеню, марку асфальту або бетону.\nОпишіть Ваш проект або додаткові побажання.';
-
   // Ініціалізація форми при відкритті модального вікна
   useEffect(() => {
     if (isOpen) {
-      // Встановлюємо предвибраний товар якщо є (тільки для режиму замовлення)
-      if (!isConsultationMode && orderData?.preSelectedProduct) {
+      // Встановлюємо предвибраний товар якщо є
+      if (orderData.preSelectedProduct) {
         setFormData(prev => ({
           ...prev,
           product: orderData.preSelectedProduct
@@ -107,7 +94,7 @@ const OrderModal = () => {
       setAddressData(null);
       setDeliveryValidation(null);
     }
-  }, [isOpen, orderData?.preSelectedProduct, isConsultationMode]);
+  }, [isOpen, orderData.preSelectedProduct]);
 
   // Обробка закриття модального вікна
   const handleClose = () => {
@@ -145,7 +132,7 @@ const OrderModal = () => {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, isSubmitting]);
+  }, [isOpen, isSubmitting, handleClose]);
 
   // Детекція проблемних мобільних браузерів
   useEffect(() => {
@@ -155,10 +142,12 @@ const OrderModal = () => {
       const isProblematicBrowser = /miuibrowser|samsungbrowser|ucbrowser|oppo|vivo/i.test(userAgent);
       
       if (isMobile || isProblematicBrowser) {
+        // Додаємо клас для принудового використання нативних select
         const selects = document.querySelectorAll('.form-select');
         selects.forEach(select => {
           select.classList.add('native-mobile');
           
+          // Додаткове виправлення для Android
           if (/android/i.test(userAgent)) {
             select.style.cssText += `
               -webkit-appearance: listbox !important;
@@ -176,6 +165,7 @@ const OrderModal = () => {
     };
 
     if (isOpen) {
+      // Виконуємо детекцію після відкриття модалки
       setTimeout(detectMobileBrowser, 100);
     }
   }, [isOpen]);
@@ -188,6 +178,7 @@ const OrderModal = () => {
       [name]: value
     }));
     
+    // Очищаємо помилку при введенні (видаляємо з об'єкта повністю)
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -197,18 +188,21 @@ const OrderModal = () => {
     }
   };
 
-  // Спеціальна обробка для поля імені
+  // Спеціальна обробка для поля імені - дозволяємо тільки кириличні літери
   const handleNameInput = (e) => {
     const { value } = e.target;
     const originalValue = value;
+    // Дозволяємо тільки українські літери, пробіли, дефіси та апострофи
     const filteredValue = value.replace(/[^А-ЯІЇЄа-яіїє\'\-\s]/g, '');
     
+    // Показуємо попередження якщо символи були відфільтровані
     if (originalValue !== filteredValue && originalValue.length > 0) {
       setErrors(prev => ({
         ...prev,
         nameWarning: 'Дозволені тільки українські літери, пробіли, дефіси та апострофи'
       }));
       
+      // Прибираємо попередження через 3 секунди
       setTimeout(() => {
         setErrors(prev => {
           const newErrors = { ...prev };
@@ -223,6 +217,7 @@ const OrderModal = () => {
       name: filteredValue
     }));
     
+    // Очищаємо критичну помилку при введенні
     if (errors.name) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -239,6 +234,9 @@ const OrderModal = () => {
     setAddressData(data);
     setDeliveryValidation(data.validation);
     
+    // Адреса більше не є обов'язковою, тому не очищаємо помилки
+    
+    // Додаємо лог для відлагодження
     if (data.validation) {
       console.log('Результат валідації доставки:', {
         region: data.validation.region,
@@ -248,11 +246,11 @@ const OrderModal = () => {
     }
   };
 
-  // Валідація форми з однаковою якістю для обох режимів
+  // Валідація форми
   const validateForm = () => {
     const newErrors = {};
 
-    // Валідація імені
+    // Валідація імені - тільки кириличні літери, пробіли, дефіси та апострофи
     if (!formData.name.trim()) {
       newErrors.name = 'Поле "Ім\'я" є обов\'язковим';
     } else if (!/^[А-ЯІЇЄа-яіїє\'\-\s]+$/.test(formData.name.trim())) {
@@ -267,28 +265,32 @@ const OrderModal = () => {
     if (!formData.phone.trim()) {
       newErrors.phone = 'Поле "Телефон" є обов\'язковим';
     } else {
+      // Очищуємо телефон від всіх символів крім цифр і +
       const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
+      
+      // Перевіряємо формати: +380XXXXXXXXX або 0XXXXXXXXX
       if (!/^(\+380\d{9}|0\d{9})$/.test(cleanPhone)) {
         newErrors.phone = 'Введіть коректний український номер телефону (наприклад: +380671234567 або 0671234567)';
       }
     }
 
-    // Валідація email
+    // Валідація email якщо заповнений
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = 'Введіть коректний email адрес';
     }
 
-    // Додаткові поля валідуються ТІЛЬКИ якщо це режим замовлення
-    if (!isConsultationMode) {
-      // Адреса та пункт навантаження НЕ обов'язкові
-    }
+    // ВИДАЛЕНО: Валідація адреси доставки та пункту навантаження
+    // Поля "Адреса доставки" та "Пункт навантаження" тепер НЕ обов'язкові
+    // Клієнт може подати заявку без цих полів, менеджер уточнить деталі по телефону
 
+    // Зберігаємо попередження про ім'я якщо воно є
     if (errors.nameWarning) {
       newErrors.nameWarning = errors.nameWarning;
     }
 
     setErrors(newErrors);
     
+    // Повертаємо true тільки якщо немає критичних помилок (виключаємо попередження)
     const criticalErrorKeys = Object.keys(newErrors).filter(key => key !== 'nameWarning');
     return criticalErrorKeys.length === 0;
   };
@@ -298,6 +300,7 @@ const OrderModal = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      // Прокручуємо до першої помилки
       const firstErrorField = document.querySelector('.form-input.error, .form-select.error');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ 
@@ -312,19 +315,21 @@ const OrderModal = () => {
     setIsSubmitting(true);
 
     try {
+      // Тут буде інтеграція з Google Sheets API, Telegram та Email
+      // Поки що симулюємо відправку
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       console.log('Дані замовлення:', {
         ...formData,
         addressData,
         deliveryValidation,
-        source: orderData?.source,
-        isConsultationMode,
+        source: orderData.source,
         timestamp: new Date().toISOString()
       });
 
       setShowSuccess(true);
       
+      // Автоматично закриваємо модальне вікно через 3 секунди після успіху
       setTimeout(() => {
         handleClose();
       }, 3000);
@@ -337,7 +342,7 @@ const OrderModal = () => {
     }
   };
 
-  // Отримання доступних пунктів навантаження
+  // Отримання доступних пунктів навантаження для обраного товару
   const getAvailableLoadingPoints = () => {
     if (!formData.product) return [];
     return loadingPoints[formData.product] || [];
@@ -350,18 +355,12 @@ const OrderModal = () => {
       <div className="order-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="order-modal-header">
-          <h2 className="order-modal-title">{modalTitle}</h2>
+          <h2 className="order-modal-title">Замовити матеріали</h2>
           <p className="order-modal-subtitle">
-            {isConsultationMode ? (
-              modalSubtitle
-            ) : (
-              <>
-                {modalSubtitle.split('073 9 27 27 00')[0]}
-                <a href="tel:+380739272700" className="phone-link">
-                  073 9 27 27 00
-                </a>
-              </>
-            )}
+            Заповніть форму і ми зв'яжемося з вами протягом 15 хвилин або просто зателефонуйте{' '}
+            <a href="tel:+380739272700" className="phone-link">
+              073 9 27 27 00
+            </a>
           </p>
           <button onClick={handleClose} className="order-close-btn">
             <svg viewBox="0 0 24 24" fill="none">
@@ -373,18 +372,20 @@ const OrderModal = () => {
         {/* Body */}
         <div className="order-modal-body">
           {showSuccess ? (
+            // Повідомлення про успіх
             <div className="order-success">
               <svg className="order-success-icon" viewBox="0 0 24 24" fill="none">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <h3>{isConsultationMode ? 'Дякуємо за звернення!' : 'Дякуємо за замовлення!'}</h3>
+              <h3>Дякуємо за замовлення!</h3>
               <p>
                 Ваша заявка успішно відправлена.<br/>
                 Наш менеджер зв'яжеться з вами найближчим часом.
               </p>
             </div>
           ) : (
+            // Форма замовлення
             <form onSubmit={handleSubmit} className="order-form">
               {/* Ім'я */}
               <div className="form-group">
@@ -450,142 +451,139 @@ const OrderModal = () => {
                 {errors.email && <div className="form-error">{errors.email}</div>}
               </div>
 
-              {/* Поля для замовлення - показуємо тільки якщо НЕ консультація */}
-              {!isConsultationMode && (
-                <>
-                  {/* Оберіть товар */}
-                  <div className="form-group">
-                    <label className="form-label">Оберіть товар</label>
-                    <select
-                      name="product"
-                      value={formData.product}
+              {/* Оберіть товар */}
+              <div className="form-group">
+                <label className="form-label">Оберіть товар</label>
+                <select
+                  name="product"
+                  value={formData.product}
+                  onChange={handleInputChange}
+                  className="form-select"
+                  disabled={isSubmitting}
+                >
+                  <option value="">Не обрано</option>
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Тип отримання */}
+              <div className="form-group">
+                <label className="form-label">Спосіб отримання</label>
+                <div className="radio-group">
+                  <div className="radio-option">
+                    <input
+                      type="radio"
+                      id="delivery"
+                      name="deliveryType"
+                      value="delivery"
+                      checked={formData.deliveryType === 'delivery'}
                       onChange={handleInputChange}
-                      className="form-select"
                       disabled={isSubmitting}
-                    >
-                      <option value="">Не обрано</option>
-                      {products.map(product => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
+                    <label htmlFor="delivery">Доставка</label>
                   </div>
+                  <div className="radio-option">
+                    <input
+                      type="radio"
+                      id="pickup"
+                      name="deliveryType"
+                      value="pickup"
+                      checked={formData.deliveryType === 'pickup'}
+                      onChange={handleInputChange}
+                      disabled={isSubmitting}
+                    />
+                    <label htmlFor="pickup">Самовивіз</label>
+                  </div>
+                </div>
+              </div>
 
-                  {/* Тип отримання */}
+              {/* Умовні поля */}
+              {formData.deliveryType === 'delivery' && (
+                <div className="conditional-field">
                   <div className="form-group">
-                    <label className="form-label">Спосіб отримання</label>
-                    <div className="radio-group">
-                      <div className="radio-option">
-                        <input
-                          type="radio"
-                          id="delivery"
-                          name="deliveryType"
-                          value="delivery"
-                          checked={formData.deliveryType === 'delivery'}
-                          onChange={handleInputChange}
-                          disabled={isSubmitting}
-                        />
-                        <label htmlFor="delivery">Доставка</label>
-                      </div>
-                      <div className="radio-option">
-                        <input
-                          type="radio"
-                          id="pickup"
-                          name="deliveryType"
-                          value="pickup"
-                          checked={formData.deliveryType === 'pickup'}
-                          onChange={handleInputChange}
-                          disabled={isSubmitting}
-                        />
-                        <label htmlFor="pickup">Самовивіз</label>
-                      </div>
+                    <label className="form-label">Адреса доставки</label>
+                    <AddressSearch
+                      value={formData.address}
+                      onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+                      onAddressSelect={handleAddressSelect}
+                      error={errors.address}
+                      disabled={isSubmitting}
+                      placeholder="Введіть адресу доставки (необов'язково)..."
+                    />
+                    {errors.address && <div className="form-error">{errors.address}</div>}
+                    
+                    {/* Інформативне повідомлення */}
+                    <div style={{
+                      fontSize: '0.825rem',
+                      color: '#6c757d',
+                      marginTop: '6px',
+                      fontStyle: 'italic'
+                    }}>
+                      Адресу можна не вказувати — менеджер уточнить деталі доставки по телефону
                     </div>
                   </div>
+                </div>
+              )}
 
-                  {/* Умовні поля */}
-                  {formData.deliveryType === 'delivery' && (
-                    <div className="conditional-field">
-                      <div className="form-group">
-                        <label className="form-label">Адреса доставки</label>
-                        <AddressSearch
-                          value={formData.address}
-                          onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                          onAddressSelect={handleAddressSelect}
-                          error={errors.address}
-                          disabled={isSubmitting}
-                          placeholder="Введіть адресу доставки (необов'язково)..."
-                        />
-                        {errors.address && <div className="form-error">{errors.address}</div>}
-                        
-                        <div style={{
-                          fontSize: '0.825rem',
-                          color: '#6c757d',
-                          marginTop: '6px',
-                          fontStyle: 'italic'
-                        }}>
-                          Адресу можна не вказувати — менеджер уточнить деталі доставки по телефону
-                        </div>
-                      </div>
-                    </div>
-                  )}
+             {formData.deliveryType === 'pickup' && formData.product && (
+              <div className="conditional-field">
+                <div className="form-group">
+                  <label className="form-label">Пункт навантаження</label>
+                  <select
+                    name="loadingPoint"
+                    value={formData.loadingPoint}
+                    onChange={handleInputChange}
+                    className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
+                    disabled={isSubmitting}
+                  >
+                    <option value="">Не обрано</option>
+                    {getAvailableLoadingPoints().map((point, index) => (
+                      <option key={point.id} value={point.id}>
+                        ⬤ {point.name} | {point.location}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
+                  
+                  {/* Інформативне повідомлення */}
+                  <div style={{
+                    fontSize: '0.825rem',
+                    color: '#6c757d',
+                    marginTop: '6px',
+                    fontStyle: 'italic'
+                  }}>
+                    Пункт навантаження можна не обирати — менеджер допоможе обрати найзручніший
+                  </div>
+                </div>
+              </div>
+            )}
 
-                  {formData.deliveryType === 'pickup' && formData.product && (
-                    <div className="conditional-field">
-                      <div className="form-group">
-                        <label className="form-label">Пункт навантаження</label>
-                        <select
-                          name="loadingPoint"
-                          value={formData.loadingPoint}
-                          onChange={handleInputChange}
-                          className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
-                          disabled={isSubmitting}
-                        >
-                          <option value="">Не обрано</option>
-                          {getAvailableLoadingPoints().map((point) => (
-                            <option key={point.id} value={point.id}>
-                              ⬤ {point.name} | {point.location}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
-                        
-                        <div style={{
-                          fontSize: '0.825rem',
-                          color: '#6c757d',
-                          marginTop: '6px',
-                          fontStyle: 'italic'
-                        }}>
-                          Пункт навантаження можна не обирати — менеджер допоможе обрати найзручніший
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Підказка якщо обрано самовивіз, але не обрано товар */}
-                  {formData.deliveryType === 'pickup' && !formData.product && (
-                    <div className="conditional-field">
-                      <div style={{
-                        padding: '12px 16px',
-                        backgroundColor: 'rgba(255, 165, 0, 0.08)',
-                        border: '1px solid rgba(255, 165, 0, 0.3)',
-                        borderRadius: '8px',
-                        color: '#856404',
-                        fontSize: '0.9rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#FFA500', flexShrink: 0 }}>
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span>Оберіть товар, щоб побачити доступні пункти навантаження</span>
-                      </div>
-                    </div>
-                  )}
-                </>
+              {/* Підказка якщо обрано самовивіз, але не обрано товар */}
+              {formData.deliveryType === 'pickup' && !formData.product && (
+                <div className="conditional-field">
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: 'rgba(255, 165, 0, 0.08)',
+                    border: '1px solid rgba(255, 165, 0, 0.3)',
+                    borderRadius: '8px',
+                    color: '#856404',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#FFA500', flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M12 16v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Оберіть товар, щоб побачити доступні пункти навантаження</span>
+                  </div>
+                </div>
               )}
 
               {/* Повідомлення */}
@@ -596,13 +594,13 @@ const OrderModal = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   className="form-textarea"
-                  placeholder={messagePlaceholder}
+                  placeholder="Уточніть бажану фракцію щебеню, марку асфальту або бетону.&#10;Опишіть Ваш проект або додаткові побажання."
                   disabled={isSubmitting}
                   rows="4"
                 />
               </div>
 
-              {/* Помилки валідації */}
+              {/* Загальна помилка валідації - показуємо тільки якщо є критичні помилки */}
               {criticalErrors.length > 0 && !isSubmitting && (
                 <div style={{
                   padding: '12px 16px',
@@ -635,6 +633,7 @@ const OrderModal = () => {
                 </div>
               )}
 
+              {/* Помилка відправки */}
               {errors.submit && (
                 <div className="form-error" style={{ textAlign: 'center', fontSize: '1rem' }}>
                   {errors.submit}
@@ -654,7 +653,7 @@ const OrderModal = () => {
                       Відправка...
                     </span>
                   ) : (
-                    submitButtonText
+                    'Надіслати заявку'
                   )}
                 </button>
                 <button
@@ -667,47 +666,45 @@ const OrderModal = () => {
                 </button>
               </div>
 
-              {/* Інформація про обробку - показуємо тільки для режиму замовлення */}
-              {!isConsultationMode && (
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: '#6c757d',
-                  textAlign: 'left',
-                  marginTop: '16px',
-                  marginLeft: '16px',
-                  lineHeight: '1.6',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  alignItems: 'flex-start'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Замовлення обробляються з 8:00 до 20:00, пн-сб</span>
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
-                      <path d="M1 3h15v13H1z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="6" cy="19" r="2" stroke="currentColor" strokeWidth="2"/>
-                      <circle cx="20" cy="19" r="2" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M16 3v13h4.5l2-4V8h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Мінімальна партія - 1 машина</span>
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Вартість доставки розраховується менеджером</span>
-                  </div>
+              {/* Інформація про обробку */}
+              <div style={{
+                fontSize: '0.875rem',
+                color: '#6c757d',
+                textAlign: 'left',
+                marginTop: '16px',
+                marginLeft: '16px',
+                lineHeight: '1.6',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Замовлення обробляються з 8:00 до 20:00, пн-сб</span>
                 </div>
-              )}
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                    <path d="M1 3h15v13H1z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="6" cy="19" r="2" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="20" cy="19" r="2" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M16 3v13h4.5l2-4V8h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Мінімальна партія - 1 машина</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Вартість доставки розраховується менеджером</span>
+                </div>
+              </div>
             </form>
           )}
         </div>
