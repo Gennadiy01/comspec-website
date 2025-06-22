@@ -1,42 +1,245 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# ===============================================
+# DEPENDENCIES & PACKAGES
+# ===============================================
 /node_modules
 /.pnp
 .pnp.js
+package-lock.json
+yarn.lock
 
-# testing
-/coverage
-
-# production
+# ===============================================
+# REACT BUILD & TESTING
+# ===============================================
 /build
+/coverage
+/dist
 
-# misc
-.DS_Store
+# ===============================================
+# ENVIRONMENT VARIABLES & SECRETS
+# ===============================================
+# Main environment files
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
+# Google Service Account & API credentials
+*.json
+credentials/
+keys/
+src/services/credentials/
+*service-account*
+*api-key*
+*private-key*
+
+# Other sensitive files
+*secret*
+*password*
+*token*
+
+# ===============================================
+# LOGS & DEBUG
+# ===============================================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+*.log
 
-# IDE
+# ===============================================
+# OPERATING SYSTEM FILES
+# ===============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===============================================
+# IDE & EDITOR FILES
+# ===============================================
+# Visual Studio Code
 .vscode/
+*.code-workspace
+
+# JetBrains IDEs
 .idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
 *.swp
 *.swo
+*~
 
-# OS
-Thumbs.db
-.DS_Store
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
 
-# Environment variables
-.env
+# Atom
+.atom/
 
-# Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ===============================================
+# TEMPORARY & CACHE FILES
+# ===============================================
+# ESLint cache
+.eslintcache
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# ===============================================
+# GOOGLE CLOUD & DEPLOYMENT
+# ===============================================
+# Google Cloud deployment
+.gcloudignore
+cloudbuild.yaml
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+
+# ===============================================
+# TESTING & COVERAGE
+# ===============================================
+# Jest coverage
+coverage/
+*.lcov
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# ===============================================
+# MISC DEVELOPMENT FILES
+# ===============================================
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# ===============================================
+# PROJECT SPECIFIC (COMSPEC)
+# ===============================================
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Documentation builds
+docs/build/
+
+# Local development files
+local/
+temp/
+tmp/
+
+# Database files (if any local DB used for testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# ===============================================
+# SECURITY & SENSITIVE DATA
+# ===============================================
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa
+id_rsa.pub
+known_hosts
+
+# GPG keys
+*.gpg
+*.asc
