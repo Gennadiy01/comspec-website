@@ -238,8 +238,8 @@ const AddressSearch = ({
               console.log('Зона доставки не визначена для:', region || locality);
               resolve({
                 available: false,
-                message: region ? `Доставка в ${region} не визначена` : 'Не вдалось визначити регіон доставки',
-                note: "Зв'яжіться з менеджером для уточнення можливості доставки",
+                message: region ? `Автомобільна доставка в ${region} не визначена` : 'Не вдалось визначити регіон доставки',
+                note: "Зв'яжіться з менеджером для уточнення можливості доставки автомобільним або залізничним транспортом",
                 region: finalRegion || region || locality,
                 address: fullAddress,
                 coordinates: {

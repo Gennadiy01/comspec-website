@@ -124,6 +124,11 @@ export const findNearestLoadingPoint = (coordinates, productType = null) => {
   if (productType) {
     availablePoints = availablePoints.filter(point => {
       switch (productType) {
+        case 'Щебінь': return point.hasGravel;    // ✅ Українські
+        case 'Пісок': return point.hasSand;
+        case 'Асфальт': return point.hasAsphalt;
+        case 'Бетон': return point.hasConcrete;
+        // Зворотна сумісність:
         case 'gravel': return point.hasGravel;
         case 'sand': return point.hasSand;
         case 'asphalt': return point.hasAsphalt;
@@ -174,6 +179,11 @@ export const getLoadingPointsByProduct = (productType) => {
     if (!point.active) return false;
     
     switch (productType) {
+      case 'Щебінь': return point.hasGravel;     // ✅ Українські назви
+      case 'Пісок': return point.hasSand;
+      case 'Асфальт': return point.hasAsphalt;
+      case 'Бетон': return point.hasConcrete;
+      // Зворотна сумісність (на випадок старих викликів):
       case 'gravel': return point.hasGravel;
       case 'sand': return point.hasSand;
       case 'asphalt': return point.hasAsphalt;
@@ -182,12 +192,16 @@ export const getLoadingPointsByProduct = (productType) => {
     }
   });
 };
-
 // Статистика пунктів навантаження
 export const loadingPointsStats = {
   total: loadingPoints.length,
   active: loadingPoints.filter(p => p.active).length,
   byProduct: {
+    'Щебінь': loadingPoints.filter(p => p.hasGravel && p.active).length,    // ✅ Українські ключі
+    'Пісок': loadingPoints.filter(p => p.hasSand && p.active).length,
+    'Асфальт': loadingPoints.filter(p => p.hasAsphalt && p.active).length,
+    'Бетон': loadingPoints.filter(p => p.hasConcrete && p.active).length,
+    // Зворотна сумісність:
     gravel: loadingPoints.filter(p => p.hasGravel && p.active).length,
     sand: loadingPoints.filter(p => p.hasSand && p.active).length,
     asphalt: loadingPoints.filter(p => p.hasAsphalt && p.active).length,

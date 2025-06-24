@@ -1,43 +1,21 @@
-// src/components/modals/OrderModal.js
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+// src/components/modals/OrderModal.js - ПОВНИЙ КОД з Google Sheets інтеграцією
+import React, { useState, useEffect, useRef, useMemo, useCallback  } from 'react';
 import { useOrderModal } from '../../context/OrderModalContext';
 import AddressSearch from '../forms/AddressSearch';
-import { findNearestLoadingPoint } from '../../data/loadingPoints';
+import { getLoadingPointsByProduct } from '../../data/loadingPoints';
+//import googleSheetsService from '../../services/GoogleSheetsService';
+import jsonpService from '../../services/JSONPGoogleSheetsService';
+import ValidationUtils from '../../utils/validation';
 import '../../styles/order-modal.css';
 
 // Дані продукції з контексту проекту COMSPEC
 const products = [
-  { id: 'gravel', name: 'Щебінь', category: 'Будівельні матеріали' },
-  { id: 'sand', name: 'Пісок', category: 'Будівельні матеріали' },
-  { id: 'asphalt', name: 'Асфальт', category: 'Будівельні матеріали' },
-  { id: 'concrete', name: 'Бетон', category: 'Будівельні матеріали' }
+  { id: 'Щебінь', name: 'Щебінь', category: 'Будівельні матеріали' },
+  { id: 'Пісок', name: 'Пісок', category: 'Будівельні матеріали' },
+  { id: 'Асфальт', name: 'Асфальт', category: 'Будівельні матеріали' },
+  { id: 'Бетон', name: 'Бетон', category: 'Будівельні матеріали' }
 ];
 
-// Пункти навантаження згідно з контекстом проекту
-const loadingPoints = {
-  gravel: [
-    { id: 1, name: 'ТДВ "Коростенський щебзавод"', location: 'м. Коростень, Житомирська обл.' },
-    { id: 2, name: 'ТОВ "РКДЗ"', location: 'смт. Рокитне, Київська обл.' },
-    { id: 3, name: 'ТОВ "ВО Богуславський граніт"', location: 'м. Богуслав, Київська обл.' },
-    { id: 4, name: 'ТОВ «Алас Фастів»/ЯРОШІВСЬКИЙ КАР\'ЄР', location: 'с. Ярошівка, Київська обл.' },
-    { id: 5, name: 'ТДВ "Березівський кар\'єр"', location: 'Березівка, Житомирська обл.' },
-    { id: 6, name: 'ТДВ «Ігнатпільський кар\'єр"', location: 'с. Рудня, Житомирська обл.' },
-    { id: 7, name: 'База "АБЗ"', location: 'м. Київ, вул. Покільська, 4' },
-    { id: 8, name: 'База "Ірпінь"', location: 'м. Ірпінь, Київська обл.' },
-    { id: 9, name: 'База "Бориспіль"', location: 'м. Бориспіль, Київська обл.' }
-  ],
-  sand: [
-    { id: 7, name: 'База "АБЗ"', location: 'м. Київ, вул. Покільська, 4' },
-    { id: 8, name: 'База "Ірпінь"', location: 'м. Ірпінь, Київська обл.' },
-    { id: 9, name: 'База "Бориспіль"', location: 'м. Бориспіль, Київська обл.' }
-  ],
-  asphalt: [
-    { id: 7, name: 'База "АБЗ"', location: 'м. Київ, вул. Покільська, 4' }
-  ],
-  concrete: [
-    { id: 2, name: 'ТОВ "РКДЗ"', location: 'смт. Рокитне, Київська обл.' }
-  ]
-};
 
 const OrderModal = () => {
   const { isOpen, orderData, closeOrderModal } = useOrderModal();
@@ -60,6 +38,7 @@ const OrderModal = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitResult, setSubmitResult] = useState(null); // Для зберігання результату з Google Sheets
   
   // ВАЖЛИВО: Стани для пошуку адреси - мають бути завжди присутні
   const [addressData, setAddressData] = useState(null);
@@ -104,48 +83,50 @@ const OrderModal = () => {
       setErrors({});
       setIsSubmitting(false);
       setShowSuccess(false);
+      setSubmitResult(null);
       setAddressData(null);
       setDeliveryValidation(null);
     }
   }, [isOpen, orderData?.preSelectedProduct, isConsultationMode]);
 
   // Обробка закриття модального вікна
-  const handleClose = () => {
-    // Скидаємо форму
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      product: '',
-      deliveryType: 'delivery',
-      address: '',
-      loadingPoint: '',
-      message: ''
-    });
-    setErrors({});
-    setIsSubmitting(false);
-    setShowSuccess(false);
-    setAddressData(null);
-    setDeliveryValidation(null);
-    closeOrderModal();
-  };
+  const handleClose = useCallback(() => {
+  // Скидаємо форму
+  setFormData({
+    name: '',
+    phone: '',
+    email: '',
+    product: '',
+    deliveryType: 'delivery',
+    address: '',
+    loadingPoint: '',
+    message: ''
+  });
+  setErrors({});
+  setIsSubmitting(false);
+  setShowSuccess(false);
+  setSubmitResult(null);
+  setAddressData(null);
+  setDeliveryValidation(null);
+  closeOrderModal();
+}, [closeOrderModal]); // closeOrderModal в залежностях
   
   // Обробка натискання Escape
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen && !isSubmitting) {
-        handleClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+  const handleEscape = (e) => {
+    if (e.key === 'Escape' && isOpen && !isSubmitting) {
+      handleClose();
     }
+  };
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, isSubmitting]);
+  if (isOpen) {
+    document.addEventListener('keydown', handleEscape);
+  }
+
+  return () => {
+    document.removeEventListener('keydown', handleEscape);
+  };
+}, [isOpen, isSubmitting, handleClose]);
 
   // Детекція проблемних мобільних браузерів
   useEffect(() => {
@@ -197,13 +178,19 @@ const OrderModal = () => {
     }
   };
 
-  // Спеціальна обробка для поля імені
+  // Спеціальна обробка для поля імені з валідацією через ValidationUtils
   const handleNameInput = (e) => {
     const { value } = e.target;
-    const originalValue = value;
-    const filteredValue = value.replace(/[^А-ЯІЇЄа-яіїє\'\-\s]/g, '');
+    const validation = ValidationUtils.validateName(value);
     
-    if (originalValue !== filteredValue && originalValue.length > 0) {
+    // Встановлюємо очищене значення
+    setFormData(prev => ({
+      ...prev,
+      name: validation.cleaned
+    }));
+    
+    // Показуємо попередження якщо були неприпустимі символи
+    if (value !== validation.cleaned && value.length > 0) {
       setErrors(prev => ({
         ...prev,
         nameWarning: 'Дозволені тільки українські літери, пробіли, дефіси та апострофи'
@@ -218,15 +205,32 @@ const OrderModal = () => {
       }, 3000);
     }
     
-    setFormData(prev => ({
-      ...prev,
-      name: filteredValue
-    }));
-    
+    // Очищаємо помилку валідації
     if (errors.name) {
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors.name;
+        return newErrors;
+      });
+    }
+  };
+
+  // Обробка телефону з автоматичним форматуванням
+  const handlePhoneInput = (e) => {
+    const { value } = e.target;
+    const validation = ValidationUtils.validatePhone(value);
+    
+    // Встановлюємо форматований телефон якщо валідація пройшла
+    setFormData(prev => ({
+      ...prev,
+      phone: validation.isValid ? validation.formatted : value
+    }));
+    
+    // Очищаємо помилку якщо телефон став валідним
+    if (validation.isValid && errors.phone) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.phone;
         return newErrors;
       });
     }
@@ -248,52 +252,24 @@ const OrderModal = () => {
     }
   };
 
-  // Валідація форми з однаковою якістю для обох режимів
+  // Валідація форми з використанням ValidationUtils
   const validateForm = () => {
-    const newErrors = {};
-
-    // Валідація імені
-    if (!formData.name.trim()) {
-      newErrors.name = 'Поле "Ім\'я" є обов\'язковим';
-    } else if (!/^[А-ЯІЇЄа-яіїє\'\-\s]+$/.test(formData.name.trim())) {
-      newErrors.name = 'Ім\'я може містити лише українські літери, пробіли, дефіси та апострофи';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Ім\'я повинно містити щонайменше 2 символи';
-    } else if (formData.name.trim().length > 50) {
-      newErrors.name = 'Ім\'я не може перевищувати 50 символів';
-    }
-
-    // Валідація телефону
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Поле "Телефон" є обов\'язковим';
-    } else {
-      const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
-      if (!/^(\+380\d{9}|0\d{9})$/.test(cleanPhone)) {
-        newErrors.phone = 'Введіть коректний український номер телефону (наприклад: +380671234567 або 0671234567)';
-      }
-    }
-
-    // Валідація email
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = 'Введіть коректний email адрес';
-    }
-
-    // Додаткові поля валідуються ТІЛЬКИ якщо це режим замовлення
-    if (!isConsultationMode) {
-      // Адреса та пункт навантаження НЕ обов'язкові
-    }
-
-    if (errors.nameWarning) {
-      newErrors.nameWarning = errors.nameWarning;
-    }
-
-    setErrors(newErrors);
+    const validation = ValidationUtils.validateOrderForm(formData, isConsultationMode);
     
-    const criticalErrorKeys = Object.keys(newErrors).filter(key => key !== 'nameWarning');
-    return criticalErrorKeys.length === 0;
+    setErrors(validation.errors);
+    
+    // Додаємо попередження про ім'я якщо воно є
+    if (errors.nameWarning) {
+      setErrors(prev => ({
+        ...prev,
+        nameWarning: errors.nameWarning
+      }));
+    }
+    
+    return validation.isValid;
   };
 
-  // Відправка форми
+  // Відправка форми з Google Sheets інтеграцією
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -310,38 +286,142 @@ const OrderModal = () => {
     }
 
     setIsSubmitting(true);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.submit;
+      return newErrors;
+    });
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Підготовка даних для Google Sheets з використанням ValidationUtils
+      const cleanedData = ValidationUtils.prepareDataForSheets(formData, isConsultationMode);
       
-      console.log('Дані замовлення:', {
-        ...formData,
-        addressData,
-        deliveryValidation,
-        source: orderData?.source,
+      // Додаємо дані з валідації адреси
+      const orderDataForSheets = {
+        ...cleanedData,
+       // region: addressData?.validation?.region || deliveryValidation?.region || '',
+        // Конвертуємо ID пункту навантаження в назву
+       // loadingPoint: formData.loadingPoint ? 
+         // getAvailableLoadingPoints().find(p => p.id === formData.loadingPoint)?.name || '' : ''
+         region: (() => {
+  // Спочатку перевіряємо дані з addressData
+  if (addressData?.validation?.region) {
+    return addressData.validation.region;
+  }
+  
+  // Потім перевіряємо deliveryValidation
+  if (deliveryValidation?.region) {
+    return deliveryValidation.region;
+  }
+  
+  // Якщо є адреса, але немає валідації - витягуємо область вручну
+  if (formData.address) {
+    const extractedRegion = ValidationUtils.validateDeliveryZone(formData.address);
+    return extractedRegion.region;
+  }
+  
+  // Якщо нічого немає - повертаємо порожній рядок
+  return '';
+})(),
+
+
+
+        loadingPoint: (() => {
+  console.log('🔍 Debug loadingPoint:', {
+    formLoadingPoint: formData.loadingPoint,
+    formLoadingPointType: typeof formData.loadingPoint,
+    availablePoints: getAvailableLoadingPoints().map(p => ({ id: p.id, idType: typeof p.id, name: p.name }))
+  });
+  
+  const foundPoint = getAvailableLoadingPoints().find(p => p.id.toString() === formData.loadingPoint.toString());
+  console.log('🎯 Found point:', foundPoint);
+  
+  return foundPoint?.name || '';
+})()
+   
+      };
+
+      // Debug: логування регіону (ПІСЛЯ об'єкта!)
+console.log('🔍 Debug region detection:', {
+  formAddress: formData.address,
+  addressDataRegion: addressData?.validation?.region,
+  deliveryValidationRegion: deliveryValidation?.region,
+  finalRegion: orderDataForSheets.region
+});
+
+      // Визначаємо джерело замовлення
+      const source = orderData?.source === 'services-page' ? 'services-page' : 'product-page';
+      
+      console.log('Відправляємо замовлення в Google Sheets:', {
+        formData: orderDataForSheets,
         isConsultationMode,
-        timestamp: new Date().toISOString()
+        source,
+        addressData,
+        deliveryValidation
       });
 
-      setShowSuccess(true);
-      
-      setTimeout(() => {
-        handleClose();
-      }, 3000);
+      // Відправляємо замовлення через JSONP сервіс (БЕЗ CORS проблем)
+      const result = await jsonpService.saveOrder(
+        orderDataForSheets, 
+        isConsultationMode, 
+        source
+      );
+
+      if (result.success) {
+        setSubmitResult(result);
+        setShowSuccess(true);
+        
+        console.log('Замовлення успішно збережено:', {
+          orderId: result.orderId,
+          manager: result.manager,
+          mode: isConsultationMode ? 'consultation' : 'order',
+          source: source,
+          data: result.data
+        });
+
+        // Автоматичне закриття через 5 секунд (збільшено для читання результату)
+        setTimeout(() => {
+          handleClose();
+        }, 5000);
+      } else {
+        throw new Error('Не вдалося зберегти замовлення');
+      }
 
     } catch (error) {
       console.error('Помилка відправки замовлення:', error);
-      setErrors({ submit: 'Помилка при відправці замовлення. Спробуйте ще раз.' });
+      
+      // Показуємо зрозумілу помилку користувачу
+      let errorMessage = 'Помилка при відправці замовлення. Спробуйте ще раз.';
+      
+      if (error.message.includes('підключитися до бази даних')) {
+        errorMessage = 'Тимчасові проблеми з сервером. Спробуйте за кілька хвилин або зателефонуйте нам.';
+      } else if (error.message.includes('валідації')) {
+        errorMessage = error.message;
+      } else if (error.message.includes('Немає активних менеджерів')) {
+        errorMessage = 'Наразі всі менеджери зайняті. Будь ласка, зателефонуйте нам або спробуйте пізніше.';
+      } else if (error.message.includes('OVER_QUERY_LIMIT')) {
+        errorMessage = 'Перевищено ліміт запитів. Спробуйте через кілька хвилин або зателефонуйте нам.';
+      }
+      
+      setErrors({ submit: errorMessage });
+      
+      // Детальне логування для відладки
+      console.error('Деталі помилки:', {
+        message: error.message,
+        stack: error.stack,
+        formData: formData,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Отримання доступних пунктів навантаження
-  const getAvailableLoadingPoints = () => {
-    if (!formData.product) return [];
-    return loadingPoints[formData.product] || [];
-  };
+const getAvailableLoadingPoints = () => {
+  if (!formData.product) return [];
+  return getLoadingPointsByProduct(formData.product);
+};
 
   if (!isOpen) return null;
 
@@ -380,9 +460,41 @@ const OrderModal = () => {
               </svg>
               <h3>{isConsultationMode ? 'Дякуємо за звернення!' : 'Дякуємо за замовлення!'}</h3>
               <p>
-                Ваша заявка успішно відправлена.<br/>
-                Наш менеджер зв'яжеться з вами найближчим часом.
+                {submitResult ? (
+                  <>
+                    Ваша заявка успішно відправлена.<br/>
+                    <strong>Номер замовлення: #{submitResult.orderId}</strong><br/>
+                    <strong>Ваш менеджер: {submitResult.manager}</strong><br/>
+                    Очікуйте дзвінок найближчим часом.
+                  </>
+                ) : (
+                  <>
+                    Ваша заявка успішно відправлена.<br/>
+                    Наш менеджер зв'яжеться з вами найближчим часом.
+                  </>
+                )}
               </p>
+              
+              {/* Додаткова інформація про замовлення */}
+              {submitResult && submitResult.data && (
+                <div style={{
+                  marginTop: '20px',
+                  padding: '15px',
+                  backgroundColor: 'rgba(0, 128, 128, 0.05)',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  color: '#495057'
+                }}>
+                  <div><strong>Дата:</strong> {submitResult.data.Date} о {submitResult.data.Time}</div>
+                  {submitResult.data.Product && (
+                    <div><strong>Продукт:</strong> {products.find(p => p.id === submitResult.data.Product)?.name || submitResult.data.Product}</div>
+                  )}
+                  {submitResult.data.Delivery_Type && (
+                    <div><strong>Доставка:</strong> {submitResult.data.Delivery_Type === 'delivery' ? 'Доставка' : 'Самовивіз'}</div>
+                  )}
+                  <div><strong>Режим:</strong> {submitResult.data.Mode === 'consultation' ? 'Консультація' : 'Замовлення'}</div>
+                </div>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="order-form">
@@ -427,12 +539,19 @@ const OrderModal = () => {
                   type="tel"
                   name="phone"
                   value={formData.phone}
-                  onChange={handleInputChange}
+                  onChange={handlePhoneInput}
                   className={`form-input ${errors.phone ? 'error' : ''}`}
                   placeholder="+38 (0__) ___-__-__"
                   disabled={isSubmitting}
                 />
                 {errors.phone && <div className="form-error">{errors.phone}</div>}
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#6c757d',
+                  marginTop: '4px'
+                }}>
+                  Формати: +380671234567, 380671234567, 0671234567
+                </div>
               </div>
 
               {/* Email */}
@@ -518,6 +637,23 @@ const OrderModal = () => {
                         />
                         {errors.address && <div className="form-error">{errors.address}</div>}
                         
+                        {/* Показуємо результат валідації доставки */}
+                        {deliveryValidation && (
+                          <div style={{
+                            marginTop: '8px',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            backgroundColor: deliveryValidation.available ? 
+                              'rgba(40, 167, 69, 0.1)' : 'rgba(255, 193, 7, 0.1)',
+                            color: deliveryValidation.available ? '#155724' : '#856404',
+                            border: `1px solid ${deliveryValidation.available ? 
+                              'rgba(40, 167, 69, 0.3)' : 'rgba(255, 193, 7, 0.3)'}`
+                          }}>
+                            <strong>{deliveryValidation.region}:</strong> {deliveryValidation.message}
+                          </div>
+                        )}
+                        
                         <div style={{
                           fontSize: '0.825rem',
                           color: '#6c757d',
@@ -544,7 +680,7 @@ const OrderModal = () => {
                           <option value="">Не обрано</option>
                           {getAvailableLoadingPoints().map((point) => (
                             <option key={point.id} value={point.id}>
-                              ⬤ {point.name} | {point.location}
+                              ⬤ {point.name} | {point.address}
                             </option>
                           ))}
                         </select>
@@ -599,7 +735,16 @@ const OrderModal = () => {
                   placeholder={messagePlaceholder}
                   disabled={isSubmitting}
                   rows="4"
+                  maxLength="1000"
                 />
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#6c757d',
+                  marginTop: '4px',
+                  textAlign: 'right'
+                }}>
+                  {formData.message.length}/1000 символів
+                </div>
               </div>
 
               {/* Помилки валідації */}
@@ -629,15 +774,44 @@ const OrderModal = () => {
                       {errors.name && <li>Перевірте поле "Ім'я"</li>}
                       {errors.phone && <li>Перевірте поле "Телефон"</li>}
                       {errors.email && <li>Перевірте поле "Email"</li>}
+                      {errors.address && <li>Перевірте адресу доставки</li>}
                       {errors.submit && <li>{errors.submit}</li>}
                     </ul>
                   </div>
                 </div>
               )}
 
+              {/* Спеціальна помилка відправки */}
               {errors.submit && (
-                <div className="form-error" style={{ textAlign: 'center', fontSize: '1rem' }}>
-                  {errors.submit}
+                <div style={{
+                  padding: '12px 16px',
+                  backgroundColor: 'rgba(220, 53, 69, 0.08)',
+                  border: '1px solid rgba(220, 53, 69, 0.3)',
+                  borderRadius: '8px',
+                  color: '#721c24',
+                  fontSize: '0.9rem',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#dc3545', flexShrink: 0, marginTop: '2px' }}>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 8v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <div>
+                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                      Помилка відправки
+                    </div>
+                    <div>{errors.submit}</div>
+                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#856404' }}>
+                      💡 Ви завжди можете зателефонувати нам: 
+                      <a href="tel:+380739272700" style={{ color: '#008080', fontWeight: '600' }}>
+                        073 9 27 27 00
+                      </a>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -647,11 +821,15 @@ const OrderModal = () => {
                   type="submit"
                   className="btn-order-submit"
                   disabled={isSubmitting}
+                  style={{
+                    opacity: isSubmitting ? 0.7 : 1,
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                  }}
                 >
                   {isSubmitting ? (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                       <div className="order-spinner"></div>
-                      Відправка...
+                      {isConsultationMode ? 'Відправляємо заявку...' : 'Створюємо замовлення...'}
                     </span>
                   ) : (
                     submitButtonText
@@ -706,8 +884,81 @@ const OrderModal = () => {
                     </svg>
                     <span>Вартість доставки розраховується менеджером</span>
                   </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Сертифіковані матеріали з гарантією якості</span>
+                  </div>
                 </div>
               )}
+
+              {/* Інформація про консультацію */}
+              {isConsultationMode && (
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: '#6c757d',
+                  textAlign: 'left',
+                  marginTop: '16px',
+                  marginLeft: '16px',
+                  lineHeight: '1.6',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  alignItems: 'flex-start'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Безкоштовна консультація наших експертів</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Зв'яжемося протягом 15 хвилин</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                      <path d="M9 11H1v8a2 2 0 0 0 2 2h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M13 21h8a2 2 0 0 0 2-2v-8h-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M13 3h8a2 2 0 0 1 2 2v8h-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 11h8V3a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Індивідуальний розрахунок для вашого проекту</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Індикатор безпеки та конфіденційності */}
+              <div style={{
+                marginTop: '20px',
+                padding: '12px 16px',
+                backgroundColor: 'rgba(0, 128, 128, 0.05)',
+                border: '1px solid rgba(0, 128, 128, 0.2)',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                color: '#495057',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: '#008080', flexShrink: 0 }}>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="12" cy="16" r="1" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M7 11V7a5 5 0 1 1 10 0v4" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+                <span>
+                  Ваші дані захищені та використовуються виключно для обробки замовлення
+                </span>
+              </div>
             </form>
           )}
         </div>
