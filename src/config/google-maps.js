@@ -1,22 +1,23 @@
 // src/config/google-maps.js
 import React from 'react';
+import config from './environment';
 
 // Конфігурація Google Maps API для різних середовищ
 const GOOGLE_MAPS_CONFIG = {
   development: {
-    apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    apiKey: config.GOOGLE_MAPS_API_KEY,
     restrictions: ['http://localhost:3000/*'],
     language: 'uk',
     region: 'UA'
   },
   github: {
-    apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    apiKey: config.GOOGLE_MAPS_API_KEY,
     restrictions: ['https://gennadiy01.github.io/*'],
     language: 'uk',
     region: 'UA'
   },
   production: {
-    apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    apiKey: config.GOOGLE_MAPS_API_KEY,
     restrictions: ['https://comspec.ua/*', 'https://www.comspec.ua/*'],
     language: 'uk',
     region: 'UA'
@@ -40,14 +41,14 @@ export const getGoogleMapsConfig = () => {
 
 // Функція для отримання API ключа
 export const getGoogleMapsApiKey = () => {
-  const config = getGoogleMapsConfig();
+  const mapsConfig = getGoogleMapsConfig();
   
-  if (!config.apiKey) {
-    console.error('Google Maps API key не знайдено. Перевірте файл .env.local');
+  if (!mapsConfig.apiKey) {
+    console.error('Google Maps API key не знайдено');
     return null;
   }
   
-  return config.apiKey;
+  return mapsConfig.apiKey;
 };
 
 // Функція для завантаження Google Maps API
@@ -67,8 +68,8 @@ export const loadGoogleMapsAPI = () => {
       return;
     }
 
-    const config = getGoogleMapsConfig();
-    const apiKey = config.apiKey;
+    const mapsConfig = getGoogleMapsConfig();
+    const apiKey = mapsConfig.apiKey;
 
     if (!apiKey) {
       reject(new Error('Google Maps API key не знайдено'));
@@ -78,7 +79,7 @@ export const loadGoogleMapsAPI = () => {
     // Створюємо скрипт
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=${config.language}&region=${config.region}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=${mapsConfig.language}&region=${mapsConfig.region}`;
     script.async = true;
     script.defer = true;
 
@@ -149,7 +150,7 @@ export const GEOCODING_CONFIG = {
 
 // Функція для логування використання API (для моніторингу)
 export const logAPIUsage = (apiType, query = '') => {
-  if (process.env.NODE_ENV === 'development') {
+  if (config.DEBUG_MODE) {
     console.log(`Google Maps API ${apiType} використано:`, {
       timestamp: new Date().toISOString(),
       query: query.substring(0, 50), // Обрізаємо для приватності
@@ -189,7 +190,7 @@ export const validateAPIKey = () => {
   if (!apiKey) {
     return {
       valid: false,
-      message: 'API ключ не знайдено. Додайте REACT_APP_GOOGLE_MAPS_API_KEY в .env.local файл'
+      message: 'API ключ не знайдено. Перевірте конфігурацію'
     };
   }
   
@@ -206,13 +207,18 @@ export const validateAPIKey = () => {
   };
 };
 
-export default {
+// ✅ ВИПРАВЛЕННЯ ESLint помилки: створюємо змінну перед експортом
+const googleMapsUtils = {
   getGoogleMapsConfig,
   getGoogleMapsApiKey,
   loadGoogleMapsAPI,
+  useGoogleMaps,
   PLACES_CONFIG,
   GEOCODING_CONFIG,
   logAPIUsage,
   handleAPIError,
   validateAPIKey
 };
+
+// Експортуємо як default
+export default googleMapsUtils;

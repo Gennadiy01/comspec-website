@@ -1,6 +1,7 @@
 // src/components/forms/AddressSearch.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
+import config from '../../config/environment'; // ЗМІНА: використовуємо нашу конфігурацію
 import '../../styles/address-search.css';
 
 const AddressSearch = ({
@@ -18,7 +19,7 @@ const AddressSearch = ({
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [lastValidatedValue, setLastValidatedValue] = useState(''); // Додано для запобігання дублювання
+  const [lastValidatedValue, setLastValidatedValue] = useState('');
 
   const inputRef = useRef(null);
   const geocoder = useRef(null);
@@ -26,7 +27,7 @@ const AddressSearch = ({
   const loaderRef = useRef(null);
   const googleRef = useRef(null);
 
-  // ВИПРАВЛЕНІ зони доставки з більш точним розпізнаванням
+  // Зони доставки
   const deliveryZones = {
     'Київська область': {
       available: true,
@@ -48,12 +49,10 @@ const AddressSearch = ({
       available: false,
       note: 'Доставка в ваш регіон неможлива. Пропонуємо самовивіз',
     },
-    // Додаємо спеціальне правило для міста Київ
     'Київ': {
       available: true,
       note: 'Доставка по місту Київ. Вартість розраховує менеджер',
     },
-    // Додаємо альтернативні назви
     'Kiev Oblast': {
       available: true,
       note: 'Доставка власним транспортом. Вартість розраховує менеджер',
@@ -67,8 +66,15 @@ const AddressSearch = ({
   useEffect(() => {
     let isMounted = true;
 
+    // ЗМІНА: використовуємо config замість process.env
+    if (!config.GOOGLE_MAPS_API_KEY) {
+      console.error('❌ Google Maps API ключ не знайдено в конфігурації');
+      setLoadError('Google Maps API ключ не налаштований');
+      return;
+    }
+
     loaderRef.current = new Loader({
-      apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+      apiKey: config.GOOGLE_MAPS_API_KEY, // ЗМІНА: використовуємо config
       version: 'weekly',
       libraries: ['places'],
       language: 'uk',
@@ -83,9 +89,14 @@ const AddressSearch = ({
             googleRef.current = google;
             geocoder.current = new google.maps.Geocoder();
             setIsLoaded(true);
-            console.log('Google Maps API ініціалізовано');
+            console.log('✅ Google Maps API ініціалізовано');
+            
+            // ДОДАНО: логування для налагодження
+            if (config.DEBUG_MODE) {
+              console.log('🗺️ Google Maps завантажено з конфігурації:', config.ENVIRONMENT);
+            }
           } catch (error) {
-            console.error('Помилка ініціалізації сервісу:', error);
+            console.error('❌ Помилка ініціалізації сервісу:', error);
             setLoadError('Не вдалося ініціалізувати сервіс карт');
             setIsLoaded(false);
           }
@@ -93,7 +104,7 @@ const AddressSearch = ({
       })
       .catch((error) => {
         if (isMounted) {
-          console.error('Помилка завантаження Google Maps API:', error);
+          console.error('❌ Помилка завантаження Google Maps API:', error);
           setLoadError('Не вдалося завантажити сервіс карт');
           setIsLoaded(false);
         }
@@ -102,13 +113,11 @@ const AddressSearch = ({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, []); // ЗМІНА: видалено config з dependencies, оскільки він статичний
 
-  // ВИПРАВЛЕНИЙ useEffect для пошуку - тепер не тригериться після вибору адреси
+  // Пошук адрес
   useEffect(() => {
-    // Не виконуємо пошук якщо адреса вже була валідована або якщо dropdown закритий після вибору
     if (!value || value.length < 3 || !isLoaded || !googleRef.current || value === lastValidatedValue) {
-      // Примусово закриваємо dropdown якщо value відповідає валідованому значенню
       if (value === lastValidatedValue && isDropdownOpen) {
         setIsDropdownOpen(false);
         setPredictions([]);
@@ -122,16 +131,14 @@ const AddressSearch = ({
 
     const searchTimeout = setTimeout(async () => {
       try {
-        // Використовуємо пряме геокодування для пошуку адрес
         const request = {
           address: value,
-          region: 'ua',  // ISO 3166-1 Alpha-2 код країни
+          region: 'ua',
           language: 'uk'
         };
 
         geocoder.current.geocode(request, (results, status) => {
           if (status === 'OK' && results && results.length > 0) {
-            // Трансформуємо результати у формат, який очікує компонент
             const formattedPredictions = results.slice(0, 5).map(result => ({
               place_id: result.place_id,
               description: result.formatted_address,
@@ -159,7 +166,7 @@ const AddressSearch = ({
     return () => clearTimeout(searchTimeout);
   }, [value, isLoaded, lastValidatedValue, isDropdownOpen]);
 
-  // ВИПРАВЛЕНА функція валідації зони доставки
+  // Валідація зони доставки
   const validateDeliveryZone = async (placeId) => {
     if (!geocoder.current) {
       console.warn('Geocoder недоступний');
@@ -176,7 +183,10 @@ const AddressSearch = ({
     try {
       return new Promise((resolve) => {
         geocoder.current.geocode({ placeId }, (results, status) => {
-          console.log('Geocode result:', { results, status });
+          if (config.DEBUG_MODE) {
+            console.log('Geocode result:', { results, status });
+          }
+          
           if (status === 'OK' && results[0]) {
             const addressComponents = results[0].address_components;
             const location = results[0].geometry.location;
@@ -186,35 +196,36 @@ const AddressSearch = ({
             let locality = null;
             let isKyivCity = false;
 
-            // Проходимо по всіх компонентах адреси
             for (const component of addressComponents) {
-              console.log('Address component:', component.types, component.long_name);
+              if (config.DEBUG_MODE) {
+                console.log('Address component:', component.types, component.long_name);
+              }
               
-              // Перевіряємо чи це місто Київ
               if (component.types.includes('locality') && 
                   (component.long_name === 'Київ' || component.long_name === 'Kiev' || component.long_name === 'Kyiv')) {
                 locality = component.long_name;
                 isKyivCity = true;
               }
               
-              // Отримуємо область
               if (component.types.includes('administrative_area_level_1')) {
                 region = component.long_name;
               }
             }
 
-            console.log('Parsed location data:', { region, locality, isKyivCity });
+            if (config.DEBUG_MODE) {
+              console.log('Parsed location data:', { region, locality, isKyivCity });
+            }
 
             let finalRegion = null;
             let zone = null;
 
-            // Спеціальна логіка для міста Київ
             if (isKyivCity || locality === 'Київ') {
               finalRegion = 'Київ';
               zone = deliveryZones['Київ'];
-              console.log('Визначено як місто Київ');
+              if (config.DEBUG_MODE) {
+                console.log('Визначено як місто Київ');
+              }
             } else if (region) {
-              // Перевіряємо всі можливі варіанти назв області
               const possibleRegionNames = [
                 region,
                 region.replace('Oblast', 'область'),
@@ -230,12 +241,15 @@ const AddressSearch = ({
                 }
               }
               
-              console.log('Перевірено регіон:', region, 'Результат:', zone);
+              if (config.DEBUG_MODE) {
+                console.log('Перевірено регіон:', region, 'Результат:', zone);
+              }
             }
 
-            // Якщо не знайшли зону, вважаємо недоступною
             if (!zone) {
-              console.log('Зона доставки не визначена для:', region || locality);
+              if (config.DEBUG_MODE) {
+                console.log('Зона доставки не визначена для:', region || locality);
+              }
               resolve({
                 available: false,
                 message: region ? `Автомобільна доставка в ${region} не визначена` : 'Не вдалось визначити регіон доставки',
@@ -289,31 +303,29 @@ const AddressSearch = ({
     }
   };
 
-  // ВИПРАВЛЕНИЙ handlePredictionSelect
+  // Вибір адреси
   const handlePredictionSelect = async (prediction) => {
     try {
       const selectedAddress = prediction.description;
       
-      // ВАЖЛИВО: спочатку закриваємо dropdown і очищаємо все
       setIsDropdownOpen(false);
       setPredictions([]);
       setSelectedIndex(-1);
       
-      // Встановлюємо адресу та запам'ятовуємо її як валідовану
       onChange(selectedAddress);
       setLastValidatedValue(selectedAddress);
       
-      // Примусово приховуємо dropdown через невеликий timeout для надійності
       setTimeout(() => {
         setIsDropdownOpen(false);
         setPredictions([]);
       }, 50);
       
-      // Тепер валідуємо адресу
       const validation = await validateDeliveryZone(prediction.place_id);
       setValidationResult(validation);
 
-      console.log('Результат валідації адреси:', validation);
+      if (config.DEBUG_MODE) {
+        console.log('Результат валідації адреси:', validation);
+      }
 
       if (onAddressSelect) {
         onAddressSelect({
@@ -324,24 +336,21 @@ const AddressSearch = ({
       }
     } catch (error) {
       console.error('Помилка вибору адреси:', error);
-      // У випадку помилки також закриваємо dropdown
       setIsDropdownOpen(false);
       setPredictions([]);
       setSelectedIndex(-1);
     }
   };
 
-  // ДОДАНО: обробка зміни value для скидання валідації при редагуванні
+  // Обробка зміни input
   const handleInputChange = (newValue) => {
     onChange(newValue);
     
-    // Якщо користувач редагує адресу після валідації - скидаємо результат
     if (newValue !== lastValidatedValue && validationResult) {
       setValidationResult(null);
       setLastValidatedValue('');
     }
     
-    // Якщо користувач редагує валідовану адресу - закриваємо dropdown
     if (newValue !== lastValidatedValue && lastValidatedValue) {
       setIsDropdownOpen(false);
       setPredictions([]);
@@ -349,6 +358,7 @@ const AddressSearch = ({
     }
   };
 
+  // Обробка клавіш
   const handleKeyDown = (e) => {
     if (!isDropdownOpen || predictions.length === 0) return;
 
@@ -379,6 +389,7 @@ const AddressSearch = ({
     }
   };
 
+  // Обробка кліків поза компонентом
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -470,14 +481,14 @@ const AddressSearch = ({
             lineHeight: '1.4',
             border: '1px solid',
             backgroundColor: validationResult.available 
-              ? 'rgba(40, 167, 69, 0.1)' // Зелений напівпрозорий фон
-              : 'rgba(255, 193, 7, 0.1)', // Жовтий напівпрозорий фон
+              ? 'rgba(40, 167, 69, 0.1)'
+              : 'rgba(255, 193, 7, 0.1)',
             borderColor: validationResult.available 
-              ? '#28a745' // Зелена рамка
-              : '#ffc107', // Жовта рамка
+              ? '#28a745'
+              : '#ffc107',
             color: validationResult.available 
-              ? '#155724' // Темно-зелений текст
-              : '#856404', // Темно-жовтий текст
+              ? '#155724'
+              : '#856404',
           }}
         >
           <div style={{ 
@@ -487,7 +498,6 @@ const AddressSearch = ({
             alignItems: 'center',
             gap: '8px'
           }}>
-            {/* Іконка замість емодзі */}
             <svg 
               width="16" 
               height="16" 
@@ -499,7 +509,6 @@ const AddressSearch = ({
               }}
             >
               {validationResult.available ? (
-                // Іконка галочки для доступної доставки
                 <path 
                   d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-2.99" 
                   stroke="currentColor" 
@@ -508,7 +517,6 @@ const AddressSearch = ({
                   strokeLinejoin="round"
                 />
               ) : (
-                // Іконка попередження для недоступної доставки
                 <>
                   <path 
                     d="M12 9v4M12 17h.01" 

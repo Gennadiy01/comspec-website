@@ -2,15 +2,24 @@
  * СТАБІЛЬНА ВЕРСІЯ JSONP Google Sheets Service для COMSPEC
  * ✅ Перевірено - працює без помилок
  * 🔧 Тільки збільшений таймаут для надійності
+ * 🌐 Додано підтримку універсальної конфігурації
  */
+
+import config from '../config/environment';
 
 class JSONPGoogleSheetsService {
   constructor() {
-    this.scriptUrl = process.env.REACT_APP_GOOGLE_SCRIPT_URL;
+    this.scriptUrl = config.GOOGLE_SCRIPT_URL;
     this.callbackCounter = 0;
     
     console.log('[JSONPGoogleSheetsService] ✅ Ініціалізовано з URL:', this.scriptUrl);
+    console.log('[JSONPGoogleSheetsService] 🌐 Середовище:', config.ENVIRONMENT);
     console.log('[JSONPGoogleSheetsService] 🚀 CORS проблема обійдена через JSONP!');
+    
+    if (!this.scriptUrl) {
+      console.error('[JSONPGoogleSheetsService] ❌ Google Apps Script URL не налаштований');
+      throw new Error('Google Apps Script URL не налаштований');
+    }
     
     // Додаємо сервіс до window для зручності тестування
     if (typeof window !== 'undefined') {
@@ -77,7 +86,9 @@ class JSONPGoogleSheetsService {
       
       // Створюємо глобальну callback функцію
       window[callbackName] = (response) => {
-        console.log('📦 Відповідь від Google Apps Script:', response);
+        if (config.DEBUG_MODE) {
+          console.log('📦 Відповідь від Google Apps Script:', response);
+        }
         
         // ✅ ПОКРАЩЕНИЙ CLEANUP з затримкою
         setTimeout(() => {
@@ -102,15 +113,17 @@ class JSONPGoogleSheetsService {
         address: orderData.address || orderData.deliveryAddress || '',
         region: orderData.region || '',
         message: orderData.message || '',
-        source: source,
+        source: `${source}-${config.ENVIRONMENT}`,
         mode: isConsultationMode ? 'consultation' : 'order',
         Loading_Point: orderData.loadingPoint || orderData.Loading_Point || '',
         callback: callbackName
       };
       
-      // Логування для діагностики
-      console.log('🎯 Параметри для відправки:', params);
-      console.log('🎯 Loading_Point значення:', params.Loading_Point);
+      // Логування для діагностики (тільки в debug режимі)
+      if (config.DEBUG_MODE) {
+        console.log('🎯 Параметри для відправки:', params);
+        console.log('🎯 Loading_Point значення:', params.Loading_Point);
+      }
       
       // Створюємо URL з параметрами
       const urlParams = new URLSearchParams();
@@ -121,7 +134,10 @@ class JSONPGoogleSheetsService {
       });
       
       const finalUrl = `${this.scriptUrl}?${urlParams.toString()}`;
-      console.log('🌐 Фінальний URL:', finalUrl);
+      
+      if (config.DEBUG_MODE) {
+        console.log('🌐 Фінальний URL:', finalUrl);
+      }
       
       // Створюємо і виконуємо JSONP запит
       const script = document.createElement('script');
@@ -166,6 +182,57 @@ class JSONPGoogleSheetsService {
     console.log('🧪 Запуск стабільного тесту Loading_Point...');
     return this.saveOrder(testData, false, 'StableJSONPTest');
   }
+
+  /**
+   * Нова функція для відправки замовлень з OrderModal
+   */
+  async submitOrder(orderData) {
+    try {
+      const cleanData = this.cleanOrderData(orderData);
+      return await this.saveOrder(cleanData, false, 'ReactWebsite');
+    } catch (error) {
+      console.error('[JSONPGoogleSheetsService] Помилка відправки замовлення:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Очищення та нормалізація даних замовлення
+   */
+  cleanOrderData(orderData) {
+    return {
+      name: (orderData.name || '').trim(),
+      phone: this.normalizePhone(orderData.phone || ''),
+      email: (orderData.email || '').trim(),
+      product: orderData.product || '',
+      deliveryType: orderData.deliveryType || 'delivery',
+      address: (orderData.address || '').trim(),
+      loadingPoint: orderData.loadingPoint || '',
+      message: (orderData.message || '').trim(),
+      region: orderData.region || ''
+    };
+  }
+
+  /**
+   * Нормалізація телефонного номера
+   */
+  normalizePhone(phone) {
+    if (!phone) return '';
+    
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    
+    if (cleanPhone.startsWith('+380')) {
+      return cleanPhone;
+    } else if (cleanPhone.startsWith('380')) {
+      return '+' + cleanPhone;
+    } else if (cleanPhone.startsWith('0')) {
+      return '+38' + cleanPhone;
+    } else if (cleanPhone.length === 9) {
+      return '+380' + cleanPhone;
+    }
+    
+    return cleanPhone;
+  }
 }
 
 // Створюємо екземпляр сервісу
@@ -201,6 +268,37 @@ if (typeof window !== 'undefined') {
       .catch(error => {
         console.error('❌ Помилка підключення:', error);
       });
+  };
+
+  // Тест нової функції submitOrder
+  window.testSubmitOrder = () => {
+    const testOrderData = {
+      name: 'Тест SubmitOrder',
+      phone: '+380501234567',
+      email: 'test@submitorder.com',
+      product: 'Щебінь',
+      deliveryType: 'delivery',
+      address: 'Київ, вул. Тестова, 123',
+      loadingPoint: "ТДВ «Ігнатпільський кар'єр»",
+      message: 'Тестове замовлення через submitOrder'
+    };
+
+    console.log('🧪 Тест функції submitOrder...');
+    jsonpService.submitOrder(testOrderData)
+      .then(response => {
+        console.log('✅ submitOrder працює:', response);
+      })
+      .catch(error => {
+        console.error('❌ Помилка submitOrder:', error);
+      });
+  };
+
+  // Додаємо інформацію про конфігурацію до глобального об'єкта
+  window.COMSPEC_SERVICE_INFO = {
+    environment: config.ENVIRONMENT,
+    debugMode: config.DEBUG_MODE,
+    scriptUrl: config.GOOGLE_SCRIPT_URL ? 'Налаштовано' : 'Відсутній',
+    version: 'Stable JSONP v2.0'
   };
 }
 
