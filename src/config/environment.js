@@ -22,6 +22,12 @@ const getEnvVar = (name, fallback = null) => {
 // Функція для отримання runtime конфігурації
 const getRuntimeConfig = () => {
   try {
+    // 🆕 ДОДАНО: Перевірка universal config першим
+    if (typeof window !== 'undefined' && window.COMSPEC_UNIVERSAL && window.COMSPEC_UNIVERSAL.ready) {
+      console.log('🌐 Використано UNIVERSAL CONFIG');
+      return window.COMSPEC_UNIVERSAL.config;
+    }
+    
     if (typeof window !== 'undefined' && window.RUNTIME_CONFIG) {
       console.log('📦 Завантажено RUNTIME_CONFIG');
       return window.RUNTIME_CONFIG;
@@ -44,7 +50,33 @@ const getRuntimeConfig = () => {
   }
 };
 
-// Конфігурації для різних хостингів
+// 🆕 ДОДАНО: Функція для конвертації universal config у формат який очікують існуючі компоненти
+const convertUniversalConfig = (universalConfig) => {
+  if (!universalConfig) return null;
+  
+  console.log('🔄 Конвертація universal config в існуючий формат...');
+  
+  return {
+    // Існуючі назви в вашій системі
+    MAPS_API_KEY: universalConfig.GOOGLE_MAPS?.API_KEY,
+    SCRIPT_URL: universalConfig.GOOGLE_SHEETS?.SCRIPT_URL,
+    SHEETS_ID: universalConfig.GOOGLE_SHEETS?.SPREADSHEET_ID,
+    SHEETS_API_KEY: universalConfig.GOOGLE_SHEETS?.API_KEY,
+    
+    // Стандартні назви для існуючих компонентів
+    GOOGLE_MAPS_API_KEY: universalConfig.GOOGLE_MAPS?.API_KEY,
+    GOOGLE_SCRIPT_URL: universalConfig.GOOGLE_SHEETS?.SCRIPT_URL,
+    GOOGLE_SHEETS_ID: universalConfig.GOOGLE_SHEETS?.SPREADSHEET_ID,
+    GOOGLE_SHEETS_API_KEY: universalConfig.GOOGLE_SHEETS?.API_KEY,
+    
+    // Додаткові поля з universal config
+    DEBUG_MODE: universalConfig.DEBUG || false,
+    ENVIRONMENT: universalConfig.ENVIRONMENT || 'unknown',
+    META: universalConfig.META || {}
+  };
+};
+
+// Конфігурації для різних хостингів (ЗБЕРЕЖЕНО ВАШ КОД)
 const configs = {
   development: {
     // ✅ ПІДЛАШТОВАНО під існуючі змінні в .env.local
@@ -97,8 +129,25 @@ const configs = {
   }
 };
 
-// Головна функція отримання конфігурації
+// Головна функція отримання конфігурації (МОДИФІКОВАНА)
 const getConfig = () => {
+  // 🆕 ДОДАНО: Спочатку перевіряємо universal config
+  const runtimeConfig = getRuntimeConfig();
+  if (runtimeConfig && typeof window !== 'undefined' && window.COMSPEC_UNIVERSAL) {
+    const convertedConfig = convertUniversalConfig(runtimeConfig);
+    if (convertedConfig) {
+      console.log('✅ Використано конвертований universal config');
+      
+      // Додаємо додаткові поля які очікує ваша система
+      convertedConfig.ENVIRONMENT = window.COMSPEC_UNIVERSAL.hosting?.type || 'universal';
+      convertedConfig.DEBUG_MODE = convertedConfig.DEBUG_MODE || (window.COMSPEC_UNIVERSAL.hosting?.type === 'development');
+      convertedConfig.HOSTING_INFO = window.COMSPEC_UNIVERSAL.hosting || {};
+      
+      return convertedConfig;
+    }
+  }
+  
+  // 🔄 ЗБЕРЕЖЕНО: Ваша існуюча логіка як fallback
   const hostingType = detectHostingType();
   const hostingConfig = getHostingConfig();
   
@@ -126,9 +175,9 @@ const getConfig = () => {
         GOOGLE_SHEETS_API_KEY: getEnvVar('REACT_APP_GOOGLE_SHEETS_API_KEY')
       };
       
-      const runtimeConfig = getRuntimeConfig();
-      if (runtimeConfig && !config.MAPS_API_KEY) {
-        config = { ...config, ...runtimeConfig };
+      const fallbackRuntimeConfig = getRuntimeConfig();
+      if (fallbackRuntimeConfig && !config.MAPS_API_KEY) {
+        config = { ...config, ...fallbackRuntimeConfig };
         console.log('🔄 Використано runtime конфігурацію як fallback');
       }
       
@@ -163,7 +212,7 @@ const getConfig = () => {
   return config;
 };
 
-// Валідація конфігурації
+// Валідація конфігурації (ЗБЕРЕЖЕНО ВАШ КОД)
 export const validateConfig = (config) => {
   const required = ['GOOGLE_SCRIPT_URL', 'GOOGLE_MAPS_API_KEY'];
   const missing = required.filter(key => !config[key]);
@@ -177,7 +226,7 @@ export const validateConfig = (config) => {
   return true;
 };
 
-// Безпечне логування
+// Безпечне логування (ЗБЕРЕЖЕНО ВАШ КОД)
 export const logConfig = (config) => {
   const safeConfig = Object.entries(config).reduce((acc, [key, value]) => {
     if (key.includes('KEY') || key.includes('URL')) {
@@ -192,9 +241,42 @@ export const logConfig = (config) => {
   return safeConfig;
 };
 
-// ✅ ДОДАНО: Функція для сумісності з існуючими компонентами
+// ✅ ЗБЕРЕЖЕНО: Функція для сумісності з існуючими компонентами
 export const getEnvironmentConfig = () => {
   return getConfig();
+};
+
+// 🆕 ДОДАНО: Функція для чекання universal config
+export const waitForUniversalConfig = (timeout = 3000) => {
+  return new Promise((resolve) => {
+    // Якщо вже готово
+    if (window.COMSPEC_UNIVERSAL?.ready) {
+      resolve(getConfig());
+      return;
+    }
+    
+    // Слухаємо подію готовності
+    const handleConfigReady = () => {
+      cleanup();
+      resolve(getConfig());
+    };
+    
+    // Timeout
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      console.log('⏰ Timeout очікування universal config, використовуємо fallback');
+      resolve(getConfig());
+    }, timeout);
+    
+    // Cleanup
+    const cleanup = () => {
+      window.removeEventListener('comspec-config-ready', handleConfigReady);
+      clearTimeout(timeoutId);
+    };
+    
+    // Слухач події
+    window.addEventListener('comspec-config-ready', handleConfigReady);
+  });
 };
 
 // Ініціалізація конфігурації
@@ -210,7 +292,7 @@ if (config.DEBUG_MODE) {
   logConfig(config);
 }
 
-// Глобальний доступ для налагодження
+// Глобальний доступ для налагодження (РОЗШИРЕНО)
 if (typeof window !== 'undefined') {
   window.COMSPEC_DEBUG = {
     config: config,
@@ -219,7 +301,12 @@ if (typeof window !== 'undefined') {
     detectHostingType,
     getHostingConfig,
     getConfig,
-    getEnvironmentConfig
+    getEnvironmentConfig,
+    // 🆕 ДОДАНО: Нові debug функції
+    waitForUniversalConfig,
+    convertUniversalConfig,
+    hasUniversalConfig: () => !!(window.COMSPEC_UNIVERSAL?.ready),
+    getUniversalConfig: () => window.COMSPEC_UNIVERSAL
   };
 }
 
