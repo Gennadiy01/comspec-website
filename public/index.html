@@ -50,7 +50,157 @@
     ═══════════════════════════════════════════════════════════════
     Цей скрипт автоматично визначає тип хостингу і створює конфігурацію
     -->
-    <script src="%PUBLIC_URL%/config-loader.js"></script>
+    <!-- INLINE UNIVERSAL CONFIG -->
+<script>
+(function() {
+    console.log('🌐 COMSPEC Inline Config Loader v1.0');
+    console.log('📍 URL:', window.location.href);
+    
+    function detectHostingType() {
+        var hostname = window.location.hostname;
+        
+        if (hostname.includes('github.io') || hostname.includes('github.com')) {
+            return { type: 'github', name: 'GitHub Pages', features: ['static', 'https'] };
+        }
+        if (hostname.includes('hostinger')) {
+            return { type: 'hostinger', name: 'Hostinger', features: ['shared', 'php'] };
+        }
+        if (hostname.includes('mirohost')) {
+            return { type: 'mirohost', name: 'MiroHost', features: ['shared', 'ukraine'] };
+        }
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return { type: 'development', name: 'Localhost', features: ['development'] };
+        }
+        
+        return { type: 'shared', name: 'Shared Hosting', features: ['shared'] };
+    }
+    
+    function createConfig(hostingInfo) {
+        var baseConfig = {
+            GOOGLE_SHEETS: {
+                SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz3XE8u5O2Q9ez4OpKcyPB6TtrGp0ul6hPJsud4Dethj0fA2ixU7t4XCwJefl4EIgAd/exec',
+                SPREADSHEET_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
+                API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU'
+            },
+            GOOGLE_MAPS: {
+                API_KEY: 'AIzaSyBge_xIIrIbmc9Y7hPG5Fqkgkd5H4y5EUI',
+                LIBRARIES: ['places', 'geometry'],
+                LANGUAGE: 'uk',
+                REGION: 'UA'
+            },
+            DEBUG: hostingInfo.type === 'development' || hostingInfo.type === 'github',
+            ENVIRONMENT: hostingInfo.type,
+            FEATURES: {
+                CORS_ENABLED: !hostingInfo.features || hostingInfo.features.indexOf('cors-limited') === -1,
+                SSL_REQUIRED: window.location.protocol === 'https:',
+                UKRAINE_OPTIMIZED: hostingInfo.features && hostingInfo.features.indexOf('ukraine') !== -1
+            },
+            META: {
+                configVersion: '1.0.0-inline',
+                loadedAt: new Date().toISOString(),
+                hosting: hostingInfo,
+                loader: 'inline-config-loader',
+                url: window.location.href
+            }
+        };
+        
+        if (hostingInfo.type === 'github') {
+            baseConfig.DEPLOYMENT = {
+                type: 'static',
+                cdn: 'github-pages',
+                cacheBusting: true
+            };
+            baseConfig.DEBUG = true;
+        }
+        
+        return baseConfig;
+    }
+    
+    try {
+        var hostingInfo = detectHostingType();
+        var config = createConfig(hostingInfo);
+        
+        window.COMSPEC_UNIVERSAL = {
+            ready: true,
+            version: '1.0.0-inline',
+            loadedAt: new Date().toISOString(),
+            hosting: hostingInfo,
+            config: config,
+            services: {
+                googleSheetsConfig: config.GOOGLE_SHEETS,
+                googleMapsConfig: config.GOOGLE_MAPS,
+                initialized: false,
+                init: function() {
+                    console.log('🔧 Ініціалізація сервісів...');
+                    this.initialized = true;
+                    console.log('✅ Сервіси готові');
+                    return true;
+                }
+            },
+            utils: {
+                getConfig: function() { return config; },
+                getHosting: function() { return hostingInfo; },
+                isReady: function() { return true; },
+                getGoogleSheetsUrl: function() { return config.GOOGLE_SHEETS.SCRIPT_URL; },
+                getGoogleMapsKey: function() { return config.GOOGLE_MAPS.API_KEY; }
+            }
+        };
+        
+        window.COMSPEC_DEBUG = window.COMSPEC_UNIVERSAL;
+        window.COMSPEC_CONFIG = config;
+        
+        console.log('🏗️ Детектовано: ' + hostingInfo.name + ' (' + hostingInfo.type + ')');
+        console.log('✅ Inline config готовий!');
+        
+        // Подія для React
+        var readyEvent = new CustomEvent('comspec-config-ready', {
+            detail: {
+                hosting: hostingInfo,
+                config: config,
+                services: window.COMSPEC_UNIVERSAL.services,
+                timestamp: new Date().toISOString()
+            }
+        });
+        
+        if (window.dispatchEvent) {
+            window.dispatchEvent(readyEvent);
+            setTimeout(function() {
+                window.dispatchEvent(readyEvent);
+            }, 100);
+        }
+        
+        if (config.DEBUG) {
+            console.group('🔍 Debug інформація');
+            console.log('Хостинг:', hostingInfo);
+            console.log('Конфігурація:', config);
+            console.log('Сервіси:', window.COMSPEC_UNIVERSAL.services);
+            console.groupEnd();
+        }
+        
+    } catch (error) {
+        console.error('💥 Помилка inline config:', error);
+        
+        window.COMSPEC_UNIVERSAL = {
+            ready: false,
+            error: error.message,
+            fallback: true,
+            config: {
+                GOOGLE_SHEETS: {
+                    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz3XE8u5O2Q9ez4OpKcyPB6TtrGp0ul6hPJsud4Dethj0fA2ixU7t4XCwJefl4EIgAd/exec',
+                    SPREADSHEET_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY'
+                },
+                GOOGLE_MAPS: {
+                    API_KEY: 'AIzaSyBge_xIIrIbmc9Y7hPG5Fqkgkd5H4y5EUI'
+                },
+                DEBUG: true,
+                ENVIRONMENT: 'fallback'
+            }
+        };
+        
+        window.COMSPEC_DEBUG = window.COMSPEC_UNIVERSAL;
+    }
+})();
+</script>
     
     <!-- ЗБЕРЕЖЕНО: Runtime конфігурація для shared хостингу -->
     <!-- Цей скрипт буде автоматично ігноруватися якщо файл не існує -->
