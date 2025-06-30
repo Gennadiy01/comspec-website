@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../../styles/search.css';
 
@@ -226,12 +226,12 @@ const SearchModal = ({ isOpen, onClose }) => {
   };
 
   // Закриття модального вікна
-  const handleClose = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setHasSearched(false);
-    onClose();
-  };
+  const handleClose = useCallback(() => {
+  setSearchQuery('');
+  setSearchResults([]);
+  setHasSearched(false);
+  onClose();
+}, [onClose]);
 
   // Обробка натискання Escape та фокус
   useEffect(() => {
@@ -252,7 +252,7 @@ const SearchModal = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
