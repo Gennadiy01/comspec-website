@@ -470,6 +470,8 @@ const AddressSearch = ({
         </div>
       )}
 
+{/* Закомеетована  дублююча нотифікація можливості доставки */}
+
       {validationResult && (
         <div
           className="address-validation"
@@ -547,6 +549,8 @@ const AddressSearch = ({
           )}
         </div>
       )}
+      
+      {/*===========================================*/}
 
       {error && <div className="address-search-error">{error}</div>}
 

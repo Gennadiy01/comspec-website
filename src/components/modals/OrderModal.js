@@ -207,8 +207,7 @@ const OrderModal = () => {
   };
 
   // Спеціальна обробка для поля імені з валідацією через ValidationUtils
-  // Спеціальна обробка для поля імені з валідацією через ValidationUtils
-// Спеціальна обробка для поля імені з валідацією через ValidationUtils
+  
 const handleNameInput = (e) => {
   const { value } = e.target;
   const validation = ValidationUtils.validateName(value);
@@ -674,7 +673,7 @@ const handleNameInput = (e) => {
                         />
                         {errors.address && <div className="form-error">{errors.address}</div>}
                         
-                        {/* Показуємо результат валідації доставки */}
+                        {/* Показуємо результат валідації доставки ++++ дублююче повыдомлення закоментоване ++++++++++++++
                         {deliveryValidation && (
                           <div style={{
                             marginTop: '8px',
@@ -690,6 +689,8 @@ const handleNameInput = (e) => {
                             <strong>{deliveryValidation.region}:</strong> {deliveryValidation.message}
                           </div>
                         )}
+
+                        ++++++++++++++++++++++++++++++++++++++++++++++ */}
                         
                         <div style={{
                           fontSize: '0.825rem',
