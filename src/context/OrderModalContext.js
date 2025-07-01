@@ -1,4 +1,4 @@
-// src/contexts/OrderModalContext.js
+// src/context/OrderModalContext.js - ВИПРАВЛЕНО з правильним мапінгом
 import React, { createContext, useContext, useState } from 'react';
 
 // Створюємо контекст
@@ -22,21 +22,31 @@ export const OrderModalProvider = ({ children }) => {
     preSelectedProduct: ''
   });
 
-  // Функція відкриття модального вікна
+  // ✅ Функція відкриття модального вікна з покращеною логікою
   const openOrderModal = (data = {}) => {
+    console.log('🚀 Відкриваємо модальне вікно з даними:', data);
+    
     setOrderData({
       product: data.product || '',
       source: data.source || '',
-      preSelectedProduct: data.product || ''
+      preSelectedProduct: data.preSelectedProduct || data.product || ''
     });
     setIsOpen(true);
     
     // Блокуємо прокрутку сторінки
     document.body.style.overflow = 'hidden';
+    
+    console.log('✅ OrderData встановлено:', {
+      product: data.product || '',
+      source: data.source || '',
+      preSelectedProduct: data.preSelectedProduct || data.product || ''
+    });
   };
 
   // Функція закриття модального вікна
   const closeOrderModal = () => {
+    console.log('❌ Закриваємо модальне вікно');
+    
     setIsOpen(false);
     setOrderData({
       product: '',

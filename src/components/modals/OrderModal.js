@@ -1,9 +1,8 @@
-// src/components/modals/OrderModal.js - ПОВНИЙ КОД з Google Sheets інтеграцією
+// src/components/modals/OrderModal.js - ВИПРАВЛЕНО автозаповнення категорій
 import React, { useState, useEffect, useRef, useMemo, useCallback  } from 'react';
 import { useOrderModal } from '../../context/OrderModalContext';
 import AddressSearch from '../forms/AddressSearch';
 import { getLoadingPointsByProduct } from '../../data/loadingPoints';
-//import googleSheetsService from '../../services/GoogleSheetsService';
 import jsonpService from '../../services/JSONPGoogleSheetsService';
 import ValidationUtils from '../../utils/validation';
 import '../../styles/order-modal.css';
@@ -16,6 +15,13 @@ const products = [
   { id: 'Бетон', name: 'Бетон', category: 'Будівельні матеріали' }
 ];
 
+// ✅ МАПІНГ КАТЕГОРІЙ: англійські назви → українські назви
+const categoryMapping = {
+  'gravel': 'Щебінь',
+  'sand': 'Пісок', 
+  'asphalt': 'Асфальт',
+  'concrete': 'Бетон'
+};
 
 const OrderModal = () => {
   const { isOpen, orderData, closeOrderModal } = useOrderModal();
@@ -38,7 +44,7 @@ const OrderModal = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [submitResult, setSubmitResult] = useState(null); // Для зберігання результату з Google Sheets
+  const [submitResult, setSubmitResult] = useState(null);
   
   // ВАЖЛИВО: Стани для пошуку адреси - мають бути завжди присутні
   const [addressData, setAddressData] = useState(null);
@@ -63,15 +69,37 @@ const OrderModal = () => {
     ? 'Опишіть послуги, які вас цікавлять...' 
     : 'Уточніть бажану фракцію щебеню, марку асфальту або бетону.\nОпишіть Ваш проект або додаткові побажання.';
 
-  // Ініціалізація форми при відкритті модального вікна
+  // ✅ ВИПРАВЛЕНО: Ініціалізація форми при відкритті модального вікна
   useEffect(() => {
     if (isOpen) {
-      // Встановлюємо предвибраний товар якщо є (тільки для режиму замовлення)
-      if (!isConsultationMode && orderData?.preSelectedProduct) {
+      // Скидаємо форму до початкових значень
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        product: '',
+        deliveryType: 'delivery',
+        address: '',
+        loadingPoint: '',
+        message: ''
+      });
+
+      // ✅ АВТОЗАПОВНЕННЯ ТОВАРУ (тільки для режиму замовлення)
+      if (!isConsultationMode && orderData?.product) {
+        console.log('🔄 Автозаповнення товару:', {
+          orderDataProduct: orderData.product,
+          mappedProduct: categoryMapping[orderData.product]
+        });
+
+        // Використовуємо мапінг для конвертації категорії
+        const mappedProduct = categoryMapping[orderData.product] || orderData.product;
+        
         setFormData(prev => ({
           ...prev,
-          product: orderData.preSelectedProduct
+          product: mappedProduct
         }));
+
+        console.log('✅ Товар встановлено:', mappedProduct);
       }
       
       // Фокусуємося на першому полі після відкриття
@@ -87,46 +115,46 @@ const OrderModal = () => {
       setAddressData(null);
       setDeliveryValidation(null);
     }
-  }, [isOpen, orderData?.preSelectedProduct, isConsultationMode]);
+  }, [isOpen, orderData?.product, isConsultationMode]);
 
   // Обробка закриття модального вікна
   const handleClose = useCallback(() => {
-  // Скидаємо форму
-  setFormData({
-    name: '',
-    phone: '',
-    email: '',
-    product: '',
-    deliveryType: 'delivery',
-    address: '',
-    loadingPoint: '',
-    message: ''
-  });
-  setErrors({});
-  setIsSubmitting(false);
-  setShowSuccess(false);
-  setSubmitResult(null);
-  setAddressData(null);
-  setDeliveryValidation(null);
-  closeOrderModal();
-}, [closeOrderModal]); // closeOrderModal в залежностях
+    // Скидаємо форму
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      product: '',
+      deliveryType: 'delivery',
+      address: '',
+      loadingPoint: '',
+      message: ''
+    });
+    setErrors({});
+    setIsSubmitting(false);
+    setShowSuccess(false);
+    setSubmitResult(null);
+    setAddressData(null);
+    setDeliveryValidation(null);
+    closeOrderModal();
+  }, [closeOrderModal]);
   
   // Обробка натискання Escape
   useEffect(() => {
-  const handleEscape = (e) => {
-    if (e.key === 'Escape' && isOpen && !isSubmitting) {
-      handleClose();
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isOpen && !isSubmitting) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
     }
-  };
 
-  if (isOpen) {
-    document.addEventListener('keydown', handleEscape);
-  }
-
-  return () => {
-    document.removeEventListener('keydown', handleEscape);
-  };
-}, [isOpen, isSubmitting, handleClose]);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, isSubmitting, handleClose]);
 
   // Детекція проблемних мобільних браузерів
   useEffect(() => {
@@ -299,55 +327,48 @@ const OrderModal = () => {
       // Додаємо дані з валідації адреси
       const orderDataForSheets = {
         ...cleanedData,
-       // region: addressData?.validation?.region || deliveryValidation?.region || '',
-        // Конвертуємо ID пункту навантаження в назву
-       // loadingPoint: formData.loadingPoint ? 
-         // getAvailableLoadingPoints().find(p => p.id === formData.loadingPoint)?.name || '' : ''
-         region: (() => {
-  // Спочатку перевіряємо дані з addressData
-  if (addressData?.validation?.region) {
-    return addressData.validation.region;
-  }
-  
-  // Потім перевіряємо deliveryValidation
-  if (deliveryValidation?.region) {
-    return deliveryValidation.region;
-  }
-  
-  // Якщо є адреса, але немає валідації - витягуємо область вручну
-  if (formData.address) {
-    const extractedRegion = ValidationUtils.validateDeliveryZone(formData.address);
-    return extractedRegion.region;
-  }
-  
-  // Якщо нічого немає - повертаємо порожній рядок
-  return '';
-})(),
-
-
+        region: (() => {
+          // Спочатку перевіряємо дані з addressData
+          if (addressData?.validation?.region) {
+            return addressData.validation.region;
+          }
+          
+          // Потім перевіряємо deliveryValidation
+          if (deliveryValidation?.region) {
+            return deliveryValidation.region;
+          }
+          
+          // Якщо є адреса, але немає валідації - витягуємо область вручну
+          if (formData.address) {
+            const extractedRegion = ValidationUtils.validateDeliveryZone(formData.address);
+            return extractedRegion.region;
+          }
+          
+          // Якщо нічого немає - повертаємо порожній рядок
+          return '';
+        })(),
 
         loadingPoint: (() => {
-  console.log('🔍 Debug loadingPoint:', {
-    formLoadingPoint: formData.loadingPoint,
-    formLoadingPointType: typeof formData.loadingPoint,
-    availablePoints: getAvailableLoadingPoints().map(p => ({ id: p.id, idType: typeof p.id, name: p.name }))
-  });
-  
-  const foundPoint = getAvailableLoadingPoints().find(p => p.id.toString() === formData.loadingPoint.toString());
-  console.log('🎯 Found point:', foundPoint);
-  
-  return foundPoint?.name || '';
-})()
-   
+          console.log('🔍 Debug loadingPoint:', {
+            formLoadingPoint: formData.loadingPoint,
+            formLoadingPointType: typeof formData.loadingPoint,
+            availablePoints: getAvailableLoadingPoints().map(p => ({ id: p.id, idType: typeof p.id, name: p.name }))
+          });
+          
+          const foundPoint = getAvailableLoadingPoints().find(p => p.id.toString() === formData.loadingPoint.toString());
+          console.log('🎯 Found point:', foundPoint);
+          
+          return foundPoint?.name || '';
+        })()
       };
 
       // Debug: логування регіону (ПІСЛЯ об'єкта!)
-console.log('🔍 Debug region detection:', {
-  formAddress: formData.address,
-  addressDataRegion: addressData?.validation?.region,
-  deliveryValidationRegion: deliveryValidation?.region,
-  finalRegion: orderDataForSheets.region
-});
+      console.log('🔍 Debug region detection:', {
+        formAddress: formData.address,
+        addressDataRegion: addressData?.validation?.region,
+        deliveryValidationRegion: deliveryValidation?.region,
+        finalRegion: orderDataForSheets.region
+      });
 
       // Визначаємо джерело замовлення
       const source = orderData?.source === 'services-page' ? 'services-page' : 'product-page';
@@ -418,10 +439,10 @@ console.log('🔍 Debug region detection:', {
   };
 
   // Отримання доступних пунктів навантаження
-const getAvailableLoadingPoints = () => {
-  if (!formData.product) return [];
-  return getLoadingPointsByProduct(formData.product);
-};
+  const getAvailableLoadingPoints = () => {
+    if (!formData.product) return [];
+    return getLoadingPointsByProduct(formData.product);
+  };
 
   if (!isOpen) return null;
 
@@ -589,6 +610,20 @@ const getAvailableLoadingPoints = () => {
                         </option>
                       ))}
                     </select>
+                    
+                    {/* ✅ ВІДЛАДОЧНА ІНФОРМАЦІЯ (можна видалити після тестування) */}
+                    {orderData?.product && (
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: '#6c757d',
+                        marginTop: '4px',
+                        padding: '4px 8px',
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '4px'
+                      }}>
+                        Debug: {orderData.product} → {categoryMapping[orderData.product] || orderData.product}
+                      </div>
+                    )}
                   </div>
 
                   {/* Тип отримання */}
