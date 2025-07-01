@@ -73,6 +73,10 @@ export const validatePhone = (phone) => {
 /**
  * Валідація імені (українські літери)
  */
+/**
+ /**
+ * ✅ ВИПРАВЛЕНА валідація імені (українські літери + пробіли + апострофи + дефіси)
+ */
 export const validateName = (name) => {
   if (!name || typeof name !== 'string') {
     return {
@@ -82,41 +86,43 @@ export const validateName = (name) => {
     };
   }
 
-  const trimmedName = name.trim();
+  // Використовуємо trim тільки для валідації, зберігаємо оригінал
+  const trimmedForValidation = name.trim();
   
-  if (trimmedName.length < 2) {
+  if (trimmedForValidation.length < 2) {
     return {
       isValid: false,
       message: 'Ім\'я повинно містити щонайменше 2 символи',
-      cleaned: trimmedName
+      cleaned: name
     };
   }
   
-  if (trimmedName.length > 50) {
+  if (trimmedForValidation.length > 50) {
     return {
       isValid: false,
       message: 'Ім\'я не може перевищувати 50 символів',
-      cleaned: trimmedName.substring(0, 50)
+      cleaned: name.substring(0, 50)
     };
   }
   
-  // Дозволені символи: українські літери, пробіли, дефіси, апострофи
-  const nameRegex = /^[А-ЯІЇЄа-яіїє'-\s]+$/;
+  // ✅ ВИПРАВЛЕНИЙ regex: українські літери + пробіл + апостроф + дефіс
+  const nameRegex = /^[А-ЯІЇЄа-яіїє '-]+$/;
   
-  if (!nameRegex.test(trimmedName)) {
+  if (!nameRegex.test(trimmedForValidation)) {
     return {
       isValid: false,
       message: 'Ім\'я може містити лише українські літери, пробіли, дефіси та апострофи',
-      cleaned: trimmedName.replace(/[А-ЯІЇЄа-яіїє'-\s]/g, '')
+      cleaned: name.replace(/[^А-ЯІЇЄа-яіїє '-]/g, '')
     };
   }
   
   return {
     isValid: true,
     message: '',
-    cleaned: trimmedName
+    cleaned: name
   };
 };
+
 
 /**
  * Валідація email

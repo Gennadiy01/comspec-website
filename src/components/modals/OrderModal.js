@@ -207,41 +207,43 @@ const OrderModal = () => {
   };
 
   // Спеціальна обробка для поля імені з валідацією через ValidationUtils
-  const handleNameInput = (e) => {
-    const { value } = e.target;
-    const validation = ValidationUtils.validateName(value);
-    
-    // Встановлюємо очищене значення
-    setFormData(prev => ({
+  // Спеціальна обробка для поля імені з валідацією через ValidationUtils
+// Спеціальна обробка для поля імені з валідацією через ValidationUtils
+const handleNameInput = (e) => {
+  const { value } = e.target;
+  const validation = ValidationUtils.validateName(value);
+  
+  // Встановлюємо очищене значення
+  setFormData(prev => ({
+    ...prev,
+    name: validation.cleaned
+  }));
+  
+  // Показуємо попередження якщо були неприпустимі символи
+  if (value !== validation.cleaned && value.length > 0) {
+    setErrors(prev => ({
       ...prev,
-      name: validation.cleaned
+      nameWarning: 'Дозволені тільки українські літери, пробіли, дефіси та апострофи'
     }));
     
-    // Показуємо попередження якщо були неприпустимі символи
-    if (value !== validation.cleaned && value.length > 0) {
-      setErrors(prev => ({
-        ...prev,
-        nameWarning: 'Дозволені тільки українські літери, пробіли, дефіси та апострофи'
-      }));
-      
-      setTimeout(() => {
-        setErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors.nameWarning;
-          return newErrors;
-        });
-      }, 3000);
-    }
-    
-    // Очищаємо помилку валідації
-    if (errors.name) {
+    setTimeout(() => {
       setErrors(prev => {
         const newErrors = { ...prev };
-        delete newErrors.name;
+        delete newErrors.nameWarning;
         return newErrors;
       });
-    }
-  };
+    }, 3000);
+  }
+  
+  // Очищаємо помилку валідації
+  if (errors.name) {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.name;
+      return newErrors;
+    });
+  }
+};
 
   // Обробка телефону з автоматичним форматуванням
   const handlePhoneInput = (e) => {
