@@ -1,7 +1,9 @@
 {
   "files": {
-    "main.css": "/comspec-website/static/css/main.1306d95e.css",
-    "main.js": "/comspec-website/static/js/main.fb775795.js",
+    "main.css": "/comspec-website/static/css/main.4b52a2da.css",
+    "main.js": "/comspec-website/static/js/main.104ab93f.js",
+    "static/js/540.36a5a3c8.chunk.js": "/comspec-website/static/js/540.36a5a3c8.chunk.js",
+    "static/js/528.c32139da.chunk.js": "/comspec-website/static/js/528.c32139da.chunk.js",
     "static/media/concrete.png": "/comspec-website/static/media/concrete.75bd6f4c2dcd7d4442d9.png",
     "static/media/delivery.png": "/comspec-website/static/media/delivery.00a109a063409c9950b4.png",
     "static/media/quality.png": "/comspec-website/static/media/quality.51343393d215f934310e.png",
@@ -11,11 +13,13 @@
     "static/media/gravel.png": "/comspec-website/static/media/gravel.298fbeb776951afa3f14.png",
     "static/media/sand.png": "/comspec-website/static/media/sand.69b8055ee335db73b663.png",
     "index.html": "/comspec-website/index.html",
-    "main.1306d95e.css.map": "/comspec-website/static/css/main.1306d95e.css.map",
-    "main.fb775795.js.map": "/comspec-website/static/js/main.fb775795.js.map"
+    "main.4b52a2da.css.map": "/comspec-website/static/css/main.4b52a2da.css.map",
+    "main.104ab93f.js.map": "/comspec-website/static/js/main.104ab93f.js.map",
+    "540.36a5a3c8.chunk.js.map": "/comspec-website/static/js/540.36a5a3c8.chunk.js.map",
+    "528.c32139da.chunk.js.map": "/comspec-website/static/js/528.c32139da.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1306d95e.css",
-    "static/js/main.fb775795.js"
+    "static/css/main.4b52a2da.css",
+    "static/js/main.104ab93f.js"
   ]
 }

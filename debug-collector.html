@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMSPEC - Збір даних для налагодження</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #008080;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #008080;
+            border-bottom: 3px solid #008080;
+            padding-bottom: 8px;
+            font-size: 1.3rem;
+        }
+        button {
+            background: linear-gradient(135deg, #008080 0%, #006666 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,128,128,0.2);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,128,128,0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .data-output {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .copy-btn {
+            background: #28a745;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+        .status-good {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-bad {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .status-warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #008080, #00a0a0);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 COMSPEC Debug Data Collector</h1>
+        <p style="text-align: center; color: #666; font-size: 18px;">
+            Цей інструмент збере всі необхідні дані для продовження налагодження Google Sheets інтеграції в наступному чаті
+        </p>
+
+        <div class="highlight">
+            <strong>📋 Інструкція:</strong> Натисніть "🚀 Зібрати всі дані" та скопіюйте результат для наступного чату з Claude
+        </div>
+
+        <div class="section">
+            <h3>🎯 Автоматичний збір даних</h3>
+            <button onclick="collectAllData()" id="collectBtn">🚀 Зібрати всі дані</button>
+            <button onclick="testFormNow()" style="background: #17a2b8;">📝 Протестувати форму зараз</button>
+            <button onclick="clearOutput()">🗑️ Очистити</button>
+            
+            <div class="progress" id="progressContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="progressText" style="text-align: center; margin: 10px 0; font-weight: bold;"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Зібрані дані для налагодження</h3>
+            <button onclick="copyToClipboard()" class="copy-btn" id="copyBtn" style="display: none;">
+                📋 Копіювати все для наступного чату
+            </button>
+            <div id="debugOutput" class="data-output">
+Натисніть "Зібрати всі дані" для початку збору інформації...
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🔍 Ручні тести</h3>
+            <button onclick="testEnvironment()">🔧 Тест середовища</button>
+            <button onclick="testNetworking()">🌐 Тест мережі</button>
+            <button onclick="testGoogleAPIs()">🔗 Тест Google APIs</button>
+            <button onclick="collectBrowserInfo()">🖥️ Інфо браузера</button>
+        </div>
+    </div>
+
+    <script>
+        let debugData = {
+            timestamp: new Date().toISOString(),
+            testResults: {},
+            environment: {},
+            errors: [],
+            recommendations: []
+        };
+
+        function updateProgress(percent, text) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = percent + '%';
+            progressText.textContent = text;
+            
+            if (percent >= 100) {
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressText.textContent = '';
+                }, 1000);
+            }
+        }
+
+        function addToOutput(text) {
+            const output = document.getElementById('debugOutput');
+            output.textContent += text + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('debugOutput').textContent = 'Дані очищено. Натисніть "Зібрати всі дані" для повторного збору...\n';
+            document.getElementById('copyBtn').style.display = 'none';
+            debugData = {
+                timestamp: new Date().toISOString(),
+                testResults: {},
+                environment: {},
+                errors: [],
+                recommendations: []
+            };
+        }
+
+        async function collectAllData() {
+            const btn = document.getElementById('collectBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Збираю дані...';
+            
+            clearOutput();
+            addToOutput('🚀 COMSPEC DEBUG DATA COLLECTION');
+            addToOutput('='.repeat(60));
+            addToOutput(`⏰ Час збору: ${new Date().toLocaleString()}`);
+            addToOutput('📍 URL: ' + window.location.href);
+            addToOutput('');
+
+            try {
+                updateProgress(10, 'Збір інформації про середовище...');
+                await testEnvironment();
+                
+                updateProgress(25, 'Тестування мережевого підключення...');
+                await testNetworking();
+                
+                updateProgress(40, 'Перевірка Google APIs...');
+                await testGoogleAPIs();
+                
+                updateProgress(55, 'Збір інформації про браузер...');
+                await collectBrowserInfo();
+                
+                updateProgress(70, 'Тестування React додатку...');
+                await testReactApp();
+                
+                updateProgress(85, 'Аналіз помилок та рекомендацій...');
+                await analyzeAndRecommend();
+                
+                updateProgress(100, 'Збір даних завершено!');
+                
+                addToOutput('\n🎯 ПІДСУМОК ДЛЯ НАСТУПНОГО ЧАТУ:');
+                addToOutput('='.repeat(60));
+                addToOutput(JSON.stringify(debugData, null, 2));
+                
+                document.getElementById('copyBtn').style.display = 'inline-block';
+                
+            } catch (error) {
+                addToOutput(`❌ КРИТИЧНА ПОМИЛКА: ${error.message}`);
+                debugData.errors.push({
+                    type: 'CRITICAL_ERROR',
+                    message: error.message,
+                    stack: error.stack
+                });
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Зібрати всі дані';
+            }
+        }
+
+        async function testEnvironment() {
+            addToOutput('🔧 ТЕСТ СЕРЕДОВИЩА:');
+            
+            const envTests = {
+                hostname: window.location.hostname,
+                port: window.location.port,
+                protocol: window.location.protocol,
+                pathname: window.location.pathname,
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine
+            };
+
+            debugData.environment = envTests;
+
+            Object.entries(envTests).forEach(([key, value]) => {
+                addToOutput(`  ${key}: ${value}`);
+            });
+
+            // Перевірка localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                addToOutput('  localStorage: ✅ Працює');
+                debugData.environment.localStorage = true;
+            } catch (e) {
+                addToOutput('  localStorage: ❌ Не працює');
+                debugData.environment.localStorage = false;
+            }
+
+            addToOutput('');
+        }
+
+        async function testNetworking() {
+            addToOutput('🌐 ТЕСТ МЕРЕЖІ:');
+            
+            const networkTests = [];
+            const testUrls = [
+                { url: 'https://google.com', name: 'Google (загальний інтернет)', timeout: 5000 },
+                { url: 'https://googleapis.com', name: 'Google APIs', timeout: 5000 },
+                { url: 'http://localhost:3000', name: 'React додаток', timeout: 3000 },
+                { url: 'https://sheets.googleapis.com', name: 'Google Sheets API', timeout: 5000 }
+            ];
+
+            for (const test of testUrls) {
+                try {
+                    const startTime = Date.now();
+                    const response = await Promise.race([
+                        fetch(test.url, { method: 'HEAD', mode: 'no-cors' }),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout')), test.timeout)
+                        )
+                    ]);
+                    const duration = Date.now() - startTime;
+                    
+                    const result = {
+                        url: test.url,
+                        name: test.name,
+                        status: 'success',
+                        duration: duration,
+                        message: `✅ Доступний (${duration}ms)`
+                    };
+                    
+                    networkTests.push(result);
+                    addToOutput(`  ${test.name}: ${result.message}`);
+                    
+                } catch (error) {
+                    const result = {
+                        url: test.url,
+                        name: test.name,
+                        status: 'error',
+                        error: error.message,
+                        message: `❌ ${error.message}`
+                    };
+                    
+                    networkTests.push(result);
+                    addToOutput(`  ${test.name}: ${result.message}`);
+                }
+            }
+
+            debugData.testResults.networking = networkTests;
+            addToOutput('');
+        }
+
+        async function testGoogleAPIs() {
+            addToOutput('🔗 ТЕСТ GOOGLE APIs:');
+            
+            const apiTests = [];
+            
+            // Тест Google Sheets API
+            try {
+                const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets/test', {
+                    method: 'GET'
+                });
+                
+                const result = {
+                    api: 'Google Sheets API',
+                    status: response.status,
+                    statusText: response.statusText,
+                    accessible: [400, 403, 404].includes(response.status), // Ці статуси означають що API працює
+                    message: [400, 403, 404].includes(response.status) ? 
+                        `✅ API працює (${response.status})` : 
+                        `⚠️ Неочікуваний статус: ${response.status}`
+                };
+                
+                apiTests.push(result);
+                addToOutput(`  Sheets API: ${result.message}`);
+                
+            } catch (error) {
+                const result = {
+                    api: 'Google Sheets API',
+                    status: 'error',
+                    error: error.message,
+                    accessible: false,
+                    message: `❌ ${error.message}`
+                };
+                
+                apiTests.push(result);
+                addToOutput(`  Sheets API: ${result.message}`);
+            }
+
+            // Тест Google Maps API (якщо доступний на сторінці)
+            if (window.google && window.google.maps) {
+                addToOutput('  Maps API: ✅ Завантажений на сторінці');
+                apiTests.push({
+                    api: 'Google Maps API',
+                    status: 'loaded',
+                    accessible: true,
+                    message: 'Завантажений на сторінці'
+                });
+            } else {
+                addToOutput('  Maps API: ⚠️ Не завантажений на цій сторінці');
+                apiTests.push({
+                    api: 'Google Maps API',
+                    status: 'not_loaded',
+                    accessible: false,
+                    message: 'Не завантажений на цій сторінці'
+                });
+            }
+
+            debugData.testResults.googleAPIs = apiTests;
+            addToOutput('');
+        }
+
+        async function collectBrowserInfo() {
+            addToOutput('🖥️ ІНФОРМАЦІЯ ПРО БРАУЗЕР:');
+            
+            const browserInfo = {
+                userAgent: navigator.userAgent,
+                vendor: navigator.vendor,
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                maxTouchPoints: navigator.maxTouchPoints,
+                screen: {
+                    width: screen.width,
+                    height: screen.height,
+                    colorDepth: screen.colorDepth
+                },
+                window: {
+                    innerWidth: window.innerWidth,
+                    innerHeight: window.innerHeight,
+                    devicePixelRatio: window.devicePixelRatio
+                },
+                location: {
+                    href: window.location.href,
+                    protocol: window.location.protocol,
+                    host: window.location.host,
+                    pathname: window.location.pathname
+                }
+            };
+
+            debugData.environment.browser = browserInfo;
+
+            // Виявлення типу браузера
+            let browserType = 'Unknown';
+            if (navigator.userAgent.includes('Chrome')) browserType = 'Chrome';
+            else if (navigator.userAgent.includes('Firefox')) browserType = 'Firefox';
+            else if (navigator.userAgent.includes('Safari')) browserType = 'Safari';
+            else if (navigator.userAgent.includes('Edge')) browserType = 'Edge';
+
+            addToOutput(`  Браузер: ${browserType}`);
+            addToOutput(`  Розмір вікна: ${window.innerWidth}x${window.innerHeight}`);
+            addToOutput(`  Платформа: ${navigator.platform}`);
+            addToOutput(`  Мова: ${navigator.language}`);
+            addToOutput(`  Онлайн статус: ${navigator.onLine ? '✅' : '❌'}`);
+            addToOutput('');
+        }
+
+        async function testReactApp() {
+            addToOutput('⚛️ ТЕСТ REACT ДОДАТКУ:');
+            
+            const reactTests = [];
+
+            // Тест доступності React додатку
+            try {
+                const response = await fetch('http://localhost:3000/');
+                const text = await response.text();
+                
+                const hasRootDiv = text.includes('id="root"') || text.includes("id='root'");
+                const hasReactScript = text.includes('react') || text.includes('/static/js/');
+                const hasCSS = text.includes('/static/css/') || text.includes('stylesheet');
+                
+                reactTests.push({
+                    test: 'React App Response',
+                    status: response.status,
+                    success: response.ok,
+                    hasRootDiv,
+                    hasReactScript,
+                    hasCSS
+                });
+
+                addToOutput(`  HTTP статус: ${response.status} ${response.ok ? '✅' : '❌'}`);
+                addToOutput(`  Root div: ${hasRootDiv ? '✅' : '❌'}`);
+                addToOutput(`  React скрипти: ${hasReactScript ? '✅' : '❌'}`);
+                addToOutput(`  CSS стилі: ${hasCSS ? '✅' : '❌'}`);
+                
+            } catch (error) {
+                reactTests.push({
+                    test: 'React App Response',
+                    success: false,
+                    error: error.message
+                });
+                
+                addToOutput(`  React додаток: ❌ ${error.message}`);
+            }
+
+            // Перевірка глобальних змінних React
+            const hasReactDev = typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined';
+            addToOutput(`  React DevTools: ${hasReactDev ? '✅' : '❌'}`);
+
+            debugData.testResults.react = reactTests;
+            addToOutput('');
+        }
+
+        async function analyzeAndRecommend() {
+            addToOutput('🔍 АНАЛІЗ І РЕКОМЕНДАЦІЇ:');
+            
+            const recommendations = [];
+            
+            // Аналіз мережевих проблем
+            const networkIssues = debugData.testResults.networking?.filter(test => test.status === 'error') || [];
+            if (networkIssues.length > 0) {
+                recommendations.push({
+                    type: 'NETWORK_ISSUES',
+                    priority: 'HIGH',
+                    message: 'Виявлено проблеми з мережею',
+                    details: networkIssues,
+                    solution: 'Перевірте інтернет з\'єднання та фаєрвол'
+                });
+            }
+
+            // Аналіз Google APIs
+            const apiIssues = debugData.testResults.googleAPIs?.filter(test => !test.accessible) || [];
+            if (apiIssues.length > 0) {
+                recommendations.push({
+                    type: 'GOOGLE_API_ISSUES',
+                    priority: 'HIGH',
+                    message: 'Проблеми з доступом до Google APIs',
+                    details: apiIssues,
+                    solution: 'Перевірте API ключі та налаштування Google Cloud'
+                });
+            }
+
+            // Аналіз React додатку
+            const reactIssues = debugData.testResults.react?.filter(test => !test.success) || [];
+            if (reactIssues.length > 0) {
+                recommendations.push({
+                    type: 'REACT_APP_ISSUES',
+                    priority: 'CRITICAL',
+                    message: 'React додаток недоступний або працює некоректно',
+                    details: reactIssues,
+                    solution: 'Перевірте чи запущений npm start та чи немає помилок компіляції'
+                });
+            }
+
+            // Рекомендації по браузеру
+            if (!debugData.environment.localStorage) {
+                recommendations.push({
+                    type: 'BROWSER_ISSUES',
+                    priority: 'MEDIUM',
+                    message: 'LocalStorage недоступний',
+                    solution: 'Увімкніть cookies та local storage в браузері'
+                });
+            }
+
+            debugData.recommendations = recommendations;
+
+            if (recommendations.length === 0) {
+                addToOutput('  ✅ Серйозних проблем не виявлено');
+            } else {
+                recommendations.forEach((rec, index) => {
+                    addToOutput(`  ${index + 1}. [${rec.priority}] ${rec.message}`);
+                    addToOutput(`     Рішення: ${rec.solution}`);
+                });
+            }
+            addToOutput('');
+        }
+
+        async function testFormNow() {
+            addToOutput('📝 ВІДКРИВАЮ ФОРМУ ДЛЯ ТЕСТУВАННЯ...');
+            
+            try {
+                // Відкриваємо React додаток для тестування форми
+                const testWindow = window.open('http://localhost:3000/', '_blank');
+                
+                addToOutput('✅ Форма відкрита в новій вкладці');
+                addToOutput('');
+                addToOutput('📋 ІНСТРУКЦІЇ ДЛЯ ТЕСТУВАННЯ ФОРМИ:');
+                addToOutput('1. Натисніть "Замовити матеріали" або "Замовити консультацію"');
+                addToOutput('2. Заповніть тестові дані:');
+                addToOutput('   Ім\'я: Тест Системи');
+                addToOutput('   Телефон: +380671234567');
+                addToOutput('   Email: test@comspec.ua');
+                addToOutput('3. Натисніть "Надіслати замовлення"');
+                addToOutput('4. ВАЖЛИВО: Відкрийте консоль браузера (F12 → Console)');
+                addToOutput('5. Скопіюйте всі повідомлення з консолі');
+                addToOutput('6. Додайте ці повідомлення до даних для наступного чату');
+                addToOutput('');
+                
+                // Додаємо інструкції до debug data
+                debugData.formTestInstructions = {
+                    testData: {
+                        name: 'Тест Системи',
+                        phone: '+380671234567',
+                        email: 'test@comspec.ua'
+                    },
+                    expectedLogs: [
+                        'Відправляємо замовлення в Google Sheets:',
+                        'Замовлення успішно збережено:',
+                        'або помилки типу: Помилка відправки замовлення:'
+                    ],
+                    instructions: 'Відкрийте консоль браузера (F12) та скопіюйте всі логи після відправки форми'
+                };
+                
+            } catch (error) {
+                addToOutput(`❌ Помилка відкриття форми: ${error.message}`);
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('debugOutput');
+            
+            // Створюємо повний звіт для копіювання
+            const fullReport = `
+COMSPEC GOOGLE SHEETS INTEGRATION DEBUG REPORT
+==============================================
+Зібрано: ${new Date().toLocaleString()}
+URL збору: ${window.location.href}
+
+${output.textContent}
+
+🔧 ІНСТРУКЦІЇ ДЛЯ ПРОДОВЖЕННЯ:
+1. Скопіюйте цей повний звіт
+2. Відкрийте новий чат з Claude
+3. Вставте це повідомлення: 
+
+"Привіт! Продовжуємо налагодження Google Sheets інтеграції для COMSPEC. 
+Ось debug дані з автоматичного збору:
+
+[ВСТАВТЕ СКОПІЙОВАНИЙ ЗВІТ ТУТВ]
+
+Допоможи проаналізувати проблеми та виправити інтеграцію."
+
+📝 ДОДАТКОВО ПОТРІБНО:
+- Результати тестування форми (логи з консолі браузера)
+- Environment variables статус (є чи немає)
+- Будь-які додаткові помилки з консолі
+
+==============================================
+            `.trim();
+            
+            // Копіюємо в буфер обміну
+            navigator.clipboard.writeText(fullReport).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Скопійовано!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+                
+                alert('📋 Дані скопійовано! Тепер можете відкрити новий чат з Claude та вставити ці дані для продовження налагодження.');
+            }).catch(() => {
+                // Fallback для старих браузерів
+                const textArea = document.createElement('textarea');
+                textArea.value = fullReport;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                alert('📋 Дані скопійовано в буфер обміну!');
+            });
+        }
+
+        // Автоматичний запуск при завантаженні сторінки
+        window.onload = function() {
+            addToOutput('🎯 Debug Data Collector завантажено');
+            addToOutput('💡 Натисніть "Зібрати всі дані" для автоматичного збору інформації');
+            addToOutput('📝 Або "Протестувати форму зараз" для тестування інтеграції');
+            addToOutput('');
+        };
+    </script>
+</body>
+</html>
