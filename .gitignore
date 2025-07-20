@@ -207,10 +207,11 @@ jspm_packages/
 # ===============================================
 # PROJECT SPECIFIC (COMSPEC)
 # ===============================================
-# Backup files
+# Backup files (exclude from Git)
 *.backup
 *.bak
 *.old
+*stage3backup
 
 # Documentation builds
 docs/build/
@@ -224,6 +225,18 @@ tmp/
 *.db
 *.sqlite
 *.sqlite3
+
+# ===============================================
+# OPTIMIZATION DOCUMENTATION (INCLUDE IN GIT)
+# ===============================================
+# The following files SHOULD be included in Git:
+# docs/optimization/ - всі файли документації оптимізації
+# !docs/optimization/**/*.md
+# !docs/optimization/**/*.js
+
+# However, exclude temporary test files
+docs/optimization/temp/
+docs/optimization/tmp/
 
 # ===============================================
 # SECURITY & SENSITIVE DATA

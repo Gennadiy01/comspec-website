@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Contacts = () => {
   const [formData, setFormData] = useState({
@@ -7,6 +7,29 @@ const Contacts = () => {
     email: '',
     message: ''
   });
+
+  // Обробка якорів при завантаженні сторінки
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Перевіряємо чи є це справжній якір (не маршрут)
+      const hashParts = hash.split('#');
+      if (hashParts.length > 2) {
+        // Якщо є більше одного #, беремо останню частину як якір
+        const anchorId = '#' + hashParts.pop();
+        const element = document.querySelector(anchorId);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }, 100);
+        }
+      }
+      // Ігноруємо хеші які є маршрутами (наприклад #/contacts)
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +59,7 @@ const Contacts = () => {
                 <h3>Відділ продажів</h3>
                 <div style={{marginBottom: '1rem'}}>
                   <strong>Адреса:</strong>
-                  <p>м. Київ, вул. Промислова, 15</p>
+                  <p>м. Київ, Харківське шосе, 17-А</p>
                 </div>
                 <div style={{marginBottom: '1rem'}}>
                   <strong>Телефони:</strong>
@@ -46,15 +69,15 @@ const Contacts = () => {
                     </a>
                   </p>
                   <p>
-                    <a href="tel:+380671234567" style={{color: '#008080', textDecoration: 'none'}}>
-                      067 123 45 67
+                    <a href="tel:+380445274700" style={{color: '#008080', textDecoration: 'none'}}>
+                      044 527 47 00
                     </a>
                   </p>
                 </div>
                 <div>
                   <strong>Email:</strong>
                   <p>
-                    <a href="mailto:sales@comspec.ua" style={{color: '#008080', textDecoration: 'none'}}>
+                    <a href="mailto:sales.maxigran@gmail.com" style={{color: '#008080', textDecoration: 'none'}}>
                       sales@comspec.ua
                     </a>
                   </p>
@@ -65,21 +88,21 @@ const Contacts = () => {
                 <h3>Загальні контакти</h3>
                 <div style={{marginBottom: '1rem'}}>
                   <strong>Головний офіс:</strong>
-                  <p>м. Київ, пр. Перемоги, 89, оф. 12</p>
+                  <p>02090, м. Київ, Харківське шосе, 17-А, оф. 3</p>
                 </div>
                 <div style={{marginBottom: '1rem'}}>
                   <strong>Телефон:</strong>
                   <p>
-                    <a href="tel:+380441234567" style={{color: '#008080', textDecoration: 'none'}}>
-                      (044) 123-45-67
+                    <a href="tel:+380445274700" style={{color: '#008080', textDecoration: 'none'}}>
+                      044 527 47 00
                     </a>
                   </p>
                 </div>
                 <div>
                   <strong>Email:</strong>
                   <p>
-                    <a href="mailto:info@comspec.ua" style={{color: '#008080', textDecoration: 'none'}}>
-                      info@comspec.ua
+                    <a href="mailto:comspec@comspec.ua" style={{color: '#008080', textDecoration: 'none'}}>
+                      comspec@comspec.ua
                     </a>
                   </p>
                 </div>
@@ -168,7 +191,7 @@ const Contacts = () => {
       </section>
 
       {/* Calculator Section */}
-      <section className="section gray">
+      <section id="calculator" className="section gray">
         <div className="container">
           <h2 className="section-title">Калькулятор вартості</h2>
           <div className="calculator" style={{

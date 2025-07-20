@@ -1542,3 +1542,284 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 }
+
+/* ВИПРАВЛЕНА КНОПКА ПОШУКУ - Додати в main.scss */
+
+/* ========================================
+   КНОПКА ПОШУКУ - ВИПРАВЛЕНІ СТИЛІ
+   ======================================== */
+
+/* Базові стилі кнопки пошуку */
+.search-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0.5rem !important; /* 8px */
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  padding: 0 !important; /* Прибираємо всі відступи */
+  margin: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Стилі для іконки лупи */
+.search-icon {
+  width: 1.25rem !important; /* 20px */
+  height: 1.25rem !important; /* 20px */
+  color: $primary-color !important; /* #008080 */
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  fill: none !important; /* Важливо для SVG іконок */
+  transition: all 0.3s ease !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ховер ефекти */
+.search-button:hover {
+  background-color: rgba($accent-color, 0.1) !important; /* Помаранчевий фон */
+  transform: translateY(-1px) !important;
+}
+
+.search-button:hover .search-icon {
+  color: $accent-color !important; /* #FFA500 помаранчевий */
+  transform: scale(1.1) !important;
+}
+
+/* Фокус стан */
+.search-button:focus {
+  outline: 2px solid $accent-color !important;
+  outline-offset: 2px !important;
+  background-color: rgba($accent-color, 0.1) !important;
+}
+
+.search-button:focus .search-icon {
+  color: $accent-color !important;
+}
+
+/* Активний стан */
+.search-button:active {
+  transform: translateY(0) !important;
+  background-color: rgba($accent-color, 0.2) !important;
+}
+
+/* ПРИБИРАЄМО ТЕКСТ "Пош" */
+.search-button .search-text,
+.search-button span:not(.search-icon) {
+  display: none !important; /* Повністю ховаємо текст */
+}
+
+/* Переконуємося що тільки іконка відображається */
+.search-button > *:not(.search-icon) {
+  display: none !important;
+}
+
+/* ========================================
+   МОБІЛЬНА АДАПТИВНІСТЬ
+   ======================================== */
+
+@media (max-width: 768px) {
+  .search-button {
+    width: 2.25rem !important; /* 36px на мобільних */
+    height: 2.25rem !important; /* 36px на мобільних */
+  }
+  
+  .search-icon {
+    width: 1.125rem !important; /* 18px на мобільних */
+    height: 1.125rem !important; /* 18px на мобільних */
+  }
+}
+
+@media (max-width: 480px) {
+  .search-button {
+    width: 2rem !important; /* 32px на дуже малих екранах */
+    height: 2rem !important; /* 32px на дуже малих екранах */
+    border-radius: 0.375rem !important; /* 6px */
+  }
+  
+  .search-icon {
+    width: 1rem !important; /* 16px на дуже малих екранах */
+    height: 1rem !important; /* 16px на дуже малих екранах */
+  }
+}
+
+/* ========================================
+   ВИПРАВЛЕННЯ ПОЗИЦІОНУВАННЯ В HEADER
+   ======================================== */
+
+/* Правильне позиціонування в nav-section */
+.header .nav-section {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important; /* 24px між навігацією та пошуком */
+}
+
+.header .nav-section .search-button {
+  margin-left: auto !important; /* Притискаємо до правого краю */
+  flex-shrink: 0 !important; /* Не дозволяємо стискатися */
+}
+
+/* Мобільні елементи управління */
+.mobile-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important; /* 12px між кнопкою пошуку та бургером */
+}
+
+.mobile-controls .search-button {
+  order: 1 !important; /* Пошук перший */
+  margin: 0 !important;
+}
+
+.mobile-controls .burger-menu {
+  order: 2 !important; /* Бургер другий */
+}
+
+/* ========================================
+   ПРИБИРАЄМО КОНФЛІКТУЮЧІ СТИЛІ
+   ======================================== */
+
+/* Скидаємо всі enhanced стилі які конфліктують */
+.search-button.enhanced-search-btn,
+.enhanced-search-btn {
+  all: unset !important; /* Скидаємо ВСІ стилі */
+  
+  /* Повертаємо тільки потрібні базові стилі */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 0.5rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background: transparent !important;
+}
+
+/* Переконуємося що enhanced стилі не застосовуються */
+.search-button.enhanced-search-btn:before,
+.enhanced-search-btn:before {
+  display: none !important;
+}
+
+/* ========================================
+   ЗАБЕЗПЕЧЕННЯ ПРАВИЛЬНОЇ ІКОНКИ
+   ======================================== */
+
+/* Якщо використовується Font Awesome або інші іконочні шрифти */
+.search-button .fa-search,
+.search-button .fas.fa-search,
+.search-button .far.fa-search {
+  font-size: 1.125rem !important; /* 18px */
+  color: $primary-color !important;
+  transition: color 0.3s ease !important;
+}
+
+.search-button:hover .fa-search,
+.search-button:hover .fas.fa-search,
+.search-button:hover .far.fa-search {
+  color: $accent-color !important;
+}
+
+/* Якщо використовується Unicode символ */
+.search-button::before {
+  content: "🔍" !important; /* Unicode лупа як fallback */
+  font-size: 1.125rem !important;
+  display: block !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Ховаємо fallback якщо є справжня іконка */
+.search-button .search-icon ~ *::before,
+.search-button:has(.search-icon)::before {
+  display: none !important;
+}
+
+/* ========================================
+   SVG ІКОНКА ЛУПИ (ЯКЩО ПОТРІБНО)
+   ======================================== */
+
+/* Стилі для SVG іконки пошуку */
+.search-button svg.search-icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  stroke: $primary-color !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.search-button:hover svg.search-icon {
+  stroke: $accent-color !important;
+  transform: scale(1.1) !important;
+}
+
+
+/* ========================================
+   ВИСОКИЙ ПРІОРИТЕТ - ФІНАЛЬНІ ВИПРАВЛЕННЯ
+   ======================================== */
+
+/* Остаточне виправлення з найвищим пріоритетом */
+.header .search-button,
+.nav-section .search-button,
+.mobile-controls .search-button {
+  /* Базові розміри та позиціонування */
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  min-width: 2.5rem !important;
+  min-height: 2.5rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  /* Зовнішній вигляд */
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  
+  /* Flexbox */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  /* Інтерактивність */
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  
+  /* Прибираємо всі додаткові елементи */
+  text-indent: -9999px !important; /* Ховаємо текст */
+  overflow: hidden !important;
+}
+
+/* Іконка з найвищим пріоритетом */
+.header .search-button .search-icon,
+.nav-section .search-button .search-icon,
+.mobile-controls .search-button .search-icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  color: $primary-color !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2 !important;
+  transition: all 0.3s ease !important;
+  text-indent: 0 !important; /* Повертаємо для іконки */
+}
+
+/* Ховер з найвищим пріоритетом */
+.header .search-button:hover,
+.nav-section .search-button:hover,
+.mobile-controls .search-button:hover {
+  background-color: rgba($accent-color, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.header .search-button:hover .search-icon,
+.nav-section .search-button:hover .search-icon,
+.mobile-controls .search-button:hover .search-icon {
+  color: $accent-color !important;
+  transform: scale(1.1) !important;
+}

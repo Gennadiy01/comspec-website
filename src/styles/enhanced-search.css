@@ -1,0 +1,1315 @@
+/* Enhanced Search Styles - src/styles/enhanced-search.css */
+
+/* Змінні для пошукової системи */
+:root {
+  --search-primary: #008080;
+  --search-primary-light: #e6f3f3;
+  --search-accent: #FFA500;
+  --search-accent-light: #fff4e6;
+  --search-text: #333f4f;
+  --search-text-light: #6c757d;
+  --search-border: #dee2e6;
+  --search-bg: #ffffff;
+  --search-bg-light: #f8f9fa;
+  --search-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --search-shadow-light: 0 2px 10px rgba(0, 0, 0, 0.05);
+  --search-radius: 12px;
+  --search-radius-small: 8px;
+}
+
+/* Основне модальне вікно пошуку */
+.search-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 50px 20px;
+  animation: searchModalFadeIn 0.3s ease;
+}
+
+.search-modal-container {
+  background: var(--search-bg);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: searchModalSlideIn 0.3s ease;
+  overflow: hidden;
+}
+
+/* Заголовок модального вікна */
+.search-modal-header {
+  padding: 30px 30px 20px;
+  border-bottom: 1px solid var(--search-border);
+  background: linear-gradient(135deg, var(--search-bg) 0%, var(--search-bg-light) 100%);
+}
+
+.search-modal-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-modal-title h2 {
+  margin: 0;
+  color: var(--search-text);
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.search-modal-close {
+  background: var(--search-bg-light);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--search-text-light);
+}
+
+.search-modal-close:hover {
+  background: var(--search-primary-light);
+  color: var(--search-primary);
+  transform: rotate(90deg);
+}
+
+/* Поле пошуку */
+.search-input-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.search-modal-input {
+  width: 100%;
+  padding: 15px 50px 15px 20px;
+  border: 2px solid var(--search-border);
+  border-radius: var(--search-radius);
+  font-size: 1.1rem;
+  background: var(--search-bg);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.search-modal-input:focus {
+  outline: none;
+  border-color: var(--search-primary);
+  box-shadow: 0 0 0 4px rgba(0, 128, 128, 0.1);
+  background: var(--search-bg);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--search-text-light);
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.search-clear-btn:hover {
+  background: var(--search-primary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Вкладки пошуку */
+.search-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.search-tab {
+  padding: 10px 20px;
+  background: transparent;
+  border: 2px solid var(--search-border);
+  border-radius: var(--search-radius);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--search-text-light);
+}
+
+.search-tab:hover {
+  border-color: var(--search-primary-light);
+  background: var(--search-primary-light);
+  color: var(--search-primary);
+}
+
+.search-tab.active {
+  background: var(--search-primary);
+  border-color: var(--search-primary);
+  color: white;
+  box-shadow: var(--search-shadow-light);
+}
+
+/* Контент модального вікна */
+.search-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 30px;
+}
+
+.search-tab-content {
+  height: 100%;
+}
+
+/* Швидкий пошук - популярні теги */
+.search-suggestions {
+  margin-bottom: 30px;
+}
+
+.search-suggestions h4 {
+  margin: 0 0 15px 0;
+  color: var(--search-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.search-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-suggestion-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--search-bg-light);
+  border: 1px solid var(--search-border);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--search-text);
+}
+
+.search-suggestion-tag:hover {
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
+  color: var(--search-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--search-shadow-light);
+}
+
+.tag-icon {
+  font-size: 1.1rem;
+}
+
+/* Результати пошуку */
+.search-results-list,
+.global-search-results {
+  margin-top: 20px;
+}
+
+.results-header {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--search-border);
+}
+
+.results-header h4 {
+  margin: 0;
+  color: var(--search-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Результати пошуку (мінімалістичні) */
+.search-result-item,
+.global-result-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: var(--search-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 15px;
+}
+
+.search-result-item:hover,
+.global-result-item:hover {
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
+  transform: translateX(5px);
+  box-shadow: var(--search-shadow-light);
+}
+
+.result-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--search-bg-light);
+  border-radius: var(--search-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Приховуємо порожні іконки */
+.result-icon:empty {
+  display: none;
+}
+
+/* Коригуємо відступи коли немає іконки */
+.result-icon:empty + .result-content {
+  margin-left: 0;
+}
+
+.result-content {
+  flex: 1;
+}
+
+.result-title {
+  font-weight: 600;
+  color: var(--search-text);
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+
+.result-description,
+.result-text {
+  color: var(--search-text-light);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 0.85rem;
+}
+
+.result-category,
+.result-tag {
+  color: var(--search-primary);
+  font-weight: 500;
+}
+
+.result-relevance {
+  color: var(--search-text-light);
+  font-size: 0.8rem;
+}
+
+.result-arrow {
+  color: var(--search-text-light);
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.search-result-item:hover .result-arrow,
+.global-result-item:hover .result-arrow {
+  transform: translateX(5px);
+  color: var(--search-primary);
+}
+
+/* Підсвічування тексту */
+.search-highlight-text {
+  background: var(--search-accent-light);
+  color: var(--search-accent);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.search-highlight {
+  animation: searchHighlight 2s ease;
+  border: 2px solid var(--search-accent) !important;
+  background: var(--search-accent-light) !important;
+  border-radius: var(--search-radius-small);
+}
+
+/* Глобальний пошук */
+.global-search-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.global-search-filters {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 15px 20px;
+  background: var(--search-bg-light);
+  border-radius: var(--search-radius);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  color: var(--search-text);
+  font-weight: 500;
+}
+
+.filter-group select {
+  padding: 6px 12px;
+  border: 1px solid var(--search-border);
+  border-radius: var(--search-radius-small);
+  font-size: 0.9rem;
+  background: var(--search-bg);
+  color: var(--search-text);
+}
+
+.filter-group input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.global-search-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Категорії результатів */
+.result-category {
+  margin-bottom: 25px;
+}
+
+.category-title {
+  margin: 0 0 15px 0;
+  color: var(--search-text);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 10px 15px;
+  background: var(--search-bg-light);
+  border-radius: var(--search-radius-small);
+  border-left: 4px solid var(--search-primary);
+}
+
+.category-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Стани завантаження та порожніх результатів */
+.global-search-loading,
+.search-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  color: var(--search-text-light);
+}
+
+.global-search-info {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--search-text-light);
+}
+
+.global-search-info h4 {
+  margin: 0 0 10px 0;
+  color: var(--search-text);
+}
+
+.index-stats {
+  margin-top: 15px;
+  font-size: 0.85rem;
+}
+
+.global-search-empty,
+.search-no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--search-text-light);
+}
+
+.global-search-empty h4,
+.search-no-results h4 {
+  margin: 0 0 10px 0;
+  color: var(--search-text);
+}
+
+.btn-reindex {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: var(--search-primary);
+  color: white;
+  border: none;
+  border-radius: var(--search-radius-small);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-reindex:hover {
+  background: #006666;
+  transform: translateY(-2px);
+}
+
+/* Історія пошуку */
+.search-history {
+  margin-top: 30px;
+}
+
+.search-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--search-border);
+}
+
+.search-section-header h4 {
+  margin: 0;
+  color: var(--search-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.clear-history-btn {
+  background: none;
+  border: none;
+  color: var(--search-text-light);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.clear-history-btn:hover {
+  color: var(--search-primary);
+}
+
+.history-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--search-bg-light);
+  border-radius: var(--search-radius-small);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  background: var(--search-primary-light);
+  transform: translateX(5px);
+}
+
+.history-content {
+  flex: 1;
+}
+
+.history-query {
+  font-weight: 600;
+  color: var(--search-text);
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.history-result {
+  font-size: 0.85rem;
+  color: var(--search-text-light);
+}
+
+.history-time {
+  font-size: 0.8rem;
+  color: var(--search-text-light);
+}
+
+/* Швидкі дії */
+.search-quick-actions {
+  margin-top: 30px;
+}
+
+.search-quick-actions h4 {
+  margin: 0 0 15px 0;
+  color: var(--search-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 15px;
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: var(--search-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.quick-action-btn:hover {
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
+  transform: translateY(-3px);
+  box-shadow: var(--search-shadow-light);
+}
+
+.action-icon {
+  font-size: 2rem;
+}
+
+.action-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--search-text);
+}
+
+/* Підказки для переходу */
+.global-search-hint {
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--search-primary-light) 0%, var(--search-accent-light) 100%);
+  border-radius: var(--search-radius-small);
+  border-left: 4px solid var(--search-primary);
+}
+
+.global-search-hint p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--search-text);
+}
+
+/* Рекомендації при відсутності результатів */
+.no-results-suggestions {
+  margin-top: 20px;
+}
+
+.no-results-suggestions p {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: var(--search-text);
+}
+
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.suggestion-chip {
+  padding: 6px 12px;
+  background: var(--search-primary-light);
+  border: 1px solid var(--search-primary);
+  border-radius: 15px;
+  font-size: 0.85rem;
+  color: var(--search-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.suggestion-chip:hover {
+  background: var(--search-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Спінер завантаження */
+.search-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--search-border);
+  border-top-color: var(--search-primary);
+  border-radius: 50%;
+  animation: searchSpin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+/* Підвал модального вікна */
+.search-modal-footer {
+  padding: 15px 30px;
+  border-top: 1px solid var(--search-border);
+  background: var(--search-bg-light);
+}
+
+.search-tips {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.search-tip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--search-text-light);
+}
+
+.search-tip kbd {
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+/* Анімації */
+@keyframes searchModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes searchModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes searchSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes searchHighlight {
+  0% {
+    background: var(--search-accent);
+    transform: scale(1.05);
+  }
+  50% {
+    background: var(--search-accent-light);
+    transform: scale(1.02);
+  }
+  100% {
+    background: transparent;
+    transform: scale(1);
+  }
+}
+
+/* Адаптивний дизайн */
+@media (max-width: 768px) {
+  .search-modal-overlay {
+    padding: 20px 15px;
+    align-items: flex-start;
+  }
+
+  .search-modal-container {
+    max-height: 95vh;
+    border-radius: 15px;
+  }
+
+  .search-modal-header {
+    padding: 20px 20px 15px;
+  }
+
+  .search-modal-title h2 {
+    font-size: 1.5rem;
+  }
+
+  .search-modal-content {
+    padding: 15px 20px;
+  }
+
+  .search-modal-input {
+    font-size: 1rem;
+    padding: 12px 40px 12px 15px;
+  }
+
+  .search-tabs {
+    flex-direction: column;
+  }
+
+  .search-tab {
+    text-align: center;
+  }
+
+  .search-tags {
+    justify-content: center;
+  }
+
+  .global-search-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .filter-group {
+    justify-content: space-between;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-tips {
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .search-result-item,
+  .global-result-item {
+    padding: 12px 15px;
+  }
+
+  .result-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-modal-overlay {
+    padding: 10px;
+  }
+
+  .search-modal-header {
+    padding: 15px;
+  }
+
+  .search-modal-content {
+    padding: 10px 15px;
+  }
+
+  .search-modal-footer {
+    padding: 10px 15px;
+  }
+
+  .search-tips {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Стилі для гібридного пошуку */
+.dynamic-result {
+  border-left: 3px solid var(--search-accent);
+}
+
+.static-result {
+  border-left: 3px solid var(--search-primary);
+}
+
+.dynamic-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--search-accent);
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 10px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.btn-stats {
+  padding: 6px 12px;
+  background: var(--search-bg-light);
+  border: 1px solid var(--search-border);
+  border-radius: var(--search-radius-small);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--search-text);
+}
+
+.btn-stats:hover {
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
+}
+
+/* Покращена статистика */
+.index-stats {
+  margin-top: 15px;
+  padding: 10px;
+  background: var(--search-bg-light);
+  border-radius: var(--search-radius-small);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.index-stats strong {
+  color: var(--search-primary);
+}
+
+/* Покращення для результатів */
+.results-header {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--search-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.results-header small {
+  color: var(--search-text-light);
+  font-size: 0.8rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --search-bg: #1a1a1a;
+    --search-bg-light: #2d2d2d;
+    --search-text: #ffffff;
+    --search-text-light: #b0b0b0;
+    --search-border: #404040;
+    --search-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --search-shadow-light: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .search-modal-container {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .search-modal-input {
+    background: var(--search-bg-light);
+    color: var(--search-text);
+  }
+
+  .search-suggestion-tag {
+    background: var(--search-bg-light);
+    color: var(--search-text);
+  }
+
+  .search-result-item,
+  .global-result-item {
+    background: var(--search-bg-light);
+    color: var(--search-text);
+  }
+
+  .result-icon {
+    background: var(--search-bg);
+  }
+}
+
+/* ========================================
+   ДОДАТИ В КІНЕЦЬ enhanced-search.css
+   СПРОЩЕНИЙ ІНТЕРФЕЙС БЕЗ ВКЛАДОК v2.0
+   ======================================== */
+
+/* ПРИХОВАНА НАВІГАЦІЯ З ВКЛАДОК */
+.search-tabs {
+  display: none !important;
+}
+
+/* 🆕 КОНТЕНТ ПІДКАЗОК */
+.search-suggestions-content {
+  padding: 25px 0;
+}
+
+.search-quick-content,
+.search-global-content {
+  height: 100%;
+  min-height: 300px;
+}
+
+/* ПОКРАЩЕНІ ПОПУЛЯРНІ ТЕГИ БЕЗ ІКОНОК */
+.search-suggestions-content .search-suggestion-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 24px !important;
+  background: var(--search-bg) !important;
+  border: 2px solid var(--search-border) !important;
+  border-radius: 30px !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  color: var(--search-text) !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  box-shadow: var(--search-shadow-light) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 120px !important;
+}
+
+.search-suggestions-content .search-suggestion-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.search-suggestions-content .search-suggestion-tag:hover::before {
+  left: 100%;
+}
+
+.search-suggestions-content .search-suggestion-tag:hover {
+  background: var(--search-primary-light) !important;
+  border-color: var(--search-primary) !important;
+  color: var(--search-primary) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: var(--search-shadow) !important;
+}
+
+.search-suggestions-content .tag-text {
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  font-size: 0.9rem !important;
+}
+
+/* ПОКРАЩЕНІ ШВИДКІ ДІЇ БЕЗ ІКОНОК */
+.search-suggestions-content .quick-action-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px 24px !important;
+  background: var(--search-bg) !important;
+  border: 2px solid var(--search-border) !important;
+  border-radius: var(--search-radius) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-align: center !important;
+  min-height: 80px !important;
+  box-shadow: var(--search-shadow-light) !important;
+  text-decoration: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.search-suggestions-content .quick-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 128, 128, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.search-suggestions-content .quick-action-btn:hover::before {
+  left: 100%;
+}
+
+.search-suggestions-content .quick-action-btn:hover {
+  background: var(--search-primary-light) !important;
+  border-color: var(--search-primary) !important;
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: var(--search-shadow) !important;
+}
+
+.search-suggestions-content .action-text {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: var(--search-text) !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.3px !important;
+  transition: color 0.3s ease !important;
+  text-transform: uppercase !important;
+  font-size: 0.95rem !important;
+}
+
+.search-suggestions-content .quick-action-btn:hover .action-text {
+  color: var(--search-primary) !important;
+}
+
+/* 🆕 ПОКРАЩЕНІ РОЗМІРИ ПОПУЛЯРНИХ ТЕГІВ */
+.search-suggestions-content .search-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+  justify-content: center !important;
+  margin-top: 10px !important;
+}
+
+/* 🆕 СТИЛІ ДЛЯ РІЗНИХ ТИПІВ КОНТЕНТУ */
+.search-suggestions-content .search-suggestions {
+  margin-bottom: 40px !important;
+}
+
+.search-suggestions-content .search-history {
+  margin-bottom: 40px !important;
+}
+
+.search-suggestions-content .search-quick-actions {
+  margin-bottom: 20px !important;
+}
+
+/* 🆕 ПОКРАЩЕНІ ЗАГОЛОВКИ СЕКЦІЙ */
+.search-suggestions-content .search-suggestions h4,
+.search-suggestions-content .search-history h4,
+.search-suggestions-content .search-quick-actions h4 {
+  margin: 0 0 20px 0 !important;
+  color: var(--search-text) !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  position: relative !important;
+  padding-bottom: 15px !important;
+}
+
+.search-suggestions-content .search-suggestions h4::after,
+.search-suggestions-content .search-history h4::after,
+.search-suggestions-content .search-quick-actions h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--search-primary) 0%, var(--search-accent) 100%);
+  border-radius: 2px;
+}
+
+/* 🆕 ПОКРАЩЕНА ІСТОРІЯ ПОШУКУ */
+.search-suggestions-content .history-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 16px 20px !important;
+  background: var(--search-bg) !important;
+  border: 2px solid var(--search-border) !important;
+  border-radius: var(--search-radius) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--search-shadow-light) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.search-suggestions-content .history-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 128, 128, 0.1), transparent);
+  transition: left 0.4s;
+}
+
+.search-suggestions-content .history-item:hover::before {
+  left: 100%;
+}
+
+.search-suggestions-content .history-item:hover {
+  background: var(--search-primary-light) !important;
+  border-color: var(--search-primary) !important;
+  transform: translateX(8px) scale(1.01) !important;
+  box-shadow: var(--search-shadow) !important;
+}
+
+.search-suggestions-content .history-query {
+  font-weight: 700 !important;
+  color: var(--search-text) !important;
+  font-size: 1rem !important;
+  transition: color 0.3s ease !important;
+}
+
+.search-suggestions-content .history-result {
+  font-size: 0.9rem !important;
+  color: var(--search-text-light) !important;
+  margin-top: 4px !important;
+}
+
+.search-suggestions-content .history-time {
+  font-size: 0.8rem !important;
+  color: var(--search-text-light) !important;
+  font-weight: 500 !important;
+}
+
+.search-suggestions-content .history-item:hover .history-query {
+  color: var(--search-primary) !important;
+}
+
+/* 🆕 ПОКРАЩЕНА КНОПКА ОЧИСТИТИ ІСТОРІЮ */
+.search-suggestions-content .clear-history-btn {
+  background: var(--search-bg-light) !important;
+  border: 1px solid var(--search-border) !important;
+  color: var(--search-text-light) !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-weight: 500 !important;
+}
+
+.search-suggestions-content .clear-history-btn:hover {
+  background: #ff6b6b !important;
+  border-color: #ff6b6b !important;
+  color: white !important;
+  transform: scale(1.05) !important;
+}
+
+/* АДАПТИВНІ ПОКРАЩЕННЯ */
+@media (max-width: 768px) {
+  .search-modal-input {
+    font-size: 1rem !important;
+    padding: 12px 40px 12px 15px !important;
+  }
+  .search-suggestions-content .search-suggestion-tag {
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .search-suggestions-content .tag-icon {
+    font-size: 1.1rem !important;
+  }
+  
+  .search-suggestions-content .quick-action-btn {
+    min-height: 60px !important;
+    padding: 16px 20px !important;
+  }
+  
+  .search-suggestions-content .action-text {
+    font-size: 0.9rem !important;
+  }
+  
+  .search-suggestions-content .search-tags {
+    gap: 10px !important;
+  }
+  
+  .search-suggestions-content .quick-actions-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-modal-input {
+    font-size: 0.9rem !important;
+    padding: 10px 35px 10px 12px !important;
+  }
+  
+  /* Плейсхолдер для маленьких екранів */
+  .search-modal-input::placeholder {
+    font-size: 0.85rem !important;
+    opacity: 0.7 !important;
+  }
+  .search-suggestions-content .search-suggestion-tag {
+    padding: 10px 14px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .search-suggestions-content .quick-actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .search-suggestions-content .quick-action-btn {
+    min-height: 50px !important;
+    padding: 14px 16px !important;
+  }
+  
+  .search-suggestions-content .search-suggestions h4,
+  .search-suggestions-content .search-history h4,
+  .search-suggestions-content .search-quick-actions h4 {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* 🆕 АНІМАЦІЇ ДЛЯ ПЛАВНИХ ПЕРЕХОДІВ */
+@keyframes searchSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-suggestions-content {
+  animation: searchSlideIn 0.4s ease;
+}
+
+.search-quick-content {
+  animation: searchSlideIn 0.4s ease 0.1s both;
+}
+
+.search-global-content {
+  animation: searchSlideIn 0.4s ease 0.1s both;
+}
+
+/* 🆕 ПІДСВІЧУВАННЯ АКТИВНОГО СТАНУ */
+.search-type-indicator.active {
+  background: linear-gradient(135deg, var(--search-primary) 0%, var(--search-accent) 100%) !important;
+  color: white !important;
+  border-left-color: var(--search-accent) !important;
+  box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3) !important;
+}
+
+.search-indicator.active {
+  font-weight: 700 !important;
+}
+
+/* 🆕 SCROLL СТИЛІ ДЛЯ КРАЩОГО UX */
+.search-suggestions-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-suggestions-content::-webkit-scrollbar-track {
+  background: var(--search-bg-light);
+  border-radius: 3px;
+}
+
+.search-suggestions-content::-webkit-scrollbar-thumb {
+  background: var(--search-primary);
+  border-radius: 3px;
+}
+
+.search-suggestions-content::-webkit-scrollbar-thumb:hover {
+  background: #006666;
+}

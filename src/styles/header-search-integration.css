@@ -1,0 +1,241 @@
+/* header-search-integration.css - Стилі для інтеграції кнопки пошуку в header */
+
+/* Покращена кнопка пошуку в header */
+.enhanced-search-btn {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #008080 0%, #006666 100%);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 128, 128, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-search-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.enhanced-search-btn:hover::before {
+  left: 100%;
+}
+
+.enhanced-search-btn:hover {
+  background: linear-gradient(135deg, #006666 0%, #004d4d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+}
+
+.enhanced-search-btn:active {
+  transform: translateY(0);
+}
+
+.enhanced-search-btn .search-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+.enhanced-search-btn:hover .search-icon {
+  transform: scale(1.1) rotate(15deg);
+}
+
+.enhanced-search-btn .search-text {
+  font-weight: 600;
+}
+
+/* Адаптивність для кнопки пошуку */
+@media (max-width: 768px) {
+  .enhanced-search-btn .search-text {
+    display: none;
+  }
+  
+  .enhanced-search-btn {
+    padding: 12px;
+    border-radius: 50%;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  
+  .enhanced-search-btn .search-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .enhanced-search-btn {
+    padding: 10px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  .enhanced-search-btn .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Оптимізація для існуючих стилів header */
+.nav-section {
+  position: relative;
+}
+
+.desktop-nav {
+  margin-right: 20px;
+}
+
+/* Покращений z-index для модального вікна */
+.search-modal-overlay {
+  z-index: 9999 !important;
+}
+
+/* Плавний перехід для кнопки пошуку */
+.search-button {
+  transition: all 0.3s ease;
+}
+
+/* Підтримка існуючих стилів */
+.header .search-button.enhanced-search-btn {
+  margin-left: auto;
+}
+
+/* Фокус стан для accessibility */
+.enhanced-search-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
+}
+
+/* Анімація при завантаженні */
+@keyframes searchButtonFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enhanced-search-btn {
+  animation: searchButtonFadeIn 0.5s ease 0.2s both;
+}
+
+/* Покращення для темної теми */
+@media (prefers-color-scheme: dark) {
+  .enhanced-search-btn {
+    background: linear-gradient(135deg, #008080 0%, #006666 100%);
+    box-shadow: 0 2px 8px rgba(0, 128, 128, 0.4);
+  }
+  
+  .enhanced-search-btn:hover {
+    background: linear-gradient(135deg, #00a0a0 0%, #008080 100%);
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.5);
+  }
+}
+
+/* Підтримка RTL */
+[dir="rtl"] .enhanced-search-btn {
+  flex-direction: row-reverse;
+}
+
+/* Стилі для підказок */
+.enhanced-search-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  animation: tooltipFadeIn 0.3s ease 0.5s forwards;
+}
+
+@keyframes tooltipFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Інтеграція з існуючою сіткою header */
+@media (min-width: 769px) {
+  .header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .nav-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+/* Забезпечення правильного порядку елементів */
+.nav-section {
+  order: 2;
+}
+
+.logo-link {
+  order: 1;
+}
+
+/* Додаткові покращення для мобільних пристроїв */
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .enhanced-search-btn {
+    order: 1;
+  }
+  
+  .burger-menu {
+    order: 2;
+  }
+}
+
+/* Інтеграція з анімаціями основного файлу */
+.enhanced-search-btn:hover {
+  animation: none; /* Відключаємо базову анімацію при hover */
+}
+
+/* Узгодження з кольоровою схемою enhanced-search.css */
+.enhanced-search-btn {
+  background: linear-gradient(135deg, var(--search-primary, #008080) 0%, #006666 100%);
+  box-shadow: 0 2px 8px rgba(0, 128, 128, 0.2);
+}
+
+.enhanced-search-btn:hover {
+  background: linear-gradient(135deg, #006666 0%, #004d4d 100%);
+  box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+}
+
+.enhanced-search-btn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
+}

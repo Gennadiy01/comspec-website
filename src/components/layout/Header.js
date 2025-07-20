@@ -1,372 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import SearchModal from '../search/SearchModal';
 import '../../styles/search.css';
-
-// Додаємо стилі для полоси прокрутки
-const scrollbarStyles = `
-  .search-modal-body {
-    /* Webkit браузери (Chrome, Safari, Edge) */
-    scrollbar-width: auto;
-    scrollbar-color: #008080 #f8fafc;
-  }
-  
-  .search-modal-body::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .search-modal-body::-webkit-scrollbar-track {
-    background: #f8fafc;
-    border-radius: 6px;
-    margin: 8px 0;
-  }
-  
-  .search-modal-body::-webkit-scrollbar-thumb {
-    background: #008080;
-    border-radius: 6px;
-    border: 2px solid #f8fafc;
-    min-height: 30px;
-  }
-  
-  .search-modal-body::-webkit-scrollbar-thumb:hover {
-    background: #006666;
-  }
-  
-  .search-modal-body::-webkit-scrollbar-corner {
-    background: #f8fafc;
-  }
-  
-  /* Для мобільних пристроїв */
-  @media (max-width: 768px) {
-    .search-modal-body::-webkit-scrollbar {
-      width: 14px;
-      height: 14px;
-    }
-    
-    .search-modal-body::-webkit-scrollbar-thumb {
-      background: #008080;
-      border: 3px solid #f8fafc;
-      border-radius: 7px;
-      min-height: 40px;
-    }
-    
-    .search-modal-body::-webkit-scrollbar-track {
-      background: #f8fafc;
-      border-radius: 7px;
-      margin: 10px 0;
-    }
-  }
-  
-  /* Для планшетів */
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .search-modal-body::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-  }
-`;
-
-// Додаємо стилі в head
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
-  styleElement.textContent = scrollbarStyles;
-  if (!document.head.querySelector('style[data-scrollbar="search-modal"]')) {
-    styleElement.setAttribute('data-scrollbar', 'search-modal');
-    document.head.appendChild(styleElement);
-  }
-}
-
-// Тимчасові дані для пошуку (потім замініть на реальні дані з вашого API)
-const siteData = [
-  {
-    id: 1,
-    title: 'Щебінь',
-    content: 'Гранітний та вапняковий щебінь різних фракцій. Сертифікована якість для будь-яких робіт.',
-    category: 'Продукція',
-    url: '/products/gravel',
-    keywords: ['щебінь', 'граніт', 'вапняк', 'фракції', 'будівництво']
-  },
-  {
-    id: 2,
-    title: 'Пісок',
-    content: 'Річковий та кар\'єрний пісок. Митий та немитий. Ідеально підходить для бетону та розчинів.',
-    category: 'Продукція',
-    url: '/products/sand',
-    keywords: ['пісок', 'річковий', 'кар\'єрний', 'бетон', 'розчин']
-  },
-  {
-    id: 3,
-    title: 'Асфальт',
-    content: 'Асфальтобетонні суміші для доріг та майданчиків. Довговічність та стійкість до навантажень.',
-    category: 'Продукція',
-    url: '/products/asphalt',
-    keywords: ['асфальт', 'дороги', 'майданчики', 'довговічність']
-  },
-  {
-    id: 4,
-    title: 'Бетон',
-    content: 'Товарний бетон усіх марок. Доставка міксерами. Лабораторний контроль кожної партії.',
-    category: 'Продукція',
-    url: '/products/concrete',
-    keywords: ['бетон', 'товарний', 'міксери', 'лабораторний контроль']
-  },
-  {
-    id: 5,
-    title: 'Доставка матеріалів',
-    content: 'Оперативна доставка будівельних матеріалів власним автопарком. Залізничні перевезення для великих обсягів.',
-    category: 'Послуги',
-    url: '/services/delivery',
-    keywords: ['доставка', 'автопарк', 'залізничні перевезення', 'логістика']
-  },
-  {
-    id: 6,
-    title: 'Розробка кар\'єрів',
-    content: 'Професійні послуги з розробки та експлуатації кар\'єрів. Сучасна техніка та досвідчені фахівці.',
-    category: 'Послуги',
-    url: '/services/quarry',
-    keywords: ['кар\'єр', 'розробка', 'експлуатація', 'техніка', 'фахівці']
-  },
-  {
-    id: 7,
-    title: 'Оренда спецтехніки',
-    content: 'Екскаватори, навантажувачі, самоскиди та інша техніка для ваших проєктів. З водієм або без.',
-    category: 'Послуги',
-    url: '/services/rental',
-    keywords: ['оренда', 'екскаватори', 'навантажувачі', 'самоскиди', 'спецтехніка']
-  },
-  {
-    id: 8,
-    title: 'Лабораторний контроль',
-    content: 'Власна лабораторія для контролю якості продукції. Сертифікація та паспорти якості на кожну партію.',
-    category: 'Послуги',
-    url: '/services/laboratory',
-    keywords: ['лабораторія', 'контроль якості', 'сертифікація', 'паспорти якості']
-  },
-  {
-    id: 9,
-    title: 'Про COMSPEC',
-    content: 'COMSPEC об\'єднує кращих експертів галузі, щоб забезпечити комплексні будівельні рішення від кар\'єру до вашого об\'єкта.',
-    category: 'Про нас',
-    url: '/about',
-    keywords: ['експерти', 'комплексні рішення', 'будівельні', 'досвід', 'партнери']
-  },
-  {
-    id: 10,
-    title: 'Контакти',
-    content: 'Зв\'яжіться з нами для отримання консультації та розрахунку вартості матеріалів.',
-    category: 'Контакти',
-    url: '/contacts',
-    keywords: ['контакти', 'консультація', 'розрахунок', 'вартість']
-  }
-];
-
-// Компонент модального вікна пошуку
-const SearchModal = ({ isOpen, onClose }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const searchInputRef = useRef(null);
-
-  // Ініціалізація компонента - фокус на input при відкритті
-  useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isOpen]);
-
-  // Функція пошуку
-  const performSearch = (query) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      setHasSearched(false);
-      return;
-    }
-
-    setIsSearching(true);
-    
-    // Симуляція затримки пошуку
-    setTimeout(() => {
-      const lowercaseQuery = query.toLowerCase();
-      const results = siteData.filter(item => {
-        return (
-          item.title.toLowerCase().includes(lowercaseQuery) ||
-          item.content.toLowerCase().includes(lowercaseQuery) ||
-          item.keywords.some(keyword => keyword.toLowerCase().includes(lowercaseQuery))
-        );
-      });
-
-      setSearchResults(results);
-      setIsSearching(false);
-      setHasSearched(true);
-    }, 300);
-  };
-
-  // Обробка введення в поле пошуку
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    performSearch(value);
-  };
-
-  // Виділення знайденого тексту
-  const highlightText = (text, query) => {
-    if (!query.trim()) return text;
-    
-    const regex = new RegExp(`(${query})`, 'gi');
-    const parts = text.split(regex);
-    
-    return parts.map((part, index) => (
-      regex.test(part) ? (
-        <mark key={index}>
-          {part}
-        </mark>
-      ) : part
-    ));
-  };
-
-  // Закриття модального вікна
-  const handleClose = useCallback(() => {
-  setSearchQuery('');
-  setSearchResults([]);
-  setHasSearched(false);
-  onClose();
-}, [onClose]);
-
-  // Обробка натискання Escape та фокус
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Затримка для фокуса після відкриття модального вікна
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, handleClose]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="search-modal-overlay" onClick={handleClose}>
-      <div className="search-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header пошукового модального вікна */}
-        <div className="search-modal-header">
-          <div className="search-input-container">
-            <svg className="search-input-icon" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Введіть запит для пошуку..."
-              value={searchQuery}
-              onChange={handleInputChange}
-              className="search-input"
-            />
-            
-            <button onClick={handleClose} className="search-close-btn">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Тіло модального вікна */}
-        <div className="search-modal-body">{/* Видалили клас search-modal-scrollbar */}
-          {/* Стан завантаження */}
-          {isSearching && (
-            <div className="search-loading">
-              <div className="search-spinner"></div>
-              <span>Пошук...</span>
-            </div>
-          )}
-
-          {/* Відсутність результатів */}
-          {!isSearching && hasSearched && searchResults.length === 0 && (
-            <div className="search-no-results">
-              <svg className="no-results-icon" viewBox="0 0 24 24" fill="none">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="11" y1="8" x2="11" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="11" y1="16" x2="11" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              <h3>Нічого не знайдено</h3>
-              <p>Спробуйте змінити запит або використайте інші ключові слова</p>
-            </div>
-          )}
-
-          {/* Результати пошуку */}
-          {!isSearching && searchResults.length > 0 && (
-            <div>
-              <div className="search-results-header">
-                <span>Знайдено результатів: {searchResults.length}</span>
-              </div>
-              
-              {searchResults.map((result) => (
-                <Link 
-                  key={result.id}
-                  to={result.url} 
-                  className="search-result-item search-result-clickable"
-                  onClick={handleClose}
-                >
-                  <div className="search-result-category">
-                    {result.category}
-                  </div>
-                  
-                  <h3 className="search-result-title">
-                    {highlightText(result.title, searchQuery)}
-                  </h3>
-                  
-                  <p className="search-result-content">
-                    {highlightText(result.content, searchQuery)}
-                  </p>
-                  
-                  <div className="search-result-link">
-                    Перейти до сторінки →
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Початковий стан - популярні запити */}
-          {!hasSearched && !isSearching && (
-            <div className="search-suggestions">
-              <h3>Популярні запити:</h3>
-              <div className="search-suggestion-tags">
-                {['щебінь', 'пісок', 'доставка', 'бетон', 'асфальт', 'оренда техніки'].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    className="search-suggestion-tag"
-                    onClick={() => {
-                      setSearchQuery(suggestion);
-                      performSearch(suggestion);
-                    }}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+import '../../styles/enhanced-search.css';
+import '../../styles/header-search-integration.css';
 
 // Основний компонент Header
 const Header = () => {
@@ -389,6 +26,15 @@ const Header = () => {
       document.activeElement.blur();
     }
   };
+
+  // Обробники для пошукового модального вікна
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleCloseSearch = useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
 
   return (
     <>
@@ -445,16 +91,18 @@ const Header = () => {
                 </Link>
               </nav>
               
-              {/* Кнопка пошуку - завжди видима */}
+              {/* Нова кнопка пошуку з розширеним функціоналом */}
               <button 
-                className="search-button" 
+                className="search-button enhanced-search-btn" 
                 aria-label="Пошук по сайту"
-                onClick={() => setIsSearchOpen(true)}
+                onClick={handleOpenSearch}
+                title="Натисніть для відкриття розширеного пошуку"
               >
                 <svg className="search-icon" viewBox="0 0 24 24" fill="none">
                   <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
                   <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
+                <span className="search-text">Пошук</span>
               </button>
               
               {/* Мобільні елементи управління */}
@@ -574,10 +222,10 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Модальне вікно пошуку */}
+      {/* Нове модальне вікно пошуку */}
       <SearchModal 
         isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
+        onClose={handleCloseSearch} 
       />
     </>
   );

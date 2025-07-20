@@ -1,8 +1,12 @@
 import React from 'react';
 import { useOrderModal } from '../context/OrderModalContext';
+import useComspecSearch from '../hooks/useSearchNavigation'; // ✅ Імпорт хука
 
 const Services = () => {
   const { openOrderModal } = useOrderModal();
+  
+  // ✅ ПРАВИЛЬНО: Хук викликається ВСЕРЕДИНІ компонента
+  const { search, highlight, clearHighlights } = useComspecSearch();
 
   // Функція для відкриття модального вікна з консультацією
   const handleConsultationClick = (serviceType) => {
@@ -111,12 +115,12 @@ const Services = () => {
       </section>
 
       {/* Delivery Services */}
-      <section className="section">
+      <section className="section" id="delivery-services">
         <div className="container">
           <h2 className="section-title">Доставка</h2>
           <div className="grid grid-2">
             {deliveryServices.map((service, index) => (
-              <div key={index} className="card">
+              <div key={index} className="card" id={`delivery-service-${index}`}>
                 <div style={{
                   height: '200px',
                   backgroundColor: '#f8f9fa',
@@ -153,12 +157,12 @@ const Services = () => {
       </section>
 
       {/* Equipment Rental */}
-      <section className="section dark">
+      <section className="section dark" id="equipment-services">
         <div className="container">
           <h2 className="section-title">Оренда спецтехніки</h2>
           <div className="grid grid-4">
             {equipmentServices.map((service, index) => (
-              <div key={index} className="card">
+              <div key={index} className="card" id={`equipment-service-${index}`}>
                 <div style={{
                   height: '150px',
                   backgroundColor: '#f8f9fa',
@@ -189,12 +193,12 @@ const Services = () => {
       </section>
 
       {/* Mining Services */}
-      <section className="section">
+      <section className="section" id="mining-services">
         <div className="container">
           <h2 className="section-title">Розробка родовищ</h2>
           <div className="grid grid-3">
             {miningServices.map((service, index) => (
-              <div key={index} className="card">
+              <div key={index} className="card" id={`mining-service-${index}`}>
                 <div style={{
                   height: '180px',
                   backgroundColor: '#f8f9fa',
@@ -231,7 +235,7 @@ const Services = () => {
       </section>
 
       {/* Additional Info */}
-      <section className="section gray">
+      <section className="section gray" id="additional-services">
         <div className="container">
           <div className="grid grid-2">
             <div>
@@ -269,6 +273,48 @@ const Services = () => {
           </div>
         </div>
       </section>
+
+      {/* ✅ ДІАГНОСТИЧНА ПАНЕЛЬ для розробки */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          position: 'fixed', 
+          bottom: '20px', 
+          right: '20px', 
+          background: '#008080', 
+          color: 'white', 
+          padding: '10px', 
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 1000,
+          maxWidth: '200px'
+        }}>
+          <div><strong>🔧 Services Dev Tools</strong></div>
+          <button onClick={() => {
+            const results = search('доставка', 3);
+            console.log('Пошук "доставка":', results);
+            highlight('доставка', 'service');
+          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
+            Пошук "доставка"
+          </button>
+          <button onClick={() => {
+            const results = search('буріння', 3);
+            console.log('Пошук "буріння":', results);
+            highlight('буріння', 'service');
+          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
+            Пошук "буріння"
+          </button>
+          <button onClick={() => {
+            const results = search('оренда', 3);
+            console.log('Пошук "оренда":', results);
+            highlight('оренда', 'service');
+          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
+            Пошук "оренда"
+          </button>
+          <button onClick={() => clearHighlights()} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
+            Очистити
+          </button>
+        </div>
+      )}
     </div>
   );
 };

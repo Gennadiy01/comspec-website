@@ -9,6 +9,9 @@ import './services/JSONPGoogleSheetsService.js';
 // 🆕 ДОДАНО: GitHub Pages config ініціалізація
 import { initGitHubPagesConfig } from './config/github-pages-config';
 
+// 🆕 ДОДАНО: Ініціалізація пошукової системи
+import './components/search/SearchEngineInitializer';
+
 // 🌐 Ініціалізація конфігурації для GitHub Pages
 if (window.location.hostname.includes('github.io')) {
     console.log('🐙 Виявлено GitHub Pages, ініціалізуємо config...');
