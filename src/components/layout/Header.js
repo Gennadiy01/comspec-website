@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import SearchModal from '../search/SearchModal';
-import '../../styles/search.css';
 import '../../styles/enhanced-search.css';
 import '../../styles/header-search-integration.css';
 

@@ -742,27 +742,6 @@ const EnhancedGlobalSearch = memo(({
                   LIVE
                 </span>
               )}
-              {highlighting && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    testHighlighting();
-                  }}
-                  style={{
-                    fontSize: '10px',
-                    background: 'none',
-                    border: '1px solid #007bff',
-                    color: '#007bff',
-                    padding: '2px 6px',
-                    borderRadius: '8px',
-                    marginLeft: '8px',
-                    cursor: 'pointer'
-                  }}
-                  title="Тест підсвічування"
-                >
-                  🎨
-                </button>
-              )}
             </h4>
             
             {result.content && (
@@ -964,9 +943,9 @@ const EnhancedGlobalSearch = memo(({
                 fontSize: '11px',
                 color: '#6c757d'
               }}>
-                <div>📊 Індексовано: {stats.totalRecords} записів</div>
-                <div>🔍 Статичних: {stats.staticIndex} | Динамічних: {stats.dynamicIndex}</div>
-                {highlighting && <div>🎨 Підсвічування: активне</div>}
+                <div>Індексовано: {stats.totalRecords} записів</div>
+                <div>Статичних: {stats.staticIndex} | Динамічних: {stats.dynamicIndex}</div>
+                {highlighting && <div>Підсвічування: активне</div>}
               </div>
             )}
           </div>

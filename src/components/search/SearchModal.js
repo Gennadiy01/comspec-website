@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOrderModal } from '../../context/OrderModalContext';
 import EnhancedGlobalSearch from './EnhancedGlobalSearch';
 import QuickSearch from './QuickSearch';
+import { searchDebug, searchDebugWarn } from '../../utils/searchDebugUtils.js';
 
 const SearchModal = memo(({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,22 +79,22 @@ const SearchModal = memo(({ isOpen, onClose }) => {
       const history = JSON.parse(localStorage.getItem('comspec_search_history') || '[]');
       setSearchHistory(history.slice(0, 5));
     } catch (error) {
-      console.warn('Не вдалося завантажити історію пошуку:', error);
+      searchDebugWarn('Не вдалося завантажити історію пошуку:', error);
       setSearchHistory([]);
     }
   };
 
   // ✅ ВИПРАВЛЕНО: Функція визначення цільової сторінки для конкретного результату
   const determineTargetPage = (result) => {
-    console.log('🎯 Визначення сторінки для конкретного результату:', result);
+    searchDebug('🎯 Визначення сторінки для конкретного результату:', result);
     
     // Спочатку перевіряємо явно вказані поля
     if (result.page) {
-      console.log(`✅ Використовуємо вказану сторінку: ${result.page}`);
+      searchDebug(`✅ Використовуємо вказану сторінку: ${result.page}`);
       return result.page;
     }
     if (result.url) {
-      console.log(`✅ Використовуємо вказаний URL: ${result.url}`);
+      searchDebug(`✅ Використовуємо вказаний URL: ${result.url}`);
       return result.url;
     }
     
@@ -102,25 +103,25 @@ const SearchModal = memo(({ isOpen, onClose }) => {
       switch (result.type.toLowerCase()) {
         case 'product':
         case 'product-variant':
-          console.log('📦 Результат - продукт, переходимо на /products');
+          searchDebug('📦 Результат - продукт, переходимо на /products');
           return '/products';
         case 'service':
-          console.log('🔧 Результат - послуга, переходимо на /services');
+          searchDebug('🔧 Результат - послуга, переходимо на /services');
           return '/services';
         case 'contact':
-          console.log('📞 Результат - контакт, переходимо на /contacts');
+          searchDebug('📞 Результат - контакт, переходимо на /contacts');
           return '/contacts';
         case 'company':
         case 'mission':
         case 'about':
-          console.log('ℹ️ Результат - про компанію, переходимо на /about');
+          searchDebug('ℹ️ Результат - про компанію, переходимо на /about');
           return '/about';
         case 'article':
         case 'blog':
-          console.log('📰 Результат - стаття, переходимо на /articles');
+          searchDebug('📰 Результат - стаття, переходимо на /articles');
           return '/articles';
         default:
-          console.log('🤔 Невизначений тип результату, продовжуємо аналіз');
+          searchDebug('🤔 Невизначений тип результату, продовжуємо аналіз');
           break;
       }
     }
@@ -133,16 +134,16 @@ const SearchModal = memo(({ isOpen, onClose }) => {
         case 'phone':
         case 'email':
         case 'address':
-          console.log('📱 Результат - контактна інформація, переходимо на /contacts');
+          searchDebug('📱 Результат - контактна інформація, переходимо на /contacts');
           return '/contacts';
         case 'product':
-          console.log('🏗️ Результат - продукція, переходимо на /products');
+          searchDebug('🏗️ Результат - продукція, переходимо на /products');
           return '/products';
         case 'service':
-          console.log('⚙️ Результат - послуги, переходимо на /services');
+          searchDebug('⚙️ Результат - послуги, переходимо на /services');
           return '/services';
         default:
-          console.log('🤔 Невизначений контекст результату, продовжуємо аналіз');
+          searchDebug('🤔 Невизначений контекст результату, продовжуємо аналіз');
           break;
       }
     }
@@ -153,14 +154,14 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     if (content.includes('щебінь') || content.includes('пісок') || 
         content.includes('бетон') || content.includes('асфальт') ||
         content.includes('матеріал') || content.includes('продукц')) {
-      console.log('🏗️ За змістом - продукція, переходимо на /products');
+      searchDebug('🏗️ За змістом - продукція, переходимо на /products');
       return '/products';
     }
     
     if (content.includes('доставка') || content.includes('послуг') || 
         content.includes('сервіс') || content.includes('оренда') ||
         content.includes('лабораторн') || content.includes('буріння')) {
-      console.log('🚚 За змістом - послуги, переходимо на /services');
+      searchDebug('🚚 За змістом - послуги, переходимо на /services');
       return '/services';
     }
     
@@ -168,25 +169,25 @@ const SearchModal = memo(({ isOpen, onClose }) => {
         content.includes('адреса') || content.includes('контакт') ||
         content.includes('офіс') || content.includes('зв\'язок') ||
         /\+38|044|067|050|@/.test(content)) {
-      console.log('📞 За змістом - контакти, переходимо на /contacts');
+      searchDebug('📞 За змістом - контакти, переходимо на /contacts');
       return '/contacts';
     }
     
     if (content.includes('компан') || content.includes('про нас') || 
         content.includes('історія') || content.includes('досвід') ||
         content.includes('місія')) {
-      console.log('ℹ️ За змістом - про нас, переходимо на /about');
+      searchDebug('ℹ️ За змістом - про нас, переходимо на /about');
       return '/about';
     }
     
     // Залишаємося на поточній сторінці
-    console.log('🏠 Не вдалося визначити - залишаємося на поточній сторінці');
+    searchDebug('🏠 Не вдалося визначити - залишаємося на поточній сторінці');
     return window.location.pathname;
   };
 
   // ✅ ВИПРАВЛЕНО: Функція навігації з підсвічуванням
   const navigateWithHighlighting = (targetPage, result, searchTerm) => {
-    console.log('🚀 Навігація з підсвічуванням:', { 
+    searchDebug('🚀 Навігація з підсвічуванням:', { 
       targetPage, 
       result, 
       searchTerm
@@ -203,13 +204,13 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     // Зберігаємо в sessionStorage для використання після переходу
     try {
       sessionStorage.setItem('comspec_highlight_after_navigation', JSON.stringify(highlightInfo));
-      console.log('💾 Інформація для підсвічування збережена');
+      searchDebug('💾 Інформація для підсвічування збережена');
     } catch (error) {
-      console.warn('Не вдалося зберегти інформацію для підсвічування:', error);
+      searchDebugWarn('Не вдалося зберегти інформацію для підсвічування:', error);
     }
     
     // Виконуємо навігацію
-    console.log(`🔄 Навігація на: ${targetPage}`);
+    searchDebug(`🔄 Навігація на: ${targetPage}`);
     navigate(targetPage);
     
     // Плануємо підсвічування після завантаження нової сторінки
@@ -220,7 +221,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
 
   // ✅ ВИПРАВЛЕНО: Функція відкладеного підсвічування
   const performDelayedHighlighting = (result, searchTerm) => {
-    console.log('🎨 Виконання відкладеного підсвічування:', { 
+    searchDebug('🎨 Виконання відкладеного підсвічування:', { 
       result, 
       searchTerm,
       currentPage: window.location.pathname
@@ -289,7 +290,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
             targetElement.classList.remove('comspec-search-focus');
           }, 3000);
           
-          console.log('✅ Фокус та підсвічування застосовано до елемента:', targetElement.tagName);
+          searchDebug('✅ Фокус та підсвічування застосовано до елемента:', targetElement.tagName);
           return true;
         }
         return false;
@@ -308,35 +309,35 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     for (let i = 0; i < attempts.length; i++) {
       try {
         if (attempts[i]()) {
-          console.log(`✅ Підсвічування успішне методом ${i + 1}`);
+          searchDebug(`✅ Підсвічування успішне методом ${i + 1}`);
           return true;
         }
       } catch (error) {
-        console.warn(`⚠️ Метод ${i + 1} підсвічування не спрацював:`, error);
+        searchDebugWarn(`⚠️ Метод ${i + 1} підсвічування не спрацював:`, error);
       }
     }
     
-    console.log('⚠️ Жоден метод підсвічування не спрацював');
+    searchDebug('⚠️ Жоден метод підсвічування не спрацював');
     return false;
   };
 
   // Обробка зміни пошукового запиту
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    // console.log('📝 SearchModal: зміна searchQuery з', searchQuery, 'на', value);
+    // searchDebug('📝 SearchModal: зміна searchQuery з', searchQuery, 'на', value);
     setSearchQuery(value);
   };
 
   // Обробка кліку на швидкі теги
   const handleQuickTagClick = (tagText) => {
-    // console.log('⚡ Клік на швидкий тег:', tagText);
+    // searchDebug('⚡ Клік на швидкий тег:', tagText);
     setSearchQuery(tagText);
     setSearchType('quick');
   };
 
   // Очищення пошуку
   const clearSearch = () => {
-    // console.log('🧹 SearchModal: очищення пошуку');
+    // searchDebug('🧹 SearchModal: очищення пошуку');
     setSearchQuery('');
     setSearchType('suggestions');
     searchInputRef.current?.focus();
@@ -344,7 +345,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
 
   // ✅ ГОЛОВНЕ ВИПРАВЛЕННЯ: Обробка вибору результату для конкретного результату
   const handleResultSelect = (result) => {
-    // console.log('🎯 SearchModal: обрано результат:', result);
+    // searchDebug('🎯 SearchModal: обрано результат:', result);
     
     // Зберігаємо в історію
     saveToSearchHistory(result);
@@ -353,7 +354,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     const targetPage = determineTargetPage(result);
     const currentPage = window.location.pathname;
     
-    console.log('📍 Аналіз навігації:', { 
+    searchDebug('📍 Аналіз навігації:', { 
       from: currentPage, 
       to: targetPage, 
       searchTerm: searchQuery,
@@ -362,7 +363,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     
     // Якщо потрібно перейти на іншу сторінку
     if (targetPage !== currentPage && targetPage !== '/' + currentPage.replace('/', '')) {
-      console.log('🔄 Виконуємо навігацію на нову сторінку:', targetPage);
+      searchDebug('🔄 Виконуємо навігацію на нову сторінку:', targetPage);
       
       // Закриваємо модальне вікно ПЕРЕД навігацією
       onClose();
@@ -374,7 +375,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
       
     } else {
       // Залишаємося на поточній сторінці - просто підсвічуємо
-      console.log('📍 Залишаємося на поточній сторінці, підсвічуємо елемент');
+      searchDebug('📍 Залишаємося на поточній сторінці, підсвічуємо елемент');
       
       // Спробуємо підсвітити елемент на поточній сторінці
       setTimeout(() => {
@@ -406,13 +407,13 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     try {
       localStorage.setItem('comspec_search_history', JSON.stringify(newHistory));
     } catch (error) {
-      console.warn('Помилка збереження історії:', error);
+      searchDebugWarn('Помилка збереження історії:', error);
     }
   };
 
   // Обробка кліку на історію
   const handleHistoryClick = (historyItem) => {
-    // console.log('📚 SearchModal: клік на історію:', historyItem.query);
+    // searchDebug('📚 SearchModal: клік на історію:', historyItem.query);
     setSearchQuery(historyItem.query);
     setSearchType('global');
   };
@@ -432,7 +433,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
 
   // Функція закриття глобального пошуку без негайного закриття модального вікна
   const handleGlobalSearchClose = () => {
-    // console.log('🔙 SearchModal: закриття глобального пошуку, повертаємося до підказок');
+    // searchDebug('🔙 SearchModal: закриття глобального пошуку, повертаємося до підказок');
     setSearchQuery('');
     setSearchType('suggestions');
   };

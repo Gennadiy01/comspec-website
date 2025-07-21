@@ -140,7 +140,7 @@ class SearchTestRunner {
         this.results = { total: 0, passed: 0, failed: 0, skipped: 0, duration: 0, details: [] };
         
         console.log('🚀 ПОЧАТОК ТЕСТУВАННЯ ПОШУКОВОЇ СИСТЕМИ');
-        console.log('=' .repeat(60));
+        console.log('='.repeat(60));
         
         try {
             // Виконання hooks beforeAll
@@ -359,7 +359,7 @@ class SearchTestRunner {
      */
     printSummary() {
         console.log('\n📊 ПІДСУМКИ ТЕСТУВАННЯ:');
-        console.log('=' .repeat(60));
+        console.log('='.repeat(60));
         console.log(`⏱️ Час виконання: ${Math.round(this.results.duration)}ms`);
         console.log(`📈 Всього тестів: ${this.results.total}`);
         console.log(`✅ Пройдено: ${this.results.passed}`);
@@ -618,4 +618,9 @@ if (typeof window !== 'undefined') {
     }, 1000);
 }
 
-export default SearchTestRunner;
+// Експорт для CommonJS та глобального використання
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SearchTestRunner;
+} else if (typeof window !== 'undefined') {
+    window.SearchTestRunner = SearchTestRunner;
+}

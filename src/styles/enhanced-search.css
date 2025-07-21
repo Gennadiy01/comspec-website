@@ -347,8 +347,8 @@
 
 .search-highlight {
   animation: searchHighlight 2s ease;
-  border: 2px solid var(--search-accent) !important;
-  background: var(--search-accent-light) !important;
+  border: 2px solid var(--search-accent);
+  background: var(--search-accent-light);
   border-radius: var(--search-radius-small);
 }
 
@@ -941,8 +941,8 @@
    ======================================== */
 
 /* ПРИХОВАНА НАВІГАЦІЯ З ВКЛАДОК */
-.search-tabs {
-  display: none !important;
+.search-modal-container .search-tabs {
+  display: none;
 }
 
 /* 🆕 КОНТЕНТ ПІДКАЗОК */
@@ -957,20 +957,20 @@
 }
 
 /* ПОКРАЩЕНІ ПОПУЛЯРНІ ТЕГИ БЕЗ ІКОНОК */
-.search-suggestions-content .search-suggestion-tag {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 14px 24px !important;
-  background: var(--search-bg) !important;
-  border: 2px solid var(--search-border) !important;
-  border-radius: 30px !important;
+.search-modal-container .search-suggestions-content .search-suggestion-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  background: var(--search-bg);
+  border: 2px solid var(--search-border);
+  border-radius: 30px;
   font-size: 1rem !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  color: var(--search-text) !important;
-  font-weight: 500 !important;
-  text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--search-text);
+  font-weight: 500;
+  text-decoration: none;
   box-shadow: var(--search-shadow-light) !important;
   position: relative !important;
   overflow: hidden !important;
@@ -993,35 +993,35 @@
 }
 
 .search-suggestions-content .search-suggestion-tag:hover {
-  background: var(--search-primary-light) !important;
-  border-color: var(--search-primary) !important;
-  color: var(--search-primary) !important;
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
+  color: var(--search-primary);
   transform: translateY(-3px) scale(1.02) !important;
   box-shadow: var(--search-shadow) !important;
 }
 
 .search-suggestions-content .tag-text {
-  font-weight: 600 !important;
+  font-weight: 600;
   letter-spacing: 0.5px !important;
   text-transform: uppercase !important;
   font-size: 0.9rem !important;
 }
 
 /* ПОКРАЩЕНІ ШВИДКІ ДІЇ БЕЗ ІКОНОК */
-.search-suggestions-content .quick-action-btn {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 20px 24px !important;
-  background: var(--search-bg) !important;
-  border: 2px solid var(--search-border) !important;
-  border-radius: var(--search-radius) !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
+.search-modal-container .search-suggestions-content .quick-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background: var(--search-bg);
+  border: 2px solid var(--search-border);
+  border-radius: var(--search-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
   text-align: center !important;
   min-height: 80px !important;
   box-shadow: var(--search-shadow-light) !important;
-  text-decoration: none !important;
+  text-decoration: none;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -1042,16 +1042,16 @@
 }
 
 .search-suggestions-content .quick-action-btn:hover {
-  background: var(--search-primary-light) !important;
-  border-color: var(--search-primary) !important;
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
   transform: translateY(-5px) scale(1.02) !important;
   box-shadow: var(--search-shadow) !important;
 }
 
 .search-suggestions-content .action-text {
   font-size: 1rem !important;
-  font-weight: 600 !important;
-  color: var(--search-text) !important;
+  font-weight: 600;
+  color: var(--search-text);
   line-height: 1.4 !important;
   letter-spacing: 0.3px !important;
   transition: color 0.3s ease !important;
@@ -1060,14 +1060,14 @@
 }
 
 .search-suggestions-content .quick-action-btn:hover .action-text {
-  color: var(--search-primary) !important;
+  color: var(--search-primary);
 }
 
 /* 🆕 ПОКРАЩЕНІ РОЗМІРИ ПОПУЛЯРНИХ ТЕГІВ */
-.search-suggestions-content .search-tags {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 15px !important;
+.search-modal-container .search-suggestions-content .search-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
   justify-content: center !important;
   margin-top: 10px !important;
 }
@@ -1089,10 +1089,10 @@
 .search-suggestions-content .search-suggestions h4,
 .search-suggestions-content .search-history h4,
 .search-suggestions-content .search-quick-actions h4 {
-  margin: 0 0 20px 0 !important;
-  color: var(--search-text) !important;
+  margin: 0 0 20px 0;
+  color: var(--search-text);
   font-size: 1.2rem !important;
-  font-weight: 700 !important;
+  font-weight: 700;
   text-align: center !important;
   position: relative !important;
   padding-bottom: 15px !important;
@@ -1113,16 +1113,16 @@
 }
 
 /* 🆕 ПОКРАЩЕНА ІСТОРІЯ ПОШУКУ */
-.search-suggestions-content .history-item {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  padding: 16px 20px !important;
-  background: var(--search-bg) !important;
-  border: 2px solid var(--search-border) !important;
-  border-radius: var(--search-radius) !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
+.search-modal-container .search-suggestions-content .history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--search-bg);
+  border: 2px solid var(--search-border);
+  border-radius: var(--search-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
   box-shadow: var(--search-shadow-light) !important;
   position: relative !important;
   overflow: hidden !important;
@@ -1144,52 +1144,52 @@
 }
 
 .search-suggestions-content .history-item:hover {
-  background: var(--search-primary-light) !important;
-  border-color: var(--search-primary) !important;
+  background: var(--search-primary-light);
+  border-color: var(--search-primary);
   transform: translateX(8px) scale(1.01) !important;
   box-shadow: var(--search-shadow) !important;
 }
 
 .search-suggestions-content .history-query {
-  font-weight: 700 !important;
-  color: var(--search-text) !important;
+  font-weight: 700;
+  color: var(--search-text);
   font-size: 1rem !important;
   transition: color 0.3s ease !important;
 }
 
 .search-suggestions-content .history-result {
   font-size: 0.9rem !important;
-  color: var(--search-text-light) !important;
+  color: var(--search-text-light);
   margin-top: 4px !important;
 }
 
 .search-suggestions-content .history-time {
   font-size: 0.8rem !important;
-  color: var(--search-text-light) !important;
-  font-weight: 500 !important;
+  color: var(--search-text-light);
+  font-weight: 500;
 }
 
 .search-suggestions-content .history-item:hover .history-query {
-  color: var(--search-primary) !important;
+  color: var(--search-primary);
 }
 
 /* 🆕 ПОКРАЩЕНА КНОПКА ОЧИСТИТИ ІСТОРІЮ */
 .search-suggestions-content .clear-history-btn {
-  background: var(--search-bg-light) !important;
-  border: 1px solid var(--search-border) !important;
-  color: var(--search-text-light) !important;
+  background: var(--search-bg-light);
+  border: 1px solid var(--search-border);
+  color: var(--search-text-light);
   font-size: 0.85rem !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  padding: 6px 12px !important;
-  border-radius: 20px !important;
-  font-weight: 500 !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
 .search-suggestions-content .clear-history-btn:hover {
-  background: #ff6b6b !important;
-  border-color: #ff6b6b !important;
-  color: white !important;
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+  color: white;
   transform: scale(1.05) !important;
 }
 
@@ -1197,10 +1197,10 @@
 @media (max-width: 768px) {
   .search-modal-input {
     font-size: 1rem !important;
-    padding: 12px 40px 12px 15px !important;
+    padding: 12px 40px 12px 15px;
   }
   .search-suggestions-content .search-suggestion-tag {
-    padding: 12px 16px !important;
+    padding: 12px 16px;
     font-size: 0.9rem !important;
   }
   
@@ -1210,7 +1210,7 @@
   
   .search-suggestions-content .quick-action-btn {
     min-height: 60px !important;
-    padding: 16px 20px !important;
+    padding: 16px 20px;
   }
   
   .search-suggestions-content .action-text {
@@ -1230,7 +1230,7 @@
 @media (max-width: 480px) {
   .search-modal-input {
     font-size: 0.9rem !important;
-    padding: 10px 35px 10px 12px !important;
+    padding: 10px 35px 10px 12px;
   }
   
   /* Плейсхолдер для маленьких екранів */
@@ -1239,7 +1239,7 @@
     opacity: 0.7 !important;
   }
   .search-suggestions-content .search-suggestion-tag {
-    padding: 10px 14px !important;
+    padding: 10px 14px;
     font-size: 0.85rem !important;
   }
   
@@ -1249,7 +1249,7 @@
   
   .search-suggestions-content .quick-action-btn {
     min-height: 50px !important;
-    padding: 14px 16px !important;
+    padding: 14px 16px;
   }
   
   .search-suggestions-content .search-suggestions h4,
@@ -1285,14 +1285,14 @@
 
 /* 🆕 ПІДСВІЧУВАННЯ АКТИВНОГО СТАНУ */
 .search-type-indicator.active {
-  background: linear-gradient(135deg, var(--search-primary) 0%, var(--search-accent) 100%) !important;
-  color: white !important;
-  border-left-color: var(--search-accent) !important;
+  background: linear-gradient(135deg, var(--search-primary) 0%, var(--search-accent) 100%);
+  color: white;
+  border-left-color: var(--search-accent);
   box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3) !important;
 }
 
 .search-indicator.active {
-  font-weight: 700 !important;
+  font-weight: 700;
 }
 
 /* 🆕 SCROLL СТИЛІ ДЛЯ КРАЩОГО UX */
@@ -1312,4 +1312,110 @@
 
 .search-suggestions-content::-webkit-scrollbar-thumb:hover {
   background: #006666;
+}
+
+/* ================================
+   СТИЛІ З search.css (консолідовані)
+   ================================ */
+
+/* Стилі для кнопки пошуку в хедері */
+.search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* Запобігає зменшенню */
+}
+
+.search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #008080;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.search-button:hover {
+  background-color: rgba(255, 165, 0, 0.1);
+}
+
+.search-button:hover .search-icon {
+  color: #FFA500;
+}
+
+.search-button:focus {
+  outline: 2px solid #008080;
+  outline-offset: 2px;
+}
+
+/* Альтернативні стилі для карточок результатів (з search.css) */
+.search-result-item.search-alt-style {
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.search-result-clickable.search-alt-style {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.search-result-clickable.search-alt-style:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 128, 128, 0.15);
+  border-color: #008080;
+}
+
+.search-result-clickable.search-alt-style:hover .search-result-title {
+  color: #008080;
+}
+
+.search-result-clickable.search-alt-style:hover .search-result-link {
+  color: #006666;
+  font-weight: 600;
+}
+
+/* Стилі для виділення знайденого тексту (альтернативні) */
+.search-result-item.search-alt-style mark {
+  background-color: #fff4e6;
+  color: #d69e2e;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* Адаптивність для search-button на мобільних */
+@media (max-width: 768px) {
+  .search-button {
+    margin-left: auto; /* Розташовує кнопку справа */
+  }
+
+  /* Відключаємо hover ефекти на мобільних для альтернативного стилю */
+  .search-result-clickable.search-alt-style:hover {
+    transform: none;
+  }
+  
+  .search-result-clickable.search-alt-style:active {
+    transform: scale(0.98);
+    background-color: #f7fafc;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-button {
+    margin: 0.5rem auto 0; /* Центрує кнопку на дуже малих екранах */
+    width: auto;
+    min-width: 2.5rem;
+  }
 }

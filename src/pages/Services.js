@@ -274,47 +274,6 @@ const Services = () => {
         </div>
       </section>
 
-      {/* ✅ ДІАГНОСТИЧНА ПАНЕЛЬ для розробки */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ 
-          position: 'fixed', 
-          bottom: '20px', 
-          right: '20px', 
-          background: '#008080', 
-          color: 'white', 
-          padding: '10px', 
-          borderRadius: '5px',
-          fontSize: '12px',
-          zIndex: 1000,
-          maxWidth: '200px'
-        }}>
-          <div><strong>🔧 Services Dev Tools</strong></div>
-          <button onClick={() => {
-            const results = search('доставка', 3);
-            console.log('Пошук "доставка":', results);
-            highlight('доставка', 'service');
-          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
-            Пошук "доставка"
-          </button>
-          <button onClick={() => {
-            const results = search('буріння', 3);
-            console.log('Пошук "буріння":', results);
-            highlight('буріння', 'service');
-          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
-            Пошук "буріння"
-          </button>
-          <button onClick={() => {
-            const results = search('оренда', 3);
-            console.log('Пошук "оренда":', results);
-            highlight('оренда', 'service');
-          }} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
-            Пошук "оренда"
-          </button>
-          <button onClick={() => clearHighlights()} style={{ margin: '2px', padding: '3px', fontSize: '10px' }}>
-            Очистити
-          </button>
-        </div>
-      )}
     </div>
   );
 };
