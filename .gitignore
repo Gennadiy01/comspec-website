@@ -127,7 +127,7 @@ Desktop.ini
 
 # Gatsby files
 .cache/
-public
+# public - Keep for React projects
 
 # Storybook build outputs
 .out
