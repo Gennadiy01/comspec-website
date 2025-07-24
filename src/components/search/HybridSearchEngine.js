@@ -182,6 +182,7 @@ class HybridSearchEngine {
       
       this.isInitialized = true;
       
+      // eslint-disable-next-line no-unused-vars
       const finalStats = this.getStats();
       // console.log('📊 Фінальна статистика після ініціалізації:', finalStats);
       
@@ -649,6 +650,7 @@ class HybridSearchEngine {
       results.sort((a, b) => b.relevance - a.relevance);
       
       const limitedResults = results.slice(0, limit);
+      // eslint-disable-next-line no-unused-vars
       const searchTime = performance.now() - startTime;
       
       // console.log(`📊 Знайдено результатів: ${limitedResults.length}`);

@@ -1,5 +1,5 @@
 // src/components/search/SearchModal.js - ФІНАЛЬНА ВИПРАВЛЕНА ВЕРСІЯ + React.memo оптимізація
-import React, { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrderModal } from '../../context/OrderModalContext';
 import EnhancedGlobalSearch from './EnhancedGlobalSearch';

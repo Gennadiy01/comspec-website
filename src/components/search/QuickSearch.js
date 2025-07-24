@@ -1,5 +1,5 @@
 // src/components/search/QuickSearch.js + React.memo оптимізація
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import searchEngineManager from './SearchEngineManager.js';
 
 // Використовуємо SearchEngineManager для централізованого пошуку

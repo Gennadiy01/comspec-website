@@ -6,6 +6,7 @@ const Services = () => {
   const { openOrderModal } = useOrderModal();
   
   // ✅ ПРАВИЛЬНО: Хук викликається ВСЕРЕДИНІ компонента
+  // eslint-disable-next-line no-unused-vars
   const { search, highlight, clearHighlights } = useComspecSearch();
 
   // Функція для відкриття модального вікна з консультацією

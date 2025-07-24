@@ -19,6 +19,7 @@ const EnhancedGlobalSearch = memo(({
   const [searchHistory, setSearchHistory] = useState([]);
   const [quickActions, setQuickActions] = useState([]);
   const [stats, setStats] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [debugInfo, setDebugInfo] = useState('Компонент завантажується...');
   const [isInitialized, setIsInitialized] = useState(false);
   const prevExternalQueryRef = useRef(externalSearchQuery);
@@ -204,6 +205,7 @@ const EnhancedGlobalSearch = memo(({
       });
       
       const endTime = performance.now();
+      // eslint-disable-next-line no-unused-vars
       const searchTime = endTime - startTime;
       
       // console.log(`📊 Знайдено ${rawResults.length} результатів за ${searchTime.toFixed(2)}ms`);
@@ -635,6 +637,7 @@ const EnhancedGlobalSearch = memo(({
   };
 
   // ✅ НОВА ФУНКЦІЯ: Тестування підсвічування
+  // eslint-disable-next-line no-unused-vars
   const testHighlighting = () => {
     if (!highlighting) {
       console.log('❌ Підсвічування недоступне для тестування');

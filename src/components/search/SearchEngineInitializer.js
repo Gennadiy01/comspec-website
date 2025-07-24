@@ -1,7 +1,7 @@
 // src/components/search/SearchEngineInitializer.js
 // 🚀 КОМПЛЕКСНА СИСТЕМА ІНІЦІАЛІЗАЦІЇ COMSPEC SEARCH з SearchHighlighting
 
-import { searchDebug, searchDebugWarn, searchDebugError, searchDebugGroup } from '../../utils/searchDebugUtils.js';
+import { searchDebug, searchDebugWarn, searchDebugError } from '../../utils/searchDebugUtils.js';
 
 searchDebug('🚀 Ініціалізація глобальної пошукової системи з підсвічуванням...');
 
