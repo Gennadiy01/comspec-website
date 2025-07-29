@@ -4,6 +4,7 @@ import { useOrderModal } from '../../context/OrderModalContext';
 import AddressSearch from '../forms/AddressSearch';
 import { getLoadingPointsByProduct } from '../../data/loadingPoints';
 import jsonpService from '../../services/JSONPGoogleSheetsService';
+import telegramService from '../../services/TelegramService';
 import ValidationUtils from '../../utils/validation';
 import '../../styles/order-modal.css';
 
@@ -400,6 +401,46 @@ const handleNameInput = (e) => {
           source: source,
           data: result.data
         });
+
+        // 🆕 ЕТАП 2: Відправка в Telegram після успішного збереження
+        try {
+          console.log('🔍 DEBUG: Перевірка Telegram сервісу...');
+          console.log('🔍 DEBUG: telegramService:', telegramService);
+          console.log('🔍 DEBUG: telegramService.isEnabled:', typeof telegramService.isEnabled);
+          
+          if (telegramService && typeof telegramService.isEnabled === 'function' && telegramService.isEnabled()) {
+            console.log('📤 Відправляємо замовлення в Telegram...');
+            
+            const telegramData = {
+              orderId: result.orderId,
+              manager: result.manager,
+              orderData: orderDataForSheets, // Використовуємо підготовлені дані замість result.data
+              isConsultation: isConsultationMode,
+              managerTelegramChatId: result.managerTelegramChatId
+            };
+            
+            console.log('🔍 DEBUG: Telegram дані:', telegramData);
+            
+            const telegramResult = await telegramService.sendOrderNotification(telegramData);
+            
+            if (telegramResult && telegramResult.success) {
+              console.log('✅ Telegram повідомлення відправлено:', telegramResult);
+            } else {
+              console.warn('⚠️ Помилка Telegram (замовлення збережено):', telegramResult?.message || 'Невідома помилка');
+            }
+          } else {
+            console.log('ℹ️ Telegram сервіс вимкнений або не налаштований');
+            console.log('🔍 DEBUG: telegramService enabled:', telegramService?.isEnabled?.());
+          }
+        } catch (telegramError) {
+          console.error('❌ КРИТИЧНА ПОМИЛКА Telegram:', {
+            error: telegramError,
+            message: telegramError?.message,
+            stack: telegramError?.stack,
+            name: telegramError?.name
+          });
+          // НЕ блокуємо основний процес - Telegram це додаткова функція
+        }
 
         // Автоматичне закриття через 5 секунд (збільшено для читання результату)
         setTimeout(() => {

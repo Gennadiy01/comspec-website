@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Telegram Debug Test</title>
+</head>
+<body>
+    <h1>🧪 ТЕСТ TELEGRAM ІНТЕГРАЦІЇ</h1>
+    <div id="results"></div>
+    
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3XE8u5O2Q9ez4OpKcyPB6TtrGp0ul6hPJsud4Dethj0fA2ixU7t4XCwJefl4EIgAd/exec';
+        
+        async function testGoogleScript() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>⏳ Тестування...</p>';
+            
+            try {
+                // Тест 1: Перевірка Telegram функцій
+                console.log('🧪 Тест 1: Перевірка Telegram функцій');
+                
+                const telegramTestUrl = `${GOOGLE_SCRIPT_URL}?action=testTelegram`;
+                const telegramResponse = await fetch(telegramTestUrl);
+                const telegramData = await telegramResponse.json();
+                
+                console.log('📋 Telegram test result:', telegramData);
+                
+                let html = '<h2>🧪 РЕЗУЛЬТАТИ ТЕСТУВАННЯ</h2>';
+                html += '<h3>📱 Тест Telegram функцій:</h3>';
+                html += `<pre>${JSON.stringify(telegramData, null, 2)}</pre>`;
+                
+                // Тест 2: Реальне замовлення
+                console.log('🧪 Тест 2: Реальне замовлення');
+                
+                const orderData = {
+                    action: 'saveOrder',
+                    name: 'Тест Browser Debug',
+                    phone: '+380123456789',
+                    email: 'test-browser@comspec.ua',
+                    product: 'Щебінь',
+                    deliveryType: 'delivery',
+                    address: 'м. Київ, вул. Браузер, 1',
+                    message: 'Тест через браузер - перевірка managerTelegramChatId',
+                    source: 'browser-debug-test',
+                    mode: 'order'
+                };
+                
+                const orderUrl = `${GOOGLE_SCRIPT_URL}?` + new URLSearchParams(orderData).toString();
+                const orderResponse = await fetch(orderUrl);
+                const orderResult = await orderResponse.json();
+                
+                console.log('📋 Order result:', orderResult);
+                
+                html += '<h3>📦 Тест замовлення:</h3>';
+                html += `<pre>${JSON.stringify(orderResult, null, 2)}</pre>`;
+                
+                // Аналіз
+                html += '<h3>🔍 АНАЛІЗ:</h3>';
+                
+                if (orderResult.managerTelegramChatId) {
+                    html += `<p style="color: green;">✅ managerTelegramChatId знайдено: ${orderResult.managerTelegramChatId}</p>`;
+                    html += '<p style="color: green;">✅ Telegram повинен працювати!</p>';
+                } else {
+                    html += '<p style="color: red;">❌ managerTelegramChatId ВІДСУТНІЙ!</p>';
+                    html += '<p style="color: red;">❌ Це пояснює чому Telegram не працює</p>';
+                }
+                
+                html += `<p><strong>Менеджер:</strong> ${orderResult.manager}</p>`;
+                html += `<p><strong>Order ID:</strong> ${orderResult.orderId}</p>`;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ Помилка:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Помилка: ${error.message}</p>`;
+            }
+        }
+        
+        // Автоматичний запуск при завантаженні
+        window.onload = testGoogleScript;
+    </script>
+</body>
+</html>
