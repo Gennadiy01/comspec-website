@@ -9,9 +9,9 @@ const { AbortController } = require('abort-controller');
 global.fetch = fetch;
 global.AbortController = AbortController;
 
-// Імітуємо config
+// Імітуємо config (МОКОВАНИЙ)
 const config = {
-  TELEGRAM_BOT_TOKEN: '8472229536:AAEquKfaV_nIa5opQAbb6Io2RSm3HRRFgO4',
+  TELEGRAM_BOT_TOKEN: 'MOCK_BOT_TOKEN_FOR_UNIT_TESTS',
   TELEGRAM_CHAT_ID: null,
   TELEGRAM_ENABLED: true,
   TELEGRAM_API_URL: 'https://api.telegram.org/bot',

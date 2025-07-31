@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Живий тест замовлення з Email</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🧪 Живий тест Email сповіщень</h1>
+        
+        <div class="info">
+            <strong>📧 Email буде відправлено на:</strong><br>
+            • sale3.maxigran@gmail.com<br>
+            • gennadiy.d@ukr.ua<br>
+            • maxigran.td@gmail.com<br><br>
+            <strong>📱 Telegram:</strong> Геннадій отримає повідомлення
+        </div>
+
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="name">Ім'я *</label>
+                <input type="text" id="name" name="name" required 
+                       value="Тест Користувач Email" placeholder="Введіть ваше ім'я">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Телефон *</label>
+                <input type="tel" id="phone" name="phone" required 
+                       value="+380999888777" placeholder="+380671234567">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" 
+                       value="test.email@comspec.ua" placeholder="your@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="product">Товар *</label>
+                <select id="product" name="product" required>
+                    <option value="">Оберіть товар</option>
+                    <option value="Щебінь" selected>Щебінь</option>
+                    <option value="Пісок">Пісок</option>
+                    <option value="Асфальт">Асфальт</option>
+                    <option value="Бетон">Бетон</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deliveryType">Тип доставки</label>
+                <select id="deliveryType" name="deliveryType">
+                    <option value="delivery" selected>Доставка</option>
+                    <option value="pickup">Самовивіз</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Адреса доставки</label>
+                <input type="text" id="address" name="address" 
+                       value="м. Київ, вул. Тестова, 1" placeholder="Введіть адресу">
+            </div>
+
+            <div class="form-group">
+                <label for="message">Коментар</label>
+                <textarea id="message" name="message" rows="3" 
+                          placeholder="Додаткові побажання...">🧪 LIVE TEST: Тестування email сповіщень керівникам через веб-форму</textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                📧 Відправити тестове замовлення
+            </button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // URL Google Apps Script
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpeWfinzQLOkuKFKlwjLt-cb9c8TTXt4WGq9tFrtYkaZ4Xc5H68-NND-AwTsW9DDDp/exec';
+        
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            // Показуємо індикатор завантаження
+            submitBtn.textContent = '⏳ Відправляємо...';
+            submitBtn.disabled = true;
+            result.style.display = 'none';
+            
+            try {
+                // Збираємо дані форми
+                const formData = new FormData(this);
+                const params = new URLSearchParams();
+                
+                // Додаємо параметри
+                params.append('action', 'saveOrder');
+                params.append('source', 'live-email-test');
+                params.append('mode', 'order');
+                
+                for (const [key, value] of formData.entries()) {
+                    params.append(key, value);
+                }
+                
+                console.log('📡 Відправляємо запит:', GOOGLE_SCRIPT_URL);
+                console.log('📋 Параметри:', params.toString());
+                
+                // Відправляємо запит
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
+                    method: 'GET',
+                    mode: 'no-cors' // Для cross-origin запитів
+                });
+                
+                // Оскільки використовуємо no-cors, не можемо читати відповідь
+                // Показуємо повідомлення про успіх
+                result.className = 'result success';
+                result.innerHTML = `
+                    <h3>✅ Замовлення відправлено!</h3>
+                    <p><strong>📧 Перевірте email скриньки:</strong></p>
+                    <ul>
+                        <li>sale3.maxigran@gmail.com</li>
+                        <li>gennadiy.d@ukr.ua</li>
+                        <li>maxigran.td@gmail.com</li>
+                    </ul>
+                    <p><strong>📱 Telegram:</strong> Геннадій повинен отримати повідомлення</p>
+                    <p><strong>📊 Google Sheets:</strong> Замовлення збережено в таблиці</p>
+                    <p><em>⏰ Зачекайте 1-2 хвилини для доставки email</em></p>
+                `;
+                result.style.display = 'block';
+                
+            } catch (error) {
+                console.error('❌ Помилка:', error);
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Помилка відправки</h3>
+                    <p>Деталі: ${error.message}</p>
+                    <p>Спробуйте ще раз або перевірте консоль браузера</p>
+                `;
+                result.style.display = 'block';
+            } finally {
+                // Відновлюємо кнопку
+                submitBtn.textContent = '📧 Відправити тестове замовлення';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

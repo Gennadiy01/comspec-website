@@ -388,7 +388,7 @@ class TelegramService {
     
     // Контактна інформація
     message += `Клієнт: ${data.name || 'Не вказано'}\n`;
-    message += `Телефон: ${data.phone || 'Не вказано'}\n`;
+    message += `📞 Телефон: ${data.phone || 'Не вказано'}\n`;
     
     if (data.email) {
       message += `Email: ${data.email}\n`;

@@ -5,9 +5,9 @@
 
 const https = require('https');
 
-// Конфігурація
-const BOT_TOKEN = '8472229536:AAEquKfaV_nIa5opQAbb6Io2RSm3HRRFgO4';
-const GENNADIY_CHAT_ID = '1559533342';
+// Конфігурація (МОКОВАНА)
+const BOT_TOKEN = 'MOCK_BOT_TOKEN_FOR_UNIT_TESTS';
+const GENNADIY_CHAT_ID = 'MOCK_CHAT_ID_FOR_UNIT_TESTS';
 const API_URL = 'https://api.telegram.org/bot';
 
 /**

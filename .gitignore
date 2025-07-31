@@ -28,6 +28,13 @@ yarn.lock
 .env.production
 
 # Google Service Account & API credentials
+
+# ===============================================
+# SECURITY BACKUPS (CONTAINS REAL API KEYS!)
+# ===============================================
+security-backup/
+*backup*/
+*.backup
 *.json
 credentials/
 keys/
@@ -156,6 +163,9 @@ coverage/
 # Cypress
 cypress/videos/
 cypress/screenshots/
+
+# Integration tests with real API keys and tokens
+tests/integration-manual/
 
 # ===============================================
 # MISC DEVELOPMENT FILES

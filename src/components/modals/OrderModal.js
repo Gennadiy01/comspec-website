@@ -406,9 +406,9 @@ const handleNameInput = (e) => {
         try {
           console.log('🔍 DEBUG: Перевірка Telegram сервісу...');
           console.log('🔍 DEBUG: telegramService:', telegramService);
-          console.log('🔍 DEBUG: telegramService.isEnabled:', typeof telegramService.isEnabled);
+          console.log('🔍 DEBUG: telegramService methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(telegramService)));
           
-          if (telegramService && typeof telegramService.isEnabled === 'function' && telegramService.isEnabled()) {
+          if (telegramService && telegramService.isEnabled && telegramService.isEnabled()) {
             console.log('📤 Відправляємо замовлення в Telegram...');
             
             const telegramData = {
@@ -430,7 +430,11 @@ const handleNameInput = (e) => {
             }
           } else {
             console.log('ℹ️ Telegram сервіс вимкнений або не налаштований');
-            console.log('🔍 DEBUG: telegramService enabled:', telegramService?.isEnabled?.());
+            console.log('🔍 DEBUG: telegramService enabled check:', {
+              hasService: !!telegramService,
+              hasMethod: !!(telegramService && telegramService.isEnabled),
+              isEnabled: telegramService ? telegramService.isEnabled() : 'No service'
+            });
           }
         } catch (telegramError) {
           console.error('❌ КРИТИЧНА ПОМИЛКА Telegram:', {
@@ -652,20 +656,6 @@ const handleNameInput = (e) => {
                         </option>
                       ))}
                     </select>
-                    
-                    {/* ✅ ВІДЛАДОЧНА ІНФОРМАЦІЯ (можна видалити після тестування) */}
-                    {orderData?.product && (
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: '#6c757d',
-                        marginTop: '4px',
-                        padding: '4px 8px',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '4px'
-                      }}>
-                        Debug: {orderData.product} → {categoryMapping[orderData.product] || orderData.product}
-                      </div>
-                    )}
                   </div>
 
                   {/* Тип отримання */}
