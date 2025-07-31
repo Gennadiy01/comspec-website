@@ -112,9 +112,9 @@ const configs = {
   },
   
   github: {
-    // ✅ Використовує ті самі назви що і в .env.local
+    // ✅ Використовує ті самі назви що і в .env.local - ОНОВЛЕНО 31.07.2025
     MAPS_API_KEY: 'AIzaSyBge_xIIrIbmc9Y7hPG5Fqkgkd5H4y5EUI',
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz3XE8u5O2Q9ez4OpKcyPB6TtrGp0ul6hPJsud4Dethj0fA2ixU7t4XCwJefl4EIgAd/exec',
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxpeWfinzQLOkuKFKlwjLt-cb9c8TTXt4WGq9tFrtYkaZ4Xc5H68-NND-AwTsW9DDDp/exec',
     SHEETS_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
     SHEETS_API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU',
     
@@ -137,9 +137,9 @@ const configs = {
       "Геннадій Дикий": "1559533342"
     },
     
-    // Стандартні назви для існуючих файлів
+    // Стандартні назви для існуючих файлів - ОНОВЛЕНО 31.07.2025
     GOOGLE_MAPS_API_KEY: 'AIzaSyBge_xIIrIbmc9Y7hPG5Fqkgkd5H4y5EUI',
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz3XE8u5O2Q9ez4OpKcyPB6TtrGp0ul6hPJsud4Dethj0fA2ixU7t4XCwJefl4EIgAd/exec',
+    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxpeWfinzQLOkuKFKlwjLt-cb9c8TTXt4WGq9tFrtYkaZ4Xc5H68-NND-AwTsW9DDDp/exec',
     GOOGLE_SHEETS_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
     GOOGLE_SHEETS_API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU'
   },
