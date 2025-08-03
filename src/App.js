@@ -2,6 +2,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { OrderModalProvider } from './context/OrderModalContext';
+import SimpleErrorBoundary from './components/SimpleErrorBoundary';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import OrderModal from './components/modals/OrderModal';
@@ -18,32 +19,58 @@ import './styles/main.scss';
 
 function App() {
   return (
-    <OrderModalProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="App">
-          <Header />
-                    
-          <main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/articles" element={<Articles />} />
-              <Route path="/retail-locations" element={<RetailLocations />} />
-              <Route path="/certificates/:category" element={<Certificates />} />
-            </Routes>
-          </main>
-          
-          <Footer />
-          
-          {/* Глобальне модальне вікно замовлення */}
-          <OrderModal />
-        </div>
-      </Router>
-    </OrderModalProvider>
+    <SimpleErrorBoundary>
+      <OrderModalProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="App">
+            <SimpleErrorBoundary>
+              <Header />
+            </SimpleErrorBoundary>
+                      
+            <main>
+              <Routes>
+                <Route path="/" element={
+                  <SimpleErrorBoundary>
+                    <Home />
+                  </SimpleErrorBoundary>
+                } />
+                <Route path="/products" element={
+                  <SimpleErrorBoundary><Products /></SimpleErrorBoundary>
+                } />
+                <Route path="/services" element={
+                  <SimpleErrorBoundary><Services /></SimpleErrorBoundary>
+                } />
+                <Route path="/about" element={
+                  <SimpleErrorBoundary><About /></SimpleErrorBoundary>
+                } />
+                <Route path="/contacts" element={
+                  <SimpleErrorBoundary><Contacts /></SimpleErrorBoundary>
+                } />
+                <Route path="/articles" element={
+                  <SimpleErrorBoundary><Articles /></SimpleErrorBoundary>
+                } />
+                <Route path="/retail-locations" element={
+                  <SimpleErrorBoundary><RetailLocations /></SimpleErrorBoundary>
+                } />
+                <Route path="/certificates/:category" element={
+                  <SimpleErrorBoundary><Certificates /></SimpleErrorBoundary>
+                } />
+              </Routes>
+            </main>
+            
+            <SimpleErrorBoundary>
+              <Footer />
+            </SimpleErrorBoundary>
+            
+            {/* Глобальне модальне вікно замовлення */}
+            <SimpleErrorBoundary>
+              <OrderModal />
+            </SimpleErrorBoundary>
+          </div>
+        </Router>
+      </OrderModalProvider>
+    </SimpleErrorBoundary>
   );
 }
 
