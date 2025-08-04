@@ -1,6 +1,6 @@
 {
   "name": "comspec-website",
-  "homepage": "https://gennadiy01.github.io/comspec-website",
+  "homepage": "./",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
