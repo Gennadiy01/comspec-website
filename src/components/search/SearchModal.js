@@ -1,7 +1,8 @@
-// src/components/search/SearchModal.js - ФІНАЛЬНА ВИПРАВЛЕНА ВЕРСІЯ + React.memo оптимізація
+// src/components/search/SearchModal.js - ФІНАЛЬНА ВИПРАВЛЕНА ВЕРСІЯ + React.memo оптимізація + debounce оптимізація
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrderModal } from '../../context/OrderModalContext';
+import { useDebounce } from '../../hooks/useDebounce';
 import EnhancedGlobalSearch from './EnhancedGlobalSearch';
 import QuickSearch from './QuickSearch';
 import { searchDebug, searchDebugWarn } from '../../utils/searchDebugUtils.js';
@@ -11,6 +12,9 @@ const SearchModal = memo(({ isOpen, onClose }) => {
   const [searchType, setSearchType] = useState('suggestions');
   const [searchHistory, setSearchHistory] = useState([]);
   const [placeholder, setPlaceholder] = useState('Введіть ваш запит або оберіть з підказок...');
+  
+  // Debounce пошукового запиту для оптимізації продуктивності
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
   const searchInputRef = useRef();
   const modalRef = useRef();
@@ -64,14 +68,14 @@ const SearchModal = memo(({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Автоматичний вибір типу пошуку
+  // Автоматичний вибір типу пошуку (використовуємо debounced значення)
   useEffect(() => {
-    if (!searchQuery || searchQuery.trim().length === 0) {
+    if (!debouncedSearchQuery || debouncedSearchQuery.trim().length === 0) {
       setSearchType('suggestions');
-    } else if (searchQuery.trim().length >= 2) {
+    } else if (debouncedSearchQuery.trim().length >= 2) {
       setSearchType('global');
     }
-  }, [searchQuery]);
+  }, [debouncedSearchQuery]);
 
   // Завантаження історії пошуку
   const loadSearchHistory = () => {
@@ -550,7 +554,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
               onChange={handleSearchChange}
               className="search-modal-input"
             />
-            {searchQuery && (
+            {debouncedSearchQuery && (
               <button className="search-clear-btn" onClick={clearSearch}>
                 ×
               </button>
@@ -634,7 +638,7 @@ const SearchModal = memo(({ isOpen, onClose }) => {
           {searchType === 'quick' && (
             <div className="search-quick-content">
               <QuickSearch 
-                searchQuery={searchQuery}
+                searchQuery={debouncedSearchQuery}
                 onResultSelect={handleResultSelect}
                 onSearchChange={setSearchQuery}
               />
