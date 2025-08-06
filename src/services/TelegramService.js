@@ -363,6 +363,86 @@ class TelegramService {
   }
 
   /**
+   * Відправка повідомлення про зворотний зв'язок
+   */
+  async sendFeedbackNotification(feedbackData) {
+    console.log('[TelegramService] 📋 Відправка повідомлення зворотного зв\'язку:', feedbackData);
+    
+    if (!this.isEnabled()) {
+      console.warn('[TelegramService] ⚠️ Telegram вимкнений, пропускаємо відправку');
+      return {
+        success: false,
+        message: 'Telegram сервіс вимкнений'
+      };
+    }
+    
+    try {
+      // Форматування повідомлення
+      const message = this.formatFeedbackMessage(feedbackData);
+      
+      let results = [];
+      
+      if (feedbackData.manager && feedbackData.managerTelegramChatId) {
+        console.log(`[TelegramService] 👨‍💼 Відправляємо менеджеру: ${feedbackData.manager}`);
+        console.log(`[TelegramService] 📱 Chat ID: ${feedbackData.managerTelegramChatId}`);
+        
+        try {
+          const personalResult = await this.sendMessage(message, feedbackData.managerTelegramChatId);
+          results.push({
+            target: 'personal',
+            manager: feedbackData.manager,
+            chatId: feedbackData.managerTelegramChatId,
+            ...personalResult
+          });
+          console.log(`[TelegramService] ✅ Персональне повідомлення відправлено ${feedbackData.manager} (${feedbackData.managerTelegramChatId})`);
+        } catch (error) {
+          console.error(`[TelegramService] ❌ Помилка відправки персонального повідомлення: ${error.message}`);
+          results.push({
+            target: 'personal',
+            manager: feedbackData.manager,
+            error: error.message
+          });
+        }
+      }
+      
+      return {
+        success: results.some(r => r.success),
+        results: results,
+        message: results.some(r => r.success) ? 
+          'Повідомлення відправлено: personal' : 
+          'Помилки відправки повідомлень'
+      };
+      
+    } catch (error) {
+      console.error('[TelegramService] ❌ Загальна помилка відправки повідомлення:', error);
+      return {
+        success: false,
+        error: error.message,
+        message: 'Загальна помилка відправки в Telegram'
+      };
+    }
+  }
+
+  /**
+   * Форматування повідомлення про зворотний зв'язок
+   */
+  formatFeedbackMessage(feedbackData) {
+    const { feedbackData: data } = feedbackData;
+    
+    return `НОВЕ ПОВІДОМЛЕННЯ ЗВОРОТНОГО ЗВ'ЯЗКУ
+
+Ім'я: ${data.name}
+Телефон: ${data.phone}
+Email: ${data.email || 'Не вказано'}
+
+Повідомлення:
+${data.message}
+
+Час: ${new Date().toLocaleString('uk-UA')}
+Джерело: Форма зворотного зв'язку`;
+  }
+
+  /**
    * ✅ ЕТАП 2: Форматування повідомлення про замовлення
    */
   formatOrderMessage(orderData) {

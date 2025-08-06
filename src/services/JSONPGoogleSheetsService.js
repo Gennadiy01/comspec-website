@@ -78,11 +78,90 @@ class JSONPGoogleSheetsService {
   }
 
   /**
+   * Відправка повідомлення зворотного зв'язку через JSONP
+   * @param {Object} feedbackData - Дані повідомлення {name, phone, email, message}
+   * @param {string} source - Джерело повідомлення
+   * @returns {Promise<Object>} - Результат операції
+   */
+  saveFeedback(feedbackData, source = 'contact-form') {
+    return new Promise((resolve, reject) => {
+      const callbackName = this.generateCallbackName();
+      
+      if (config.DEBUG_MODE) {
+        console.log('🔧 Створюємо callback для feedback:', callbackName);
+      }
+      
+      // Створюємо глобальну callback функцію
+      window[callbackName] = (response) => {
+        console.log('📦 Відповідь від Google Apps Script (feedback):', response);
+        delete window[callbackName];
+        
+        if (response && response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response?.error || 'Невідома помилка при відправці повідомлення'));
+        }
+      };
+      
+      // Підготовка параметрів для feedback
+      const params = {
+        action: 'saveFeedback',
+        name: feedbackData.name || '',
+        phone: feedbackData.phone || '',
+        email: feedbackData.email || '',
+        message: feedbackData.message || '',
+        source: `${source}-${config.ENVIRONMENT}`,
+        mode: 'feedback',
+        callback: callbackName
+      };
+      
+      // Логування для діагностики
+      if (config.DEBUG_MODE) {
+        console.log('🎯 Параметри для відправки (feedback):', params);
+      }
+      
+      // Створюємо URL з параметрами
+      const urlParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          urlParams.append(key, params[key]);
+        }
+      });
+      
+      const finalUrl = `${this.scriptUrl}?${urlParams.toString()}`;
+      
+      if (config.DEBUG_MODE) {
+        console.log('🌐 Фінальний URL (feedback):', finalUrl);
+      }
+      
+      // Створюємо script елемент для JSONP запиту
+      const script = document.createElement('script');
+      script.src = finalUrl;
+      script.onload = () => document.body.removeChild(script);
+      script.onerror = () => {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        reject(new Error('Помилка мережі при відправці повідомлення'));
+      };
+      
+      console.log('📤 Відправляємо JSONP запит (feedback):', finalUrl);
+      console.log('🔗 Callback функція готова:', typeof window[callbackName]);
+      
+      document.body.appendChild(script);
+    });
+  }
+
+  /**
    * ⭐ СТАБІЛЬНА функція збереження замовлення через JSONP
    */
   saveOrder(orderData, isConsultationMode = false, source = 'Website') {
     return new Promise((resolve, reject) => {
       const callbackName = this.generateCallbackName();
+      
+      // ✅ ВИПРАВЛЕННЯ ДЛЯ EDGE: створюємо callback раніше
+      if (config.DEBUG_MODE) {
+        console.log('🔧 Створюємо callback:', callbackName);
+      }
       
       // Створюємо глобальну callback функцію
       window[callbackName] = (response) => {
@@ -102,6 +181,21 @@ class JSONPGoogleSheetsService {
         }
       };
       
+      // 🔧 PRODUCTION FIX: Спеціальна обробка для самовивозу (ЗАВЖДИ, не тільки для Edge)
+      let addressValue = '';
+      let regionValue = '';
+      
+      if (orderData.deliveryType === 'pickup') {
+        // Для самовивозу гарантовано очищаємо адресу
+        addressValue = '';
+        regionValue = '';
+        console.log('🔧 Production Fix: Примусово очищено адресу для самовивозу в JSONP сервісі');
+      } else {
+        // Для доставки використовуємо звичайну логіку
+        addressValue = orderData.address || orderData.deliveryAddress || '';
+        regionValue = orderData.region || '';
+      }
+      
       // Підготовка параметрів
       const params = {
         action: 'saveOrder',
@@ -110,8 +204,8 @@ class JSONPGoogleSheetsService {
         email: orderData.email || '',
         product: orderData.product || '',
         deliveryType: orderData.deliveryType || '',
-        address: orderData.address || orderData.deliveryAddress || '',
-        region: orderData.region || '',
+        address: addressValue,
+        region: regionValue,
         message: orderData.message || '',
         source: `${source}-${config.ENVIRONMENT}`,
         mode: isConsultationMode ? 'consultation' : 'order',
@@ -139,28 +233,53 @@ class JSONPGoogleSheetsService {
         console.log('🌐 Фінальний URL:', finalUrl);
       }
       
+      // ✅ ВИПРАВЛЕННЯ ДЛЯ EDGE: переконуємось що callback існує
+      if (!window[callbackName]) {
+        console.error('❌ Callback функція не створена:', callbackName);
+        reject(new Error('Помилка створення callback функції'));
+        return;
+      }
+      
       // Створюємо і виконуємо JSONP запит
       const script = document.createElement('script');
       script.src = finalUrl;
       script.onerror = () => {
+        console.error('❌ Помилка завантаження JSONP script:', finalUrl);
         setTimeout(() => {
-          delete window[callbackName];
+          if (window[callbackName]) {
+            delete window[callbackName];
+          }
         }, 500);
         reject(new Error('Помилка відправки даних'));
       };
       
+      // ✅ ДОДАНО: логування для Edge
+      if (config.DEBUG_MODE) {
+        console.log('📤 Відправляємо JSONP запит:', finalUrl);
+        console.log('🔗 Callback функція готова:', typeof window[callbackName]);
+      }
+      
       document.head.appendChild(script);
       
-      // ✅ ЗБІЛЬШЕНИЙ ТАЙМАУТ до 20 секунд + покращений cleanup
-      setTimeout(() => {
+      // ✅ ЗБІЛЬШЕНИЙ ТАЙМАУТ до 30 секунд для Edge
+      const timeoutId = setTimeout(() => {
+        console.warn('⏰ Таймаут JSONP запиту через 30 секунд');
         if (document.head.contains(script)) {
           document.head.removeChild(script);
         }
         if (window[callbackName]) {
+          console.error('❌ Callback існує при таймауті:', callbackName);
           delete window[callbackName];
           reject(new Error('Таймаут відправки'));
         }
-      }, 20000); // Було 10000, стало 20000
+      }, 30000); // Збільшено до 30 секунд для Edge
+      
+      // ✅ ДОДАНО: очищення timeoutId при успішному callback
+      const originalCallback = window[callbackName];
+      window[callbackName] = (response) => {
+        clearTimeout(timeoutId);
+        originalCallback(response);
+      };
     });
   }
 
