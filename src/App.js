@@ -15,6 +15,12 @@ import Articles from './pages/Articles';
 import RetailLocations from './pages/RetailLocations';
 import Certificates from './pages/Certificates';
 import ScrollToTop from './components/ScrollToTop';
+
+// 🔧 PRODUCTION OPTIMIZATION: Тестові інструменти завантажуються умовно  
+// Імпортуємо напряму - логіка контролю всередині файлів
+import './utils/testingTools';
+import './utils/limitChecker';
+
 import './styles/main.scss';
 
 function App() {

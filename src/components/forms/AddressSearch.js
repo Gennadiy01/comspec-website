@@ -23,6 +23,7 @@ const AddressSearch = ({
 
   const inputRef = useRef(null);
   const geocoder = useRef(null);
+  const autocompleteService = useRef(null);
   const dropdownRef = useRef(null);
   const loaderRef = useRef(null);
   const googleRef = useRef(null);
@@ -88,6 +89,7 @@ const AddressSearch = ({
           try {
             googleRef.current = google;
             geocoder.current = new google.maps.Geocoder();
+            autocompleteService.current = new google.maps.places.AutocompleteService();
             setIsLoaded(true);
             console.log('✅ Google Maps API ініціалізовано');
             
@@ -115,9 +117,9 @@ const AddressSearch = ({
     };
   }, []); // ЗМІНА: видалено config з dependencies, оскільки він статичний
 
-  // Пошук адрес
+  // Пошук адрес через Geocoder (ТИМЧАСОВО - до налаштування Places API)
   useEffect(() => {
-    if (!value || value.length < 3 || !isLoaded || !googleRef.current || value === lastValidatedValue) {
+    if (!value || value.length < 3 || !isLoaded || !geocoder.current || value === lastValidatedValue) {
       if (value === lastValidatedValue && isDropdownOpen) {
         setIsDropdownOpen(false);
         setPredictions([]);
@@ -131,15 +133,29 @@ const AddressSearch = ({
 
     const searchTimeout = setTimeout(async () => {
       try {
+        // ТИМЧАСОВЕ РІШЕННЯ: використовуємо Geocoder для пошуку міст
         const request = {
-          address: value,
+          address: value + ', Україна',
           region: 'ua',
           language: 'uk'
         };
 
         geocoder.current.geocode(request, (results, status) => {
+          if (config.DEBUG_MODE) {
+            console.log('🔍 Geocoder результат:', { results, status, input: value });
+          }
+          
           if (status === 'OK' && results && results.length > 0) {
-            const formattedPredictions = results.slice(0, 5).map(result => ({
+            // Фільтруємо тільки населені пункти
+            const cityResults = results.filter(result => {
+              const types = result.types || [];
+              return types.includes('locality') || 
+                     types.includes('sublocality') || 
+                     types.includes('administrative_area_level_1') ||
+                     types.includes('administrative_area_level_2');
+            });
+            
+            const formattedPredictions = cityResults.slice(0, 5).map(result => ({
               place_id: result.place_id,
               description: result.formatted_address,
               structured_formatting: {
@@ -149,9 +165,9 @@ const AddressSearch = ({
             }));
             
             setPredictions(formattedPredictions);
-            setIsDropdownOpen(true);
+            setIsDropdownOpen(formattedPredictions.length > 0);
           } else {
-            console.warn('geocode: немає результатів або помилка', status);
+            console.warn('geocoder: немає результатів або помилка', status);
             setPredictions([]);
             setIsDropdownOpen(false);
           }
@@ -346,6 +362,17 @@ const AddressSearch = ({
   const handleInputChange = (newValue) => {
     onChange(newValue);
     
+    // 🔧 EDGE BROWSER FIX: Примусове очищення при порожньому значенні
+    if (!newValue || newValue === '') {
+      console.log('🔧 Edge Fix: Очищаємо стан AddressSearch');
+      setValidationResult(null);
+      setLastValidatedValue('');
+      setIsDropdownOpen(false);
+      setPredictions([]);
+      setSelectedIndex(-1);
+      return;
+    }
+    
     if (newValue !== lastValidatedValue && validationResult) {
       setValidationResult(null);
       setLastValidatedValue('');
@@ -417,6 +444,18 @@ const AddressSearch = ({
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isDropdownOpen]);
+
+  // 🔧 EDGE BROWSER FIX: Реагуємо на зміну value prop ззовні
+  useEffect(() => {
+    if (!value || value === '') {
+      console.log('🔧 Edge Fix: Value очищено ззовні, скидаємо стан');
+      setValidationResult(null);
+      setLastValidatedValue('');
+      setIsDropdownOpen(false);
+      setPredictions([]);
+      setSelectedIndex(-1);
+    }
+  }, [value]);
 
   if (loadError) {
     return (

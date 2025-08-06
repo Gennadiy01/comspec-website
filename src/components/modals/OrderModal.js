@@ -6,6 +6,7 @@ import { getLoadingPointsByProduct } from '../../data/loadingPoints';
 import jsonpService from '../../services/JSONPGoogleSheetsService';
 import telegramService from '../../services/TelegramService';
 import ValidationUtils from '../../utils/validation';
+import { isEdgeBrowser, areEdgeFixesEnabled } from '../../utils/browserDetection';
 import '../../styles/order-modal.css';
 
 // Дані продукції з контексту проекту COMSPEC
@@ -193,6 +194,34 @@ const OrderModal = () => {
   // Обробка зміни полів форми
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // 🔧 PRODUCTION FIX: Спеціальна обробка зміни типу доставки (ЗАВЖДИ, не тільки для Edge)
+    if (name === 'deliveryType' && value === 'pickup') {
+      console.log('🔧 Production Fix: Перемикання на самовивіз - очищаємо адресу');
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        address: '', // Примусово очищаємо адресу
+      }));
+      
+      // Очищаємо дані адреси і валідації
+      setAddressData(null);
+      setDeliveryValidation(null);
+      
+      // Очищаємо помилки адреси
+      if (errors.address) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.address;
+          return newErrors;
+        });
+      }
+      
+      console.log('🔧 Production Fix: Адреса очищена для самовивозу');
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -323,13 +352,32 @@ const handleNameInput = (e) => {
     });
 
     try {
+      // ✅ EDGE БРАУЗЕР FIX: очищаємо адресу ПЕРЕД обробкою для самовивозу
+      const formDataToProcess = { ...formData };
+      if (formDataToProcess.deliveryType === 'pickup') {
+        formDataToProcess.address = '';
+        formDataToProcess.region = '';
+        console.log('🔧 Edge Fix: Очищено адресу для самовивозу перед обробкою');
+      }
+      
       // Підготовка даних для Google Sheets з використанням ValidationUtils
-      const cleanedData = ValidationUtils.prepareDataForSheets(formData, isConsultationMode);
+      const cleanedData = ValidationUtils.prepareDataForSheets(formDataToProcess, isConsultationMode);
+      
+      // ✅ ДОДАТКОВИЙ ЗАХИСТ: очищаємо адресу для самовивозу після обробки
+      if (formDataToProcess.deliveryType === 'pickup') {
+        cleanedData.address = '';
+        cleanedData.region = '';
+      }
       
       // Додаємо дані з валідації адреси
       const orderDataForSheets = {
         ...cleanedData,
         region: (() => {
+          // ✅ ВИПРАВЛЕННЯ: для самовивозу регіон не потрібен
+          if (formDataToProcess.deliveryType === 'pickup') {
+            return '';
+          }
+          
           // Спочатку перевіряємо дані з addressData
           if (addressData?.validation?.region) {
             return addressData.validation.region;
@@ -383,9 +431,26 @@ const handleNameInput = (e) => {
         deliveryValidation
       });
 
+      // ✅ EDGE БРАУЗЕР FINAL FIX: остаточна перевірка перед відправкою
+      const finalOrderData = { ...orderDataForSheets };
+      if (finalOrderData.deliveryType === 'pickup') {
+        finalOrderData.address = '';
+        finalOrderData.region = '';
+        finalOrderData.deliveryAddress = ''; // Додатково очищаємо deliveryAddress
+        console.log('🔧 Edge Final Fix: Остаточно очищено адресу та регіон для самовивозу');
+        console.log('📋 Фінальні дані для відправки:', finalOrderData);
+      }
+      
+      // 🔧 ДОДАТКОВИЙ EDGE FIX: Перевірка на undefined/null значення
+      Object.keys(finalOrderData).forEach(key => {
+        if (finalOrderData[key] === undefined || finalOrderData[key] === null) {
+          finalOrderData[key] = '';
+        }
+      });
+
       // Відправляємо замовлення через JSONP сервіс (БЕЗ CORS проблем)
       const result = await jsonpService.saveOrder(
-        orderDataForSheets, 
+        finalOrderData, 
         isConsultationMode, 
         source
       );

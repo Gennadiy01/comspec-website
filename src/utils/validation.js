@@ -287,12 +287,21 @@ export const prepareDataForSheets = (formData, isConsultationMode = false) => {
     throw new Error(`Помилки валідації: ${Object.values(validation.errors).join(', ')}`);
   }
   
+  // 🔧 EDGE BROWSER FIX: Спеціальна обробка самовივозу
   const cleanedData = {
     ...validation.cleanedData,
     // Додаємо метадані
     timestamp: new Date().toISOString(),
     mode: isConsultationMode ? 'consultation' : 'order'
   };
+  
+  // 🔧 EDGE BROWSER FIX: Примусово очищаємо адресу для самовивозу
+  if (cleanedData.deliveryType === 'pickup') {
+    cleanedData.address = '';
+    cleanedData.region = '';
+    cleanedData.deliveryAddress = '';
+    console.log('🔧 Edge Fix: Адреса очищена в ValidationUtils.prepareDataForSheets');
+  }
   
   return cleanedData;
 };
