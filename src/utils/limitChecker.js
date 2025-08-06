@@ -176,9 +176,11 @@ if (!isLimitCheckingEnabled()) {
   }
 }
 
-export default {
+const limitChecker = {
   checkLimits,
   isTestingAvailable,
   waitForAvailability,
   showLimitResetTime
 };
+
+export default limitChecker;

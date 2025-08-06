@@ -6,7 +6,7 @@ import { getLoadingPointsByProduct } from '../../data/loadingPoints';
 import jsonpService from '../../services/JSONPGoogleSheetsService';
 import telegramService from '../../services/TelegramService';
 import ValidationUtils from '../../utils/validation';
-import { isEdgeBrowser, areEdgeFixesEnabled } from '../../utils/browserDetection';
+// import { isEdgeBrowser, areEdgeFixesEnabled } from '../../utils/browserDetection';
 import '../../styles/order-modal.css';
 
 // Дані продукції з контексту проекту COMSPEC

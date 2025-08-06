@@ -79,10 +79,12 @@ if (typeof window !== 'undefined') {
 }
 
 // Експорт для зручності
-export default {
+const browserDetection = {
   isEdgeBrowser,
   isMobileBrowser,
   isProblematicBrowser,
   enableEdgeFixes,
   areEdgeFixesEnabled
 };
+
+export default browserDetection;

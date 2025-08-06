@@ -308,7 +308,7 @@ if (!isTestingEnabled()) {
   }
 }
 
-export default {
+const testingTools = {
   generateTestData,
   testDeliveryOrder,
   testPickupOrder,
@@ -317,3 +317,5 @@ export default {
   runFullTest,
   detectBrowser
 };
+
+export default testingTools;
