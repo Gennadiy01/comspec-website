@@ -163,6 +163,11 @@ const Products = () => {
     window.history.pushState(null, '', newUrl);
   };
 
+  // Функція очищення пошуку
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   // Функція обробки замовлення
   const handleOrderClick = (product) => {
     openOrderModal({
@@ -215,19 +220,92 @@ const Products = () => {
             </div>
             
             <div className="search-filter">
-              <input
-                type="text"
-                placeholder="Пошук продукції..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  padding: '0.75rem',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '6px',
-                  width: '300px',
-                  maxWidth: '100%'
-                }}
-              />
+              <div style={{
+                position: 'relative',
+                display: 'inline-block',
+                width: '300px',
+                maxWidth: '100%'
+              }}>
+                {/* Іконка пошуку */}
+                <div style={{
+                  position: 'absolute',
+                  left: '0.75rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#008080',
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                  width: '16px',
+                  height: '16px'
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" style={{ width: '100%', height: '100%' }}>
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                    <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                
+                <input
+                  type="text"
+                  placeholder="Пошук продукції..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    padding: '0.75rem 0.75rem 0.75rem 2.5rem',
+                    paddingRight: searchTerm ? '2.5rem' : '0.75rem',
+                    border: '2px solid #e9ecef',
+                    borderRadius: '6px',
+                    width: '100%',
+                    fontSize: '1rem',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#008080';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 128, 128, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e9ecef';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+                
+                {/* Кнопка очищення */}
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    style={{
+                      position: 'absolute',
+                      right: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: '#6c757d',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      padding: '0',
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%',
+                      transition: 'color 0.2s ease, background-color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = '#008080';
+                      e.target.style.backgroundColor = 'rgba(0, 128, 128, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = '#6c757d';
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
+                    title="Очистити пошук"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
