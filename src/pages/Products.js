@@ -236,7 +236,10 @@ const Products = () => {
                   pointerEvents: 'none',
                   zIndex: 1,
                   width: '16px',
-                  height: '16px'
+                  height: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   <svg viewBox="0 0 24 24" fill="none" style={{ width: '100%', height: '100%' }}>
                     <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
