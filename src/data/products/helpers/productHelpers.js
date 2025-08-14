@@ -1,8 +1,8 @@
 // Утиліти для роботи з товарами COMSPEC
-import gravelData from '../categories/gravel.json';
-// import sandData from '../categories/sand.json';
-// import asphaltData from '../categories/asphalt.json';
-// import concreteData from '../categories/concrete.json';
+import { gravelData } from '../categories/gravel.js';
+// import { sandData } from '../categories/sand.js';
+// import { asphaltData } from '../categories/asphalt.js';
+// import { concreteData } from '../categories/concrete.js';
 
 // Поки що завантажуємо тільки щебінь, інші категорії додамо пізніше
 const categoriesData = {
