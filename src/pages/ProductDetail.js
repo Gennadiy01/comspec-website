@@ -101,23 +101,14 @@ const ProductDetail = () => {
   return (
     <div className="container" style={{ padding: '2rem 0' }}>
       {/* Навігаційна панель */}
-      <div style={{
-        marginBottom: '2rem',
-        padding: '1rem',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        fontSize: '0.9rem'
-      }}>
-        <Link to="/" style={{ color: '#008080', textDecoration: 'none' }}>Головна</Link>
+      <div className="breadcrumb-nav">
+        <Link to="/" className="breadcrumb-link">Головна</Link>
         <span style={{ color: '#6c757d' }}>›</span>
-        <Link to="/products" style={{ color: '#008080', textDecoration: 'none' }}>Продукція</Link>
+        <Link to="/products" className="breadcrumb-link">Продукція</Link>
         <span style={{ color: '#6c757d' }}>›</span>
         <Link 
           to={`/products?category=${product.category}`} 
-          style={{ color: '#008080', textDecoration: 'none' }}
+          className="breadcrumb-link"
         >
           {product.categoryName}
         </Link>
@@ -132,45 +123,19 @@ const ProductDetail = () => {
       {/* Кнопка назад */}
       <button 
         onClick={handleBackClick}
-        style={{
-          background: 'none',
-          border: '1px solid #008080',
-          color: '#008080',
-          padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          marginBottom: '2rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}
+        className="back-button"
       >
         ← Назад до каталогу
       </button>
 
       {/* Основний контент товару */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '3rem',
-        marginBottom: '3rem'
-      }}>
+      <div className="product-content">
         {/* Зображення товару */}
         <div>
           <div 
+            className="product-image"
             style={{
-              position: 'relative',
-              height: '400px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#6c757d',
-              overflow: 'hidden',
-              cursor: 'pointer',
-              transform: imageZoomed ? 'scale(1.1)' : 'scale(1)',
-              transition: 'transform 0.3s ease'
+              transform: imageZoomed ? 'scale(1.1)' : 'scale(1)'
             }}
             onMouseEnter={() => setImageZoomed(true)}
             onMouseLeave={() => setImageZoomed(false)}
@@ -199,21 +164,11 @@ const ProductDetail = () => {
           <ProductTitle 
             title={product.title}
             tag="h1"
-            style={{ 
-              fontSize: '2rem', 
-              marginBottom: '1rem',
-              color: '#2c3e50'
-            }}
+            className="product-title"
           />
 
           {/* Ціна */}
-          <div style={{
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: '#008080',
-            marginBottom: '1.5rem',
-            lineHeight: '1.4'
-          }}>
+          <div className="product-price">
             <span style={{ whiteSpace: 'nowrap' }}>
               {priceParts.priceNumber} {priceParts.currency}
             </span>
@@ -396,20 +351,162 @@ const ProductDetail = () => {
         </div>
       )}
 
-      {/* Responsive стилі для мобільних */}
-      <style jsx>{`
+      {/* CSS стилі */}
+      <style>{`
+        .breadcrumb-nav {
+          margin-bottom: 2rem;
+          padding: 1rem;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          flex-wrap: wrap;
+        }
+        
+        .breadcrumb-link {
+          color: #008080;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+        
+        .breadcrumb-link:hover {
+          color: #006666;
+          text-decoration: underline;
+        }
+        
+        .back-button {
+          background: none;
+          border: 1px solid #008080;
+          color: #008080;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          margin-bottom: 2rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          transition: all 0.2s ease;
+          font-size: 0.9rem;
+        }
+        
+        .back-button:hover {
+          background-color: #008080;
+          color: white;
+        }
+        
+        .product-content {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3rem;
+          margin-bottom: 3rem;
+        }
+        
+        .product-image {
+          position: relative;
+          height: 400px;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #6c757d;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+        }
+        
+        .product-title {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+          color: #2c3e50;
+        }
+        
+        .product-price {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #008080;
+          margin-bottom: 1.5rem;
+          line-height: 1.4;
+        }
+        
+        /* Планшети */
+        @media (max-width: 1024px) {
+          .product-content {
+            gap: 2rem;
+          }
+          
+          .breadcrumb-nav {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+          }
+          
+          .product-image {
+            height: 300px;
+          }
+          
+          .product-title {
+            font-size: 1.8rem;
+          }
+          
+          .product-price {
+            font-size: 1.4rem;
+          }
+        }
+        
+        /* Мобільні */
         @media (max-width: 768px) {
-          .container > div:first-child {
-            grid-template-columns: 1fr !important;
-            gap: 2rem !important;
+          .product-content {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
           }
           
-          .container h1 {
-            font-size: 1.5rem !important;
+          .breadcrumb-nav {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            gap: 0.25rem;
           }
           
-          .price {
-            font-size: 1.25rem !important;
+          .back-button {
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem;
+          }
+          
+          .product-image {
+            height: 250px;
+          }
+          
+          .product-title {
+            font-size: 1.5rem;
+          }
+          
+          .product-price {
+            font-size: 1.3rem;
+          }
+        }
+        
+        /* Дуже маленькі екрани */
+        @media (max-width: 480px) {
+          .container {
+            padding: 1rem 0 !important;
+          }
+          
+          .breadcrumb-nav {
+            margin-bottom: 1rem;
+          }
+          
+          .product-image {
+            height: 200px;
+          }
+          
+          .product-title {
+            font-size: 1.3rem;
+          }
+          
+          .product-price {
+            font-size: 1.2rem;
           }
         }
       `}</style>
