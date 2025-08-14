@@ -122,7 +122,7 @@ const OrderModal = () => {
       setAddressData(null);
       setDeliveryValidation(null);
     }
-  }, [isOpen, orderData?.product, isConsultationMode]);
+  }, [isOpen, orderData?.product, orderData?.productTitle, orderData?.source, isConsultationMode]);
 
   // Обробка закриття модального вікна
   const handleClose = useCallback(() => {
