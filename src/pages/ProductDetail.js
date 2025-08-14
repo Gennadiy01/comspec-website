@@ -433,6 +433,10 @@ const ProductDetail = () => {
         
         /* Планшети */
         @media (max-width: 1024px) {
+          .container {
+            padding: 2rem 1.5rem;
+          }
+          
           .product-content {
             gap: 2rem;
           }
@@ -457,6 +461,10 @@ const ProductDetail = () => {
         
         /* Мобільні */
         @media (max-width: 768px) {
+          .container {
+            padding: 1.5rem 1rem;
+          }
+          
           .product-content {
             grid-template-columns: 1fr;
             gap: 1.5rem;
@@ -490,7 +498,7 @@ const ProductDetail = () => {
         /* Дуже маленькі екрани */
         @media (max-width: 480px) {
           .container {
-            padding: 1rem 0 !important;
+            padding: 1rem 1rem !important;
           }
           
           .breadcrumb-nav {
