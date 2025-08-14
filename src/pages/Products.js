@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
+import ProductsAPI, { formatProductPriceParts } from '../data/products/productsAPI.js';
+import ProductTitle from '../components/ProductTitle';
 
 const Products = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const { openOrderModal } = useOrderModal();
 
   // Обробка URL параметрів при завантаженні компонента
@@ -20,126 +23,29 @@ const Products = () => {
     }
   }, [location.search]);
 
-  const products = [
-    {
-      id: 1,
-      title: 'Щебінь гранітний 5-20',
-      category: 'gravel',
-      price: '850 грн/тонна',
-      description: 'Високоміцний щебінь для будівництва доріг та фундаментів',
-      properties: ['Морозостійкий', 'Високої міцності', 'Фракція 5-20 мм'],
-      image: '/images/gravel-5-20.jpg'
-    },
-    {
-      id: 12,
-      title: 'Щебінь гранітний 5-10',
-      category: 'gravel',
-      price: '350 грн/тонна',
-      description: 'Високоміцний щебінь для будівництва доріг та фундаментів',
-      properties: ['Морозостійкий', 'Високої міцності', 'Фракція 5-10 мм'],
-      image: '/images/products/gravel-5-10.jpg'
-    },
-    {
-      id: 2,
-      title: 'Щебінь гранітний 20-40',
-      category: 'gravel',
-      price: '820 грн/тонна',
-      description: 'Крупний щебінь для масивних конструкцій',
-      properties: ['Морозостійкий', 'Високої міцності', 'Фракція 20-40 мм'],
-      image: '/images/gravel-20-40.jpg'
-    },
-    {
-      id: 3,
-      title: 'Щебінь вапняковий 10-20',
-      category: 'gravel',
-      price: '750 грн/тонна',
-      description: 'Вапняковий щебінь для дорожнього будівництва',
-      properties: ['Економний', 'Середньої міцності', 'Фракція 10-20 мм'],
-      image: '/images/gravel-limestone.jpg'
-    },
-    {
-      id: 4,
-      title: 'Пісок річковий митий',
-      category: 'sand',
-      price: '420 грн/тонна',
-      description: 'Чистий річковий пісок для будівельних робіт',
-      properties: ['Митий', 'Без глинистих домішок', 'Фракція 0-5 мм'],
-      image: '/images/sand-river.jpg'
-    },
-    {
-      id: 5,
-      title: 'Пісок кар\'єрний',
-      category: 'sand',
-      price: '380 грн/тонна',
-      description: 'Кар\'єрний пісок для різних видів робіт',
-      properties: ['Природний', 'Економний', 'Фракція 0-5 мм'],
-      image: '/images/sand-quarry.jpg'
-    },
-    {
-      id: 6,
-      title: 'Пісок будівельний',
-      category: 'sand',
-      price: '400 грн/тонна',
-      description: 'Універсальний будівельний пісок',
-      properties: ['Сертифікований', 'Універсальний', 'Фракція 0-3 мм'],
-      image: '/images/sand-construction.jpg'
-    },
-    {
-      id: 7,
-      title: 'Асфальт гарячий',
-      category: 'asphalt',
-      price: '1200 грн/тонна',
-      description: 'Гаряча асфальтобетонна суміш для дорожнього покриття',
-      properties: ['Тип А', 'Гарячий', 'Високої якості'],
-      image: '/images/asphalt-hot.jpg'
-    },
-    {
-      id: 8,
-      title: 'Асфальт холодний',
-      category: 'asphalt',
-      price: '1100 грн/тонна',
-      description: 'Холодна асфальтобетонна суміш для ремонтних робіт',
-      properties: ['Тип Б', 'Холодний', 'Для ремонту'],
-      image: '/images/asphalt-cold.jpg'
-    },
-    {
-      id: 9,
-      title: 'Бетон М200',
-      category: 'concrete',
-      price: '1800 грн/м³',
-      description: 'Товарний бетон марки М200 для загального будівництва',
-      properties: ['Марка М200', 'B15', 'Морозостійкий F100'],
-      image: '/images/concrete-m200.jpg'
-    },
-    {
-      id: 10,
-      title: 'Бетон М300',
-      category: 'concrete',
-      price: '2000 грн/м³',
-      description: 'Товарний бетон марки М300 для відповідальних конструкцій',
-      properties: ['Марка М300', 'B22.5', 'Морозостійкий F150'],
-      image: '/images/concrete-m300.jpg'
-    },
-    {
-      id: 11,
-      title: 'Бетон М400',
-      category: 'concrete',
-      price: '2200 грн/м³',
-      description: 'Високоміцний бетон для спеціальних конструкцій',
-      properties: ['Марка М400', 'B30', 'Морозостійкий F200'],
-      image: '/images/concrete-m400.jpg'
+  // Завантаження товарів з нової системи
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Завантаження товарів при ініціалізації компонента
+  useEffect(() => {
+    try {
+      // Поки що завантажуємо тільки щебінь (інші категорії будуть додані пізніше)
+      const productsData = ProductsAPI.getProductsForLegacyCode();
+      setAllProducts(productsData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Помилка завантаження товарів:', error);
+      // Fallback до пустого масиву при помилці
+      setAllProducts([]);
+      setLoading(false);
     }
-  ];
+  }, []);
 
-  const categories = [
-    { id: 'all', name: 'Всі категорії' },
-    { id: 'gravel', name: 'Щебінь' },
-    { id: 'sand', name: 'Пісок' },
-    { id: 'asphalt', name: 'Асфальт' },
-    { id: 'concrete', name: 'Бетон' }
-  ];
+  // Отримання категорій з API
+  const categories = ProductsAPI.CATEGORIES_LIST;
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = allProducts.filter(product => {
     const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -169,12 +75,22 @@ const Products = () => {
   };
 
   // Функція обробки замовлення
-  const handleOrderClick = (product) => {
+  const handleOrderClick = (e, product) => {
+    e.stopPropagation(); // Запобігаємо переходу на сторінку товару при кліку на кнопку
     openOrderModal({
-      product: product.category,
-      preSelectedProduct: product.title,
-      source: 'product-page'
+      product: product.title,
+      productTitle: product.title,
+      source: 'products-page'
     });
+  };
+
+  // Функція переходу на сторінку товару
+  const handleProductClick = (product) => {
+    // Знаходимо оригінальний продукт для отримання категорії
+    const originalProduct = ProductsAPI.getAllProducts().find(p => p.id === product.id);
+    if (originalProduct) {
+      navigate(`/products/${originalProduct.category}/${originalProduct.id}`);
+    }
   };
 
   return (
@@ -312,10 +228,48 @@ const Products = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem',
+              color: '#6c757d'
+            }}>
+              <div style={{
+                display: 'inline-block',
+                width: '40px',
+                height: '40px',
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #008080',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginBottom: '1rem'
+              }}></div>
+              <p>Завантаження товарів...</p>
+            </div>
+          )}
+
           {/* Products Grid */}
-          <div className="grid grid-3">
-            {filteredProducts.map(product => (
-              <div key={product.id} className="card">
+          {!loading && (
+            <div className="grid grid-3">
+              {filteredProducts.map(product => (
+              <div 
+                key={product.id} 
+                className="card"
+                onClick={() => handleProductClick(product)}
+                style={{
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '';
+                }}
+              >
                 <div style={{
                   height: '200px',
                   backgroundColor: '#f8f9fa',
@@ -329,15 +283,38 @@ const Products = () => {
                   Фото товару
                 </div>
                 
-                <h3>{product.title}</h3>
-                <p className="price" style={{
+                <ProductTitle title={product.title} />
+                <div className="price" style={{
                   fontSize: '1.25rem',
                   fontWeight: '600',
                   color: '#008080',
-                  marginBottom: '1rem'
+                  marginBottom: '1rem',
+                  lineHeight: '1.4'
                 }}>
-                  {product.price}
-                </p>
+                  {(() => {
+                    // Знаходимо оригінальний продукт з JSON для отримання priceValidUntil
+                    const originalProduct = ProductsAPI.getAllProducts().find(p => p.id === product.id);
+                    if (originalProduct) {
+                      const priceParts = formatProductPriceParts(originalProduct);
+                      return (
+                        <>
+                          <span style={{ whiteSpace: 'nowrap' }}>
+                            {priceParts.priceNumber} {priceParts.currency}
+                          </span>
+                          {priceParts.validUntil && (
+                            <>
+                              {' '}
+                              <span style={{ whiteSpace: 'nowrap' }}>
+                                {priceParts.validUntil}
+                              </span>
+                            </>
+                          )}
+                        </>
+                      );
+                    }
+                    return product.price;
+                  })()}
+                </div>
                 
                 <p>{product.description}</p>
                 
@@ -367,7 +344,7 @@ const Products = () => {
                 }}>
                   <button 
                     className="btn btn-accent"
-                    onClick={() => handleOrderClick(product)}
+                    onClick={(e) => handleOrderClick(e, product)}
                   >
                     Замовити
                   </button>
@@ -375,15 +352,17 @@ const Products = () => {
                     to={`/certificates/${product.category}`} 
                     className="btn btn-primary"
                     style={{fontSize: '0.875rem'}}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Сертифікати
                   </Link>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {filteredProducts.length === 0 && (
+          {!loading && filteredProducts.length === 0 && (
             <div style={{textAlign: 'center', padding: '3rem', color: '#6c757d'}}>
               <h3>Продукцію не знайдено</h3>
               <p>Спробуйте змінити фільтри або пошукову фразу</p>
@@ -407,5 +386,18 @@ const Products = () => {
     </div>
   );
 };
+
+// Додаємо CSS стилі для анімації завантаження
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+if (!document.head.querySelector('style[data-products-spinner]')) {
+  style.setAttribute('data-products-spinner', 'true');
+  document.head.appendChild(style);
+}
 
 export default Products;

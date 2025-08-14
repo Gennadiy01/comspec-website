@@ -8,6 +8,7 @@ import Footer from './components/layout/Footer';
 import OrderModal from './components/modals/OrderModal';
 import Home from './pages/Home';
 import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
 import Services from './pages/Services';
 import About from './pages/About';
 import Contacts from './pages/Contacts';
@@ -43,6 +44,9 @@ function App() {
                 } />
                 <Route path="/products" element={
                   <SimpleErrorBoundary><Products /></SimpleErrorBoundary>
+                } />
+                <Route path="/products/:category/:id" element={
+                  <SimpleErrorBoundary><ProductDetail /></SimpleErrorBoundary>
                 } />
                 <Route path="/services" element={
                   <SimpleErrorBoundary><Services /></SimpleErrorBoundary>

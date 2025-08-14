@@ -1,5 +1,8 @@
 // src/data/loadingPoints.js
 
+// Імпортуємо правила виключень на рівні модуля
+import { PRODUCT_EXCLUSIONS } from './productExclusions.js';
+
 export const loadingPoints = [
   // Щебінь - 9 пунктів
   {
@@ -192,6 +195,44 @@ export const getLoadingPointsByProduct = (productType) => {
     }
   });
 };
+
+// Функція для отримання пунктів навантаження з урахуванням правил для конкретних товарів
+export const getLoadingPointsBySpecificProduct = (productId, productTitle) => {
+  // Визначаємо категорію товару
+  // ВАЖЛИВО: Всі товари з gravel.json відносяться до категорії "Щебінь"
+  let category = 'Щебінь';
+  
+  // TODO: В майбутньому, коли будуть окремі файли для інших категорій:
+  // - sand.json → category = 'Пісок'
+  // - asphalt.json → category = 'Асфальт'  
+  // - concrete.json → category = 'Бетон'
+  
+  // Поки що всі товари (включаючи пісок, суміші, камінь) з gravel.json = "Щебінь"
+  
+  // Отримуємо пункти за категорією
+  let availablePoints = getLoadingPointsByProduct(category);
+  
+  // Застосовуємо правила виключень/включень для конкретного товару
+  if (productId && PRODUCT_EXCLUSIONS[productId]) {
+    const rules = PRODUCT_EXCLUSIONS[productId];
+    
+    if (rules.excludedPoints) {
+      // Виключаємо певні пункти
+      availablePoints = availablePoints.filter(point => 
+        !rules.excludedPoints.includes(point.id)
+      );
+    }
+    
+    if (rules.includedPoints) {
+      // Залишаємо тільки включені пункти
+      availablePoints = availablePoints.filter(point => 
+        rules.includedPoints.includes(point.id)
+      );
+    }
+  }
+  return availablePoints;
+};
+
 // Статистика пунктів навантаження
 export const loadingPointsStats = {
   total: loadingPoints.length,

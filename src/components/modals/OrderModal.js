@@ -2,28 +2,26 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback  } from 'react';
 import { useOrderModal } from '../../context/OrderModalContext';
 import AddressSearch from '../forms/AddressSearch';
-import { getLoadingPointsByProduct } from '../../data/loadingPoints';
+import { getLoadingPointsByProduct, getLoadingPointsBySpecificProduct } from '../../data/loadingPoints';
+import { isProductAvailableForPickup } from '../../data/productExclusions';
 import jsonpService from '../../services/JSONPGoogleSheetsService';
 import telegramService from '../../services/TelegramService';
 import ValidationUtils from '../../utils/validation';
 // import { isEdgeBrowser, areEdgeFixesEnabled } from '../../utils/browserDetection';
+import ProductsAPI from '../../data/products/productsAPI.js';
 import '../../styles/order-modal.css';
 
-// Дані продукції з контексту проекту COMSPEC
-const products = [
+// Отримання даних продукції з нової системи
+const categories = [
   { id: 'Щебінь', name: 'Щебінь', category: 'Будівельні матеріали' },
   { id: 'Пісок', name: 'Пісок', category: 'Будівельні матеріали' },
   { id: 'Асфальт', name: 'Асфальт', category: 'Будівельні матеріали' },
   { id: 'Бетон', name: 'Бетон', category: 'Будівельні матеріали' }
 ];
 
-// ✅ МАПІНГ КАТЕГОРІЙ: англійські назви → українські назви
-const categoryMapping = {
-  'gravel': 'Щебінь',
-  'sand': 'Пісок', 
-  'asphalt': 'Асфальт',
-  'concrete': 'Бетон'
-};
+
+// ✅ МАПІНГ КАТЕГОРІЙ: використовуємо з ProductsAPI
+const categoryMapping = ProductsAPI.CATEGORY_MAPPING;
 
 const OrderModal = () => {
   const { isOpen, orderData, closeOrderModal } = useOrderModal();
@@ -88,20 +86,27 @@ const OrderModal = () => {
 
       // ✅ АВТОЗАПОВНЕННЯ ТОВАРУ (тільки для режиму замовлення)
       if (!isConsultationMode && orderData?.product) {
-        console.log('🔄 Автозаповнення товару:', {
-          orderDataProduct: orderData.product,
-          mappedProduct: categoryMapping[orderData.product]
-        });
 
-        // Використовуємо мапінг для конвертації категорії
-        const mappedProduct = categoryMapping[orderData.product] || orderData.product;
+        let productToSet = '';
+        
+        // Логіка вибору товару залежно від джерела
+        if (orderData.source === 'hero-section' || orderData.source === 'companies-section') {
+          // З Hero або компаній - залишаємо порожнім для вибору категорії
+          productToSet = '';
+        } else if (orderData.source === 'product-card') {
+          // З картки категорії на головній - підставляємо категорію
+          const mappedProduct = categoryMapping[orderData.product] || orderData.product;
+          productToSet = mappedProduct;
+        } else if (orderData.source === 'products-page' || orderData.source === 'product-detail-page') {
+          // З сторінки товарів або деталі товару - блокуємо select і показуємо конкретний товар
+          productToSet = orderData.productTitle || orderData.product;
+        }
         
         setFormData(prev => ({
           ...prev,
-          product: mappedProduct
+          product: productToSet
         }));
 
-        console.log('✅ Товар встановлено:', mappedProduct);
       }
       
       // Фокусуємося на першому полі після відкриття
@@ -399,13 +404,16 @@ const handleNameInput = (e) => {
         })(),
 
         loadingPoint: (() => {
+          if (!formData.loadingPoint) return '';
+          
+          const availablePoints = getAvailableLoadingPoints();
           console.log('🔍 Debug loadingPoint:', {
             formLoadingPoint: formData.loadingPoint,
             formLoadingPointType: typeof formData.loadingPoint,
-            availablePoints: getAvailableLoadingPoints().map(p => ({ id: p.id, idType: typeof p.id, name: p.name }))
+            availablePoints: availablePoints.map(p => ({ id: p.id, idType: typeof p.id, name: p.name }))
           });
           
-          const foundPoint = getAvailableLoadingPoints().find(p => p.id.toString() === formData.loadingPoint.toString());
+          const foundPoint = availablePoints.find(p => p.id.toString() === formData.loadingPoint.toString());
           console.log('🎯 Found point:', foundPoint);
           
           return foundPoint?.name || '';
@@ -549,10 +557,44 @@ const handleNameInput = (e) => {
     }
   };
 
-  // Отримання доступних пунктів навантаження
+  // Отримання доступних пунктів навантаження з урахуванням правил для конкретних товарів
   const getAvailableLoadingPoints = () => {
     if (!formData.product) return [];
-    return getLoadingPointsByProduct(formData.product);
+    
+    // Отримуємо конкретний продукт
+    const allProducts = ProductsAPI.getAllProducts();
+    const foundProduct = allProducts.find(p => p.title === formData.product);
+    
+    if (foundProduct) {
+      // Використовуємо нову функцію з правилами виключень
+      
+      return getLoadingPointsBySpecificProduct(foundProduct.id, foundProduct.title);
+    } else {
+      // Якщо товар не знайдено, використовуємо стару логіку з категоріями
+      const productCategory = getProductCategoryForLoadingPoints(formData.product);
+      
+      return getLoadingPointsByProduct(productCategory);
+    }
+  };
+
+  // Функція визначення категорії товару для пунктів навантаження
+  const getProductCategoryForLoadingPoints = (product) => {
+    // Якщо це вже категорія (з Hero або карток категорій)
+    if (['Щебінь', 'Пісок', 'Асфальт', 'Бетон'].includes(product)) {
+      return product;
+    }
+
+    // Якщо це конкретний товар, визначаємо його категорію
+    const allProducts = ProductsAPI.getAllProducts();
+    const foundProduct = allProducts.find(p => p.title === product);
+    
+    if (foundProduct) {
+      // Мапимо назву категорії товару до української назви для пунктів навантаження
+      return categoryMapping[foundProduct.category] || foundProduct.categoryName || 'Щебінь';
+    }
+
+    // За замовчуванням повертаємо Щебінь
+    return 'Щебінь';
   };
 
   if (!isOpen) return null;
@@ -619,7 +661,7 @@ const handleNameInput = (e) => {
                 }}>
                   <div><strong>Дата:</strong> {submitResult.data.Date} о {submitResult.data.Time}</div>
                   {submitResult.data.Product && (
-                    <div><strong>Продукт:</strong> {products.find(p => p.id === submitResult.data.Product)?.name || submitResult.data.Product}</div>
+                    <div><strong>Продукт:</strong> {submitResult.data.Product}</div>
                   )}
                   {submitResult.data.Delivery_Type && (
                     <div><strong>Доставка:</strong> {submitResult.data.Delivery_Type === 'delivery' ? 'Доставка' : 'Самовивіз'}</div>
@@ -707,20 +749,37 @@ const handleNameInput = (e) => {
                   {/* Оберіть товар */}
                   <div className="form-group">
                     <label className="form-label">Оберіть товар</label>
-                    <select
-                      name="product"
-                      value={formData.product}
-                      onChange={handleInputChange}
-                      className="form-select"
-                      disabled={isSubmitting}
-                    >
-                      <option value="">Не обрано</option>
-                      {products.map(product => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
+                    {orderData?.source === 'products-page' || orderData?.source === 'product-detail-page' ? (
+                      /* Для конкретних товарів - показуємо тільки обраний товар */
+                      <input
+                        type="text"
+                        name="product"
+                        value={formData.product}
+                        className="form-input"
+                        disabled={true}
+                        style={{
+                          backgroundColor: '#f8f9fa',
+                          color: '#495057',
+                          cursor: 'not-allowed'
+                        }}
+                      />
+                    ) : (
+                      /* Для Hero та карток категорій - показуємо список категорій */
+                      <select
+                        name="product"
+                        value={formData.product}
+                        onChange={handleInputChange}
+                        className="form-select"
+                        disabled={isSubmitting}
+                      >
+                        <option value="">Не обрано</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   {/* Тип отримання */}
@@ -800,37 +859,73 @@ const handleNameInput = (e) => {
                     </div>
                   )}
 
-                  {formData.deliveryType === 'pickup' && formData.product && (
-                    <div className="conditional-field">
-                      <div className="form-group">
-                        <label className="form-label">Пункт навантаження</label>
-                        <select
-                          name="loadingPoint"
-                          value={formData.loadingPoint}
-                          onChange={handleInputChange}
-                          className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
-                          disabled={isSubmitting}
-                        >
-                          <option value="">Не обрано</option>
-                          {getAvailableLoadingPoints().map((point) => (
-                            <option key={point.id} value={point.id}>
-                              ⬤ {point.name} | {point.address}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
-                        
-                        <div style={{
-                          fontSize: '0.825rem',
-                          color: '#6c757d',
-                          marginTop: '6px',
-                          fontStyle: 'italic'
-                        }}>
-                          Пункт навантаження можна не обирати — менеджер допоможе обрати найзручніший
+                  {formData.deliveryType === 'pickup' && formData.product && (() => {
+                    const availablePoints = getAvailableLoadingPoints();
+                    const allProducts = ProductsAPI.getAllProducts();
+                    const foundProduct = allProducts.find(p => p.title === formData.product);
+                    const isAvailable = foundProduct ? isProductAvailableForPickup(foundProduct.id) : availablePoints.length > 0;
+                    
+                    if (!isAvailable) {
+                      return (
+                        <div className="conditional-field">
+                          <div className="form-group">
+                            <label className="form-label">Пункт навантаження</label>
+                            <div style={{
+                              padding: '12px 16px',
+                              backgroundColor: 'rgba(220, 53, 69, 0.08)',
+                              border: '1px solid rgba(220, 53, 69, 0.3)',
+                              borderRadius: '8px',
+                              color: '#721c24',
+                              fontSize: '0.9rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              minHeight: '48px'
+                            }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#dc3545', flexShrink: 0 }}>
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                                <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                                <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+                              </svg>
+                              <span>Продукція не доступна для самовивозу</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div className="conditional-field">
+                        <div className="form-group">
+                          <label className="form-label">Пункт навантаження</label>
+                          <select
+                            name="loadingPoint"
+                            value={formData.loadingPoint}
+                            onChange={handleInputChange}
+                            className={`form-select form-select-mobile-optimized ${errors.loadingPoint ? 'error' : ''}`}
+                            disabled={isSubmitting}
+                          >
+                            <option value="">Не обрано</option>
+                            {availablePoints.map((point) => (
+                              <option key={point.id} value={point.id}>
+                                ⬤ {point.name} | {point.address}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.loadingPoint && <div className="form-error">{errors.loadingPoint}</div>}
+                          
+                          <div style={{
+                            fontSize: '0.825rem',
+                            color: '#6c757d',
+                            marginTop: '6px',
+                            fontStyle: 'italic'
+                          }}>
+                            Пункт навантаження можна не обирати — менеджер допоможе обрати найзручніший
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Підказка якщо обрано самовивіз, але не обрано товар */}
                   {formData.deliveryType === 'pickup' && !formData.product && (
