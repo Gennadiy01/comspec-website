@@ -278,9 +278,26 @@ const Products = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#6c757d'
+                  color: '#6c757d',
+                  overflow: 'hidden'
                 }}>
-                  Фото товару
+                  {product.image ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.imageAlt || product.title}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  ) : (
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📦</div>
+                      <p>Фото товару</p>
+                    </div>
+                  )}
                 </div>
                 
                 <ProductTitle title={product.title} />

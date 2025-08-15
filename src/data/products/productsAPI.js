@@ -88,7 +88,8 @@ export const getProductsForLegacyCode = () => {
     price: formatProductPrice(product),
     description: product.description,
     properties: product.properties || [],
-    image: product.image || '/images/placeholder-product.jpg'
+    image: product.image,
+    imageAlt: product.imageAlt
   }));
 };
 
