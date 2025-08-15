@@ -47,7 +47,22 @@ const Products = () => {
 
   const filteredProducts = allProducts.filter(product => {
     const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Покращена логіка пошуку по кількох словах
+    const matchesSearch = (() => {
+      if (!searchTerm.trim()) return true;
+      
+      const searchWords = searchTerm.toLowerCase().trim().split(/\s+/);
+      const productText = [
+        product.title,
+        product.description || '',
+        ...(product.properties || [])
+      ].join(' ').toLowerCase();
+      
+      // Всі слова з пошукового запиту мають бути присутні в тексті товару
+      return searchWords.every(word => productText.includes(word));
+    })();
+    
     return matchesCategory && matchesSearch;
   });
 
