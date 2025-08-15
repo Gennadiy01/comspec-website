@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
-import ProductsAPI, { formatProductPriceParts } from '../data/products/productsAPI.js';
+import ProductsAPI, { formatProductPriceParts, getImageUrl } from '../data/products/productsAPI.js';
 import ProductTitle from '../components/ProductTitle';
 
 const ProductDetail = () => {
@@ -142,7 +142,7 @@ const ProductDetail = () => {
           >
             {product.image ? (
               <img 
-                src={product.image} 
+                src={getImageUrl(product.image)} 
                 alt={product.imageAlt || product.title}
                 style={{
                   maxWidth: '100%',

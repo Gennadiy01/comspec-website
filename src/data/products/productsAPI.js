@@ -72,6 +72,24 @@ export const CATEGORIES_LIST = [
   { id: 'concrete', name: 'Бетон' }
 ];
 
+// === УТИЛІТАРНІ ФУНКЦІЇ ===
+
+/**
+ * Отримання правильного URL для зображень з врахуванням базового шляху
+ * @param {string} imagePath - Шлях до зображення
+ * @returns {string} Повний URL зображення
+ */
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // Якщо вже повний URL - повертаємо як є
+  if (imagePath.startsWith('http')) return imagePath;
+  
+  // Додаємо базовий URL для GitHub Pages
+  const baseUrl = process.env.PUBLIC_URL || '';
+  return `${baseUrl}${imagePath}`;
+};
+
 // === ФУНКЦІЇ СУМІСНОСТІ ===
 
 /**
@@ -88,7 +106,7 @@ export const getProductsForLegacyCode = () => {
     price: formatProductPrice(product),
     description: product.description,
     properties: product.properties || [],
-    image: product.image,
+    image: getImageUrl(product.image),
     imageAlt: product.imageAlt
   }));
 };
