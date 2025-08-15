@@ -286,8 +286,8 @@ const Products = () => {
                       src={product.image} 
                       alt={product.imageAlt || product.title}
                       style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
+                        width: '100%',
+                        height: '100%',
                         objectFit: 'cover',
                         borderRadius: '8px'
                       }}
