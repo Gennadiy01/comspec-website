@@ -10,7 +10,6 @@ const ProductDetail = () => {
   const { openOrderModal } = useOrderModal();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [imageZoomed, setImageZoomed] = useState(false);
 
   useEffect(() => {
     try {
