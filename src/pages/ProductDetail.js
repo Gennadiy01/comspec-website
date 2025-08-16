@@ -134,11 +134,6 @@ const ProductDetail = () => {
         <div>
           <div 
             className="product-image"
-            style={{
-              transform: imageZoomed ? 'scale(1.1)' : 'scale(1)'
-            }}
-            onMouseEnter={() => setImageZoomed(true)}
-            onMouseLeave={() => setImageZoomed(false)}
           >
             {product.image ? (
               <img 
@@ -351,6 +346,15 @@ const ProductDetail = () => {
         </div>
       )}
 
+      {/* Кнопка назад внизу */}
+      <button 
+        onClick={handleBackClick}
+        className="back-button"
+        style={{ marginTop: '3rem', marginBottom: '2rem' }}
+      >
+        ← Назад до каталогу
+      </button>
+
       {/* CSS стилі */}
       <style>{`
         .breadcrumb-nav {
@@ -413,8 +417,6 @@ const ProductDetail = () => {
           justify-content: center;
           color: #6c757d;
           overflow: hidden;
-          cursor: pointer;
-          transition: transform 0.3s ease;
         }
         
         .product-title {
