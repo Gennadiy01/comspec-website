@@ -199,15 +199,15 @@ export const getLoadingPointsByProduct = (productType) => {
 // Функція для отримання пунктів навантаження з урахуванням правил для конкретних товарів
 export const getLoadingPointsBySpecificProduct = (productId, productTitle) => {
   // Визначаємо категорію товару
-  // ВАЖЛИВО: Всі товари з gravel.json відносяться до категорії "Щебінь"
+  // ВАЖЛИВО: Всі товари з gravel.js відносяться до категорії "Щебінь"
   let category = 'Щебінь';
   
   // TODO: В майбутньому, коли будуть окремі файли для інших категорій:
-  // - sand.json → category = 'Пісок'
-  // - asphalt.json → category = 'Асфальт'  
-  // - concrete.json → category = 'Бетон'
+  // - sand.js → category = 'Пісок'
+  // - asphalt.js → category = 'Асфальт'  
+  // - concrete.js → category = 'Бетон'
   
-  // Поки що всі товари (включаючи пісок, суміші, камінь) з gravel.json = "Щебінь"
+  // Поки що всі товари (включаючи пісок, суміші, камінь) з gravel.js = "Щебінь"
   
   // Отримуємо пункти за категорією
   let availablePoints = getLoadingPointsByProduct(category);
