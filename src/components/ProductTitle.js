@@ -42,7 +42,10 @@ const ProductTitle = ({
           return (
             <span 
               key={index} 
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ 
+                whiteSpace: 'nowrap',
+                display: 'inline'
+              }}
             >
               {part.content}
             </span>

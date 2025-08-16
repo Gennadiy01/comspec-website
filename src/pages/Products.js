@@ -66,6 +66,63 @@ const Products = () => {
     return matchesCategory && matchesSearch;
   });
 
+  // Логіка для адаптивних карток
+  useEffect(() => {
+    if (loading) return;
+
+    let timeoutId = null;
+
+    const handleCardResize = () => {
+      // Debounce для запобігання зацикленню
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      
+      timeoutId = setTimeout(() => {
+        const cards = document.querySelectorAll('.responsive-card');
+        cards.forEach(card => {
+          const cardWidth = card.offsetWidth;
+          const shouldBeWide = cardWidth > 480;
+          const isCurrentlyWide = card.classList.contains('wide-card');
+          
+          // Змінюємо клас тільки якщо потрібно
+          if (shouldBeWide && !isCurrentlyWide) {
+            card.classList.add('wide-card');
+          } else if (!shouldBeWide && isCurrentlyWide) {
+            card.classList.remove('wide-card');
+          }
+        });
+      }, 50);
+    };
+
+    // Використовуємо ResizeObserver з обробкою помилок
+    const resizeObserver = new ResizeObserver((entries) => {
+      try {
+        handleCardResize();
+      } catch (error) {
+        console.warn('ResizeObserver error:', error);
+      }
+    });
+    
+    // Затримка для запобігання негайної активації
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.responsive-card');
+      cards.forEach(card => {
+        resizeObserver.observe(card);
+      });
+    }, 100);
+
+    // Початкова перевірка з затримкою
+    setTimeout(handleCardResize, 200);
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      resizeObserver.disconnect();
+    };
+  }, [loading, filteredProducts]);
+
   // Функція для отримання назви активної категорії
   const getActiveCategoryName = () => {
     const category = categories.find(cat => cat.id === activeCategory);
@@ -266,15 +323,18 @@ const Products = () => {
 
           {/* Products Grid */}
           {!loading && (
-            <div className="grid grid-3">
+            <div className="grid grid-3" style={{ containerType: 'inline-size' }}>
               {filteredProducts.map(product => (
               <div 
                 key={product.id} 
-                className="card"
+                className="card responsive-card"
                 onClick={() => handleProductClick(product)}
                 style={{
                   cursor: 'pointer',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
@@ -285,16 +345,15 @@ const Products = () => {
                   e.target.style.boxShadow = '';
                 }}
               >
-                <div style={{
+                <div className="product-image-container" style={{
                   height: '200px',
                   backgroundColor: '#f8f9fa',
                   borderRadius: '8px',
                   marginBottom: '1rem',
+                  overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#6c757d',
-                  overflow: 'hidden'
+                  justifyContent: 'center'
                 }}>
                   {product.image ? (
                     <img 
@@ -308,20 +367,42 @@ const Products = () => {
                       }}
                     />
                   ) : (
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ textAlign: 'center', color: '#6c757d' }}>
                       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📦</div>
-                      <p>Фото товару</p>
+                      <p style={{ margin: 0, fontSize: '0.9rem' }}>Фото товару</p>
                     </div>
                   )}
                 </div>
                 
-                <ProductTitle title={product.title} />
+                <div className="card-content">
+                <div className="title-container" style={{
+                  minHeight: '3.9rem',
+                  maxHeight: '3.9rem',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  marginBottom: '0.5rem',
+                  paddingTop: '0.25rem'
+                }}>
+                  <ProductTitle 
+                    title={product.title} 
+                    style={{
+                      lineHeight: '1.3',
+                      textAlign: 'left',
+                      wordSpacing: 'normal',
+                      fontWeight: '600'
+                    }}
+                  />
+                </div>
                 <div className="price" style={{
                   fontSize: '1.25rem',
                   fontWeight: '600',
                   color: '#008080',
                   marginBottom: '1rem',
-                  lineHeight: '1.4'
+                  lineHeight: '1.4',
+                  minHeight: '2.5rem',
+                  display: 'flex',
+                  alignItems: 'flex-start'
                 }}>
                   {(() => {
                     // Знаходимо оригінальний продукт з JSON для отримання priceValidUntil
@@ -348,9 +429,34 @@ const Products = () => {
                   })()}
                 </div>
                 
-                <p>{product.description}</p>
+                {/* Контент що розтягується */}
+                <div style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+                  <p style={{
+                    minHeight: '4.2rem',
+                    maxHeight: '4.2rem',
+                    overflow: 'hidden',
+                    marginBottom: '1rem',
+                    lineHeight: '1.4',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    fontSize: '0.9rem',
+                    color: '#666'
+                  }}>
+                    {product.description}
+                  </p>
+                </div>
+                </div>
                 
-                <div className="properties" style={{marginBottom: '1.5rem'}}>
+                {/* Властивості (для wide-card будуть під зображенням) */}
+                <div className="properties" style={{
+                  marginBottom: '1.5rem',
+                  minHeight: '3rem',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignContent: 'flex-start',
+                  gap: '0.5rem'
+                }}>
                   {product.properties.map((prop, index) => (
                     <span
                       key={index}
@@ -360,8 +466,7 @@ const Products = () => {
                         padding: '0.25rem 0.5rem',
                         borderRadius: '12px',
                         fontSize: '0.875rem',
-                        marginRight: '0.5rem',
-                        marginBottom: '0.5rem'
+                        whiteSpace: 'nowrap'
                       }}
                     >
                       {prop}
@@ -369,6 +474,7 @@ const Products = () => {
                   ))}
                 </div>
                 
+                {/* Кнопки (для wide-card будуть в правій колонці) */}
                 <div className="card-actions" style={{
                   display: 'flex',
                   gap: '0.5rem',
@@ -419,16 +525,77 @@ const Products = () => {
   );
 };
 
-// Додаємо CSS стилі для анімації завантаження
+// Глобальна обробка помилок ResizeObserver
+window.addEventListener('error', (e) => {
+  if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+    // Придушуємо цю специфічну помилку
+    e.preventDefault();
+    return false;
+  }
+});
+
+// Додаємо CSS стилі для анімації завантаження та адаптивних карток
 const style = document.createElement('style');
 style.textContent = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+  
+  /* Стилі для широких карток */
+  .card.wide-card {
+    display: grid !important;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  
+  /* Зображення: ліва колонка, перший рядок */
+  .card.wide-card .product-image-container {
+    grid-column: 1;
+    grid-row: 1;
+    height: 250px;
+    margin-bottom: 0;
+  }
+  
+  /* Контент: права колонка, перший рядок */
+  .card.wide-card .card-content {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Властивості: ліва колонка, другий рядок (під зображенням) */
+  .card.wide-card .properties {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    align-self: start;
+  }
+  
+  /* Кнопки: права колонка, другий рядок (під контентом) */
+  .card.wide-card .card-actions {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    align-self: start;
+  }
+  
+  /* Адаптивна висота заголовків в одноколонковому режимі */
+  @media (max-width: 768px) {
+    .title-container {
+      height: auto !important;
+      max-height: none !important;
+    }
+  }
 `;
-if (!document.head.querySelector('style[data-products-spinner]')) {
-  style.setAttribute('data-products-spinner', 'true');
+if (!document.head.querySelector('style[data-products-styles]')) {
+  style.setAttribute('data-products-styles', 'true');
   document.head.appendChild(style);
 }
 

@@ -84,7 +84,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="container" style={{ padding: '2rem 0' }}>
+      <div className="container" style={{ padding: '2rem 2rem' }}>
         <div style={{ textAlign: 'center', padding: '3rem', color: '#6c757d' }}>
           <h2>Товар не знайдено</h2>
           <p>Вибачте, запитуваний товар не існує або був видалений.</p>
@@ -99,7 +99,7 @@ const ProductDetail = () => {
   const priceParts = formatProductPriceParts(product);
 
   return (
-    <div className="container" style={{ padding: '2rem 0' }}>
+    <div className="container" style={{ padding: '2rem 2rem' }}>
       {/* Навігаційна панель */}
       <div className="breadcrumb-nav">
         <Link to="/" className="breadcrumb-link">Головна</Link>
@@ -533,6 +533,8 @@ const getSpecificationLabel = (key) => {
     sand_type: 'Тип піску',
     module_size: 'Модуль крупності',
     clay_content: 'Вміст глинистих частинок',
+    moisture: 'Вологість',
+    bulk_density: 'Насипна щільність',
     concrete_grade: 'Марка бетону',
     concrete_class: 'Клас бетону',
     workability: 'Рухливість',
@@ -552,6 +554,15 @@ const getSpecificationValue = (key, value) => {
       'granite': 'граніт'
     };
     return rockTypeTranslations[value] || value;
+  }
+  
+  // Переклади для типу піску
+  if (key === 'sand_type') {
+    const sandTypeTranslations = {
+      'river': 'річковий',
+      'ravine': 'яружний'
+    };
+    return sandTypeTranslations[value] || value;
   }
   
   // Для інших характеристик повертаємо оригінальне значення

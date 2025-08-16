@@ -1,13 +1,13 @@
 // Утиліти для роботи з товарами COMSPEC
 import { gravelData } from '../categories/gravel.js';
-// import { sandData } from '../categories/sand.js';
+import { sandData } from '../categories/sand.js';
 // import { asphaltData } from '../categories/asphalt.js';
 // import { concreteData } from '../categories/concrete.js';
 
-// Поки що завантажуємо тільки щебінь, інші категорії додамо пізніше
+// Завантажуємо щебінь та пісок, інші категорії додамо пізніше
 const categoriesData = {
-  gravel: gravelData
-  // sand: sandData,
+  gravel: gravelData,
+  sand: sandData
   // asphalt: asphaltData,
   // concrete: concreteData
 };
@@ -450,11 +450,12 @@ const ProductHelpers = {
 export const wrapFractionsInTitle = (title) => {
   if (!title || typeof title !== 'string') return title;
   
-  // Регулярний вираз для пошуку фракцій типу: 0-5, 20-40, 0,05-70, 0,63-2,00 тощо
-  const fractionRegex = /(\d+(?:,\d+)?-\d+(?:,\d+)?)/g;
+  // Регулярний вираз для пошуку фракцій з можливими пробілами навколо: 0-5, 20-40, 0,05-70, 0,63-2,00 тощо
+  const fractionRegex = /(\s*)(\d+(?:,\d+)?-\d+(?:,\d+)?)(\s*)/g;
   
-  // Перевіряємо чи є фракції в заголовку
-  if (!fractionRegex.test(title)) {
+  // Перевіряємо чи є фракції в заголовку (простіший регекс для тесту)
+  const testRegex = /\d+(?:,\d+)?-\d+(?:,\d+)?/g;
+  if (!testRegex.test(title)) {
     return title;
   }
   
@@ -467,18 +468,30 @@ export const wrapFractionsInTitle = (title) => {
   fractionRegex.lastIndex = 0;
   
   while ((match = fractionRegex.exec(title)) !== null) {
-    // Додаємо текст перед фракцією
+    const [fullMatch, spaceBefore, fraction, spaceAfter] = match;
+    
+    // Додаємо текст перед фракцією (з пробілами перед)
     if (match.index > lastIndex) {
       parts.push(title.slice(lastIndex, match.index));
+    }
+    
+    // Додаємо пробіли перед фракцією (якщо є)
+    if (spaceBefore) {
+      parts.push(spaceBefore);
     }
     
     // Додаємо фракцію з no-wrap
     parts.push({
       type: 'nowrap',
-      content: match[0]
+      content: fraction
     });
     
-    lastIndex = match.index + match[0].length;
+    // Додаємо пробіли після фракції (якщо є)
+    if (spaceAfter) {
+      parts.push(spaceAfter);
+    }
+    
+    lastIndex = match.index + fullMatch.length;
   }
   
   // Додаємо залишок тексту
