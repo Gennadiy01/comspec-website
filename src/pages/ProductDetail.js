@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
-import ProductsAPI, { formatProductPriceParts, getImageUrl } from '../data/products/productsAPI.js';
+import ProductsAPI, { formatProductPriceParts } from '../data/products/productsAPI.js';
 import ProductTitle from '../components/ProductTitle';
 import LazyImage from '../components/LazyImage/LazyImage.js';
 
