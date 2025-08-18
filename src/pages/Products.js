@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
 import ProductsAPI, { formatProductPriceParts } from '../data/products/productsAPI.js';
 import ProductTitle from '../components/ProductTitle';
+import { getMobileImageUrl, getDesktopImageUrl } from '../data/products/productsAPI.js';
 
 const Products = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -356,16 +357,23 @@ const Products = () => {
                   justifyContent: 'center'
                 }}>
                   {product.image ? (
-                    <img 
-                      src={product.image} 
-                      alt={product.imageAlt || product.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                    />
+                    <picture style={{ width: '100%', height: '100%', display: 'block' }}>
+                      <source 
+                        media="(max-width: 768px)" 
+                        srcSet={getMobileImageUrl(product.image)}
+                      />
+                      <img 
+                        src={getDesktopImageUrl(product.image)}
+                        alt={product.imageAlt || product.title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          display: 'block'
+                        }}
+                      />
+                    </picture>
                   ) : (
                     <div style={{ textAlign: 'center', color: '#6c757d' }}>
                       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📦</div>

@@ -74,3 +74,21 @@
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+// Специфічні стилі для карток товарів
+.product-card-image {
+  .lazy-image__img {
+    position: relative !important;
+    display: block;
+    
+    &.loaded {
+      position: relative !important;
+    }
+  }
+  
+  .lazy-image__placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}

@@ -1,17 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getDesktopImageUrl, getMobileImageUrl, getPlaceholderImageUrl } from '../../data/products/productsAPI.js';
 import './LazyImage.scss';
 
 const LazyImage = ({ 
   src, 
   alt = '', 
-  placeholder = '/images/placeholder.jpg',
+  placeholder,
   width = 'auto',
   height = 'auto',
   className = '',
   priority = false, // Для критичних зображень (hero, логотипи)
   objectFit = 'cover',
+  responsive = false, // Чи використовувати responsive зображення
   ...props 
 }) => {
+  // Автоматично генеруємо placeholder якщо не передано
+  const placeholderSrc = placeholder || (responsive && src ? getPlaceholderImageUrl(src) : '/images/placeholder.jpg');
+  
+  // Генеруємо URLs для responsive зображень
+  const mobileImageUrl = responsive && src ? getMobileImageUrl(src) : null;
+  const desktopImageUrl = responsive && src ? getDesktopImageUrl(src) : null;
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [inView, setInView] = useState(priority); // Якщо priority - завантажувати одразу
@@ -62,9 +70,9 @@ const LazyImage = ({
       {/* Placeholder поки завантажується */}
       {!loaded && !error && (
         <div className="lazy-image__placeholder">
-          {placeholder ? (
+          {placeholderSrc ? (
             <img 
-              src={placeholder}
+              src={placeholderSrc}
               alt=""
               style={{ 
                 width: '100%', 
@@ -85,21 +93,47 @@ const LazyImage = ({
 
       {/* Основне зображення */}
       {inView && (
-        <img 
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          onError={handleError}
-          className={`lazy-image__img ${loaded ? 'loaded' : ''}`}
-          style={{ 
-            width: '100%',
-            height: '100%',
-            objectFit,
-            transition: 'opacity 0.3s ease-in-out',
-            opacity: loaded ? 1 : 0
-          }}
-          {...props}
-        />
+        responsive && desktopImageUrl ? (
+          <picture className={`lazy-image__picture ${loaded ? 'loaded' : ''}`}>
+            {mobileImageUrl && (
+              <source 
+                media="(max-width: 768px)" 
+                srcSet={mobileImageUrl}
+              />
+            )}
+            <img 
+              src={desktopImageUrl}
+              alt={alt}
+              onLoad={handleLoad}
+              onError={handleError}
+              className="lazy-image__img"
+              style={{ 
+                width: '100%',
+                height: '100%',
+                objectFit,
+                transition: 'opacity 0.3s ease-in-out',
+                opacity: loaded ? 1 : 0
+              }}
+              {...props}
+            />
+          </picture>
+        ) : (
+          <img 
+            src={src}
+            alt={alt}
+            onLoad={handleLoad}
+            onError={handleError}
+            className={`lazy-image__img ${loaded ? 'loaded' : ''}`}
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit,
+              transition: 'opacity 0.3s ease-in-out',
+              opacity: loaded ? 1 : 0
+            }}
+            {...props}
+          />
+        )
       )}
 
       {/* Fallback при помилці */}

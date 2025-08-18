@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
 import ProductsAPI, { formatProductPriceParts, getImageUrl } from '../data/products/productsAPI.js';
 import ProductTitle from '../components/ProductTitle';
+import LazyImage from '../components/LazyImage/LazyImage.js';
 
 const ProductDetail = () => {
   const { category, id } = useParams();
@@ -135,14 +136,14 @@ const ProductDetail = () => {
             className="product-image"
           >
             {product.image ? (
-              <img 
-                src={getImageUrl(product.image)} 
+              <LazyImage 
+                src={product.image}
                 alt={product.imageAlt || product.title}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
+                responsive={true}
+                width="100%"
+                height="100%"
+                objectFit="cover"
+                priority={true}
               />
             ) : (
               <div style={{ textAlign: 'center' }}>

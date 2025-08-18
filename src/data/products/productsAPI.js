@@ -75,20 +75,57 @@ export const CATEGORIES_LIST = [
 // === УТИЛІТАРНІ ФУНКЦІЇ ===
 
 /**
- * Отримання правильного URL для зображень з врахуванням базового шляху
+ * Отримання правильного URL для зображень з врахуванням базового шляху та нової структури папок
  * @param {string} imagePath - Шлях до зображення
+ * @param {string} size - Розмір зображення ('desktop', 'mobile', 'placeholder')
  * @returns {string} Повний URL зображення
  */
-export const getImageUrl = (imagePath) => {
+export const getImageUrl = (imagePath, size = 'desktop') => {
   if (!imagePath) return null;
   
   // Якщо вже повний URL - повертаємо як є
   if (imagePath.startsWith('http')) return imagePath;
   
-  // Додаємо базовий URL для GitHub Pages
+  // Базовий URL для GitHub Pages
   const baseUrl = process.env.PUBLIC_URL || '';
+  
+  // Перевіряємо чи шлях вже містить baseUrl
+  const cleanImagePath = imagePath.startsWith(baseUrl) ? imagePath.replace(baseUrl, '') : imagePath;
+  
+  // Якщо шлях вказує на /images/products/ - оновлюємо структуру
+  if (cleanImagePath.includes('/images/products/') && !cleanImagePath.includes('/desktop/') && !cleanImagePath.includes('/mobile/') && !cleanImagePath.includes('/placeholders/')) {
+    // Витягуємо назву файлу
+    const fileName = cleanImagePath.split('/').pop();
+    
+    // Формуємо новий шлях залежно від розміру
+    switch (size) {
+      case 'mobile':
+        // Для mobile версії додаємо -mobile перед розширенням
+        const mobileFileName = fileName.replace(/\.(jpg|jpeg|png)$/i, '-mobile.$1');
+        return `${baseUrl}/images/products/mobile/${mobileFileName}`;
+        
+      case 'placeholder':
+        // Для placeholder додаємо -placeholder перед розширенням та змінюємо на SVG
+        const placeholderFileName = fileName.replace(/\.(jpg|jpeg|png)$/i, '-placeholder.svg');
+        return `${baseUrl}/images/products/placeholders/${placeholderFileName}`;
+        
+      case 'desktop':
+      default:
+        // Для desktop версії використовуємо папку desktop
+        return `${baseUrl}/images/products/desktop/${fileName}`;
+    }
+  }
+  
+  // Якщо шлях вже містить структуру папок - повертаємо як є
   return `${baseUrl}${imagePath}`;
 };
+
+/**
+ * Допоміжні функції для отримання зображень різних розмірів
+ */
+export const getDesktopImageUrl = (imagePath) => getImageUrl(imagePath, 'desktop');
+export const getMobileImageUrl = (imagePath) => getImageUrl(imagePath, 'mobile');  
+export const getPlaceholderImageUrl = (imagePath) => getImageUrl(imagePath, 'placeholder');
 
 // === ФУНКЦІЇ СУМІСНОСТІ ===
 
@@ -106,7 +143,7 @@ export const getProductsForLegacyCode = () => {
     price: formatProductPrice(product),
     description: product.description,
     properties: product.properties || [],
-    image: getImageUrl(product.image),
+    image: product.image, // LazyImage сама викличе getImageUrl()
     imageAlt: product.imageAlt
   }));
 };
