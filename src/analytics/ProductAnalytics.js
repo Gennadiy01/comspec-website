@@ -16,11 +16,11 @@ class ProductAnalytics {
     this.sessionId = null;
     this.startTime = null;
     
-    // Конфігурація
+    // Конфігурація з підтримкою runtime config
     this.config = {
-      enabled: process.env.REACT_APP_ANALYTICS_ENABLED !== 'false',
-      debugMode: process.env.REACT_APP_DEBUG_MODE === 'true',
-      samplingRate: parseInt(process.env.REACT_APP_ANALYTICS_SAMPLING_RATE) || 100,
+      enabled: this.getAnalyticsEnabled(),
+      debugMode: this.getDebugMode(),
+      samplingRate: this.getSamplingRate(),
       retryLimit: 3,
       batchSize: 10
     };
@@ -394,7 +394,7 @@ class ProductAnalytics {
    */
   startQueueProcessor() {
     // Перевіряємо чи потрібно відключити аналітику на localhost
-    if (process.env.REACT_APP_DISABLE_ANALYTICS_LOCALHOST === 'true' && 
+    if (this.getDisableLocalhostAnalytics() && 
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
       this.log('🚫 Аналітика відключена для localhost');
       return;
@@ -572,6 +572,66 @@ class ProductAnalytics {
       localCache: instance.localCache,
       userStats: this.getUserStats()
     };
+  }
+
+  /**
+   * Методи для отримання конфігурації з різних джерел
+   */
+  getAnalyticsEnabled() {
+    // Через .env
+    if (process.env.REACT_APP_ANALYTICS_ENABLED !== undefined) {
+      return process.env.REACT_APP_ANALYTICS_ENABLED !== 'false';
+    }
+
+    // Через runtime config (GitHub Pages)
+    if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.ANALYTICS_ENABLED !== undefined) {
+      return window.RUNTIME_CONFIG.ANALYTICS_ENABLED;
+    }
+
+    // За замовчуванням увімкнено
+    return true;
+  }
+
+  getDebugMode() {
+    // Через .env
+    if (process.env.REACT_APP_ANALYTICS_DEBUG_MODE !== undefined) {
+      return process.env.REACT_APP_ANALYTICS_DEBUG_MODE === 'true';
+    }
+
+    // Через runtime config
+    if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.ANALYTICS_DEBUG_MODE !== undefined) {
+      return window.RUNTIME_CONFIG.ANALYTICS_DEBUG_MODE;
+    }
+
+    return false;
+  }
+
+  getSamplingRate() {
+    // Через .env
+    if (process.env.REACT_APP_ANALYTICS_SAMPLING_RATE) {
+      return parseInt(process.env.REACT_APP_ANALYTICS_SAMPLING_RATE) || 100;
+    }
+
+    // Через runtime config
+    if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.ANALYTICS_SAMPLING_RATE !== undefined) {
+      return window.RUNTIME_CONFIG.ANALYTICS_SAMPLING_RATE;
+    }
+
+    return 100;
+  }
+
+  getDisableLocalhostAnalytics() {
+    // Через .env
+    if (process.env.REACT_APP_DISABLE_ANALYTICS_LOCALHOST !== undefined) {
+      return process.env.REACT_APP_DISABLE_ANALYTICS_LOCALHOST === 'true';
+    }
+
+    // Через runtime config
+    if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.DISABLE_ANALYTICS_LOCALHOST !== undefined) {
+      return window.RUNTIME_CONFIG.DISABLE_ANALYTICS_LOCALHOST;
+    }
+
+    return false;
   }
 }
 

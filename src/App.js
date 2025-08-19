@@ -22,9 +22,17 @@ import ScrollToTop from './components/ScrollToTop';
 import './utils/testingTools';
 import './utils/limitChecker';
 
+// 📊 Система аналітики
+import ProductAnalytics from './analytics/ProductAnalytics';
+
 import './styles/main.scss';
 
 function App() {
+  // Ініціалізуємо систему аналітики при завантаженні App
+  React.useEffect(() => {
+    ProductAnalytics.init();
+  }, []);
+
   return (
     <SimpleErrorBoundary>
       <OrderModalProvider>
