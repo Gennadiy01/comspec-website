@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
-import PopularProducts from '../analytics/components/PopularProducts';
+// import PopularProducts from '../analytics/components/PopularProducts';
 
 // Імпорт зображень з src/assets для секції Продукція
 import gravelIcon from '../assets/icons/gravel.png';
@@ -147,7 +147,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Products Section */}
+      {/* Popular Products Section - Temporarily disabled */}
+      {/* 
       <section className="section popular-section gray">
         <div className="container">
           <PopularProducts 
@@ -157,6 +158,7 @@ const Home = () => {
           />
         </div>
       </section>
+      */}
 
       {/* Services Section */}
       <section className="section dark">
