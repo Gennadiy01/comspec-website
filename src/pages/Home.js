@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useOrderModal } from '../context/OrderModalContext';
+import PopularProducts from '../analytics/components/PopularProducts';
 
 // Імпорт зображень з src/assets для секції Продукція
 import gravelIcon from '../assets/icons/gravel.png';
@@ -143,6 +144,17 @@ const Home = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Popular Products Section */}
+      <section className="section popular-section gray">
+        <div className="container">
+          <PopularProducts 
+            limit={4}
+            showInHomepage={true}
+            title="Популярні товари"
+          />
         </div>
       </section>
 
