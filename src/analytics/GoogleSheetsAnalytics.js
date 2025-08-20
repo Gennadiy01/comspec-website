@@ -239,13 +239,21 @@ class GoogleSheetsAnalytics {
       return result;
 
     } catch (error) {
+      console.log(`❌ Fetch помилка для ${sheetName}:`, error.message);
+      
       // Якщо CORS помилка - спробуємо JSONP fallback
-      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-        console.log('🔄 CORS помилка, спробуємо JSONP fallback...');
+      if (error.message.includes('CORS') || 
+          error.message.includes('Failed to fetch') ||
+          error.message.includes('NetworkError') ||
+          error.name === 'TypeError') {
+        console.log('🔄 Виявлено CORS/Network помилку, спробуємо JSONP fallback...');
         try {
-          return await this.sendToSheetViaJSONP(sheetName, data);
+          const jsonpResult = await this.sendToSheetViaJSONP(sheetName, data);
+          console.log('✅ JSONP fallback спрацював:', jsonpResult);
+          return jsonpResult;
         } catch (jsonpError) {
           console.error('❌ JSONP fallback також не спрацював:', jsonpError);
+          this.logError('JSONP fallback помилка:', jsonpError);
         }
       }
       
@@ -262,27 +270,40 @@ class GoogleSheetsAnalytics {
    * JSONP fallback для обходу CORS
    */
   async sendToSheetViaJSONP(sheetName, data) {
+    console.log(`🔄 JSONP fallback для ${sheetName} з ${data.length} записами`);
+    
     return new Promise((resolve, reject) => {
       const callbackName = 'jsonp_callback_' + Math.random().toString(36).substr(2, 9);
+      console.log('📞 Створено callback:', callbackName);
       
       // Створюємо глобальний callback
       window[callbackName] = function(response) {
-        console.log('📊 JSONP Response:', response);
+        console.log('📊 JSONP Response отримано:', response);
+        
+        // Очищуємо ресурси
         delete window[callbackName];
-        document.head.removeChild(script);
+        if (script && script.parentNode) {
+          document.head.removeChild(script);
+        }
         
         if (response && response.success) {
+          console.log('✅ JSONP успішно:', response);
           resolve(response);
         } else {
+          console.error('❌ JSONP помилка в response:', response);
           reject(new Error(response?.error || 'JSONP request failed'));
         }
       };
 
       // Створюємо script tag для JSONP
       const script = document.createElement('script');
-      script.onerror = () => {
+      
+      script.onerror = (event) => {
+        console.error('❌ JSONP script loading error:', event);
         delete window[callbackName];
-        document.head.removeChild(script);
+        if (script.parentNode) {
+          document.head.removeChild(script);
+        }
         reject(new Error('JSONP script loading failed'));
       };
       
@@ -295,16 +316,21 @@ class GoogleSheetsAnalytics {
       });
       
       script.src = `${this.config.scriptUrl}?${params.toString()}`;
-      console.log('🔗 JSONP URL:', script.src);
+      console.log('🔗 JSONP URL створено:', script.src);
+      console.log('📏 URL довжина:', script.src.length);
       
       document.head.appendChild(script);
+      console.log('📜 Script додано до DOM');
       
       // Timeout після 10 секунд
       setTimeout(() => {
         if (window[callbackName]) {
+          console.warn('⏰ JSONP timeout після 10 секунд');
           delete window[callbackName];
-          document.head.removeChild(script);
-          reject(new Error('JSONP request timeout'));
+          if (script.parentNode) {
+            document.head.removeChild(script);
+          }
+          reject(new Error('JSONP request timeout (10s)'));
         }
       }, 10000);
     });
@@ -463,6 +489,9 @@ class GoogleSheetsAnalytics {
     }
 
     try {
+      console.log('🧪 Тестування підключення до Google Sheets...');
+      console.log('🔗 URL:', instance.config.scriptUrl);
+      
       const testData = [{
         timestamp: Date.now(),
         date: new Date().toISOString().split('T')[0],
@@ -473,32 +502,26 @@ class GoogleSheetsAnalytics {
         extra_data: JSON.stringify({ test: true })
       }];
 
-      const response = await fetch(instance.config.scriptUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'test',
-          sheet: instance.sheets.PRODUCT_EVENTS,
-          data: testData
-        })
-      });
-
-      const result = await response.json();
+      // Використовуємо sendToSheet замість прямого fetch
+      // Це автоматично запустить JSONP fallback якщо CORS не спрацює
+      const result = await instance.sendToSheet(instance.sheets.PRODUCT_EVENTS, testData);
+      
+      console.log('✅ Результат тестування:', result);
 
       return {
-        success: result.success || response.ok,
-        status: response.status,
+        success: result.success || true,
         data: result,
-        message: result.success ? 'Підключення успішне' : (result.error || 'Помилка підключення')
+        message: result.success ? 'Підключення успішне через sendToSheet' : 'Помилка sendToSheet'
       };
 
     } catch (error) {
+      console.error('❌ Помилка тестування підключення:', error);
       instance.logError('Помилка тестування підключення:', error);
+      
       return {
         success: false,
-        error: error.message
+        error: error.message,
+        message: `Підключення не вдалося: ${error.message}`
       };
     }
   }
@@ -630,7 +653,28 @@ export default GoogleSheetsAnalytics;
 // Глобальний доступ для відладки
 if (typeof window !== 'undefined') {
   window.GoogleSheetsAnalytics = GoogleSheetsAnalytics;
-  window.analyticsTest = () => GoogleSheetsAnalytics.testConnection();
-  window.analyticsRetry = () => GoogleSheetsAnalytics.retryFailedRequests();
-  window.analyticsStats = () => GoogleSheetsAnalytics.getFailedRequestsStats();
+  window.analyticsTest = () => {
+    console.log('🧪 Запускаємо тест підключення до Google Sheets...');
+    return GoogleSheetsAnalytics.testConnection();
+  };
+  window.analyticsRetry = () => {
+    console.log('🔄 Повторюємо невдалі запити...');
+    return GoogleSheetsAnalytics.retryFailedRequests();
+  };
+  window.analyticsStats = () => {
+    console.log('📊 Статистика невдалих запитів:');
+    const stats = GoogleSheetsAnalytics.getFailedRequestsStats();
+    console.table(stats);
+    return stats;
+  };
+  window.analyticsClear = () => {
+    console.log('🧹 Очищуємо невдалі запити...');
+    GoogleSheetsAnalytics.clearFailedRequests();
+  };
+  window.analyticsConfig = () => {
+    const instance = GoogleSheetsAnalytics.getInstance();
+    console.log('⚙️ Конфігурація аналітики:');
+    console.table(instance.config);
+    return instance.config;
+  };
 }

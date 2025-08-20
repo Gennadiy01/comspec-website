@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Google Sheets Analytics</title>
+</head>
+<body>
+    <h1>🧪 Тест Google Sheets Analytics</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Конфігурація (копіюємо з public/config.js)
+        window.RUNTIME_CONFIG = {
+            ANALYTICS_ENABLED: true,
+            ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzXekrg8my4614350FMdw0gt5XIaHZYTY7ta5kdDmIfNnFKM0K4CIaAY8TBj77sdgKu/exec',
+            ANALYTICS_SAMPLING_RATE: 100,
+            ANALYTICS_DEBUG_MODE: true,
+            DISABLE_ANALYTICS_LOCALHOST: false
+        };
+        
+        const results = document.getElementById('results');
+        
+        function log(message) {
+            console.log(message);
+            results.innerHTML += '<p>' + message + '</p>';
+        }
+        
+        // Тестуємо прямий fetch до Google Apps Script
+        async function testDirectFetch() {
+            log('🔧 Тестуємо прямий fetch до Google Apps Script...');
+            
+            const url = window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL;
+            const testData = {
+                action: 'test',
+                sheet: 'ProductEvents',
+                data: [{
+                    timestamp: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    event_type: 'connection_test',
+                    product_id: 'test',
+                    user_id: 'test_user',
+                    source: 'test',
+                    extra_data: JSON.stringify({ test: true })
+                }]
+            };
+            
+            try {
+                log('📡 Відправляємо POST запит...');
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData),
+                    mode: 'cors'
+                });
+                
+                log(`📊 Response status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('✅ POST успішний: ' + JSON.stringify(result, null, 2));
+                } else {
+                    log('❌ POST помилка: ' + response.statusText);
+                }
+                
+            } catch (error) {
+                log('❌ POST CORS/Network помилка: ' + error.message);
+                
+                // Тестуємо JSONP fallback
+                await testJSONPFallback(url, testData);
+            }
+        }
+        
+        async function testJSONPFallback(url, data) {
+            log('🔄 Тестуємо JSONP fallback...');
+            
+            return new Promise((resolve, reject) => {
+                const callbackName = 'test_callback_' + Date.now();
+                
+                window[callbackName] = function(response) {
+                    log('📊 JSONP Response: ' + JSON.stringify(response, null, 2));
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    resolve(response);
+                };
+                
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    log('❌ JSONP script loading failed');
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    reject(new Error('Script loading failed'));
+                };
+                
+                const params = new URLSearchParams({
+                    action: data.action,
+                    sheet: data.sheet,
+                    data: JSON.stringify(data.data),
+                    callback: callbackName
+                });
+                
+                script.src = url + '?' + params.toString();
+                log('🔗 JSONP URL: ' + script.src);
+                
+                document.head.appendChild(script);
+                
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        log('⏰ JSONP timeout');
+                        delete window[callbackName];
+                        document.head.removeChild(script);
+                        reject(new Error('Timeout'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        // Запускаємо тест при завантаженні сторінки
+        window.addEventListener('load', () => {
+            log('🚀 Початок тестування...');
+            testDirectFetch();
+        });
+    </script>
+</body>
+</html>

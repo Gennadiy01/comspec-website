@@ -1,16 +1,35 @@
+# 📊 ОНОВЛЕНИЙ Google Apps Script - версія 2.3
+
+## ⚠️ КРИТИЧНА ПРОБЛЕМА ВИЯВЛЕНА: 302 REDIRECT
+
+**Дата:** 20.08.2025  
+**Проблема:** Google Apps Script повертає `302 Moved Temporarily` замість виконання коду
+**Симптом:** Всі POST і GET запити редиректяться на `script.googleusercontent.com`
+**Причина:** Проблема з deployment або правами доступу
+
+## 🚨 ДІАГНОСТИКА:
+
+```bash
+# Тест показав:
+📊 Status Code: 302
+📋 Headers: {
+  'location': 'https://script.googleusercontent.com/macros/echo?user_content_key=...'
+}
+📦 Response Body: <HTML><HEAD><TITLE>Moved Temporarily</TITLE></HEAD>...
+```
+
+## 🔧 ПЛАН ВИПРАВЛЕННЯ:
+
+### 1. 🚀 НОВИЙ КОД Google Apps Script (версія 2.3):
+
+```javascript
 /**
  * 📊 COMSPEC Website Analytics - Google Apps Script v2.3
  * Виправлення проблеми 302 редирект
- * 
- * ВАЖЛИВО: Цей скрипт має бути налаштований в окремій Google таблиці,
- * незалежно від основної таблиці замовлень
- * 
- * ДАТА ОНОВЛЕННЯ: 20.08.2025
- * ВЕРСІЯ: 2.3 - Виправлено 302 редирект, спрощено код для стабільності
+ * ДАТА: 20.08.2025
  */
 
 // === КОНФІГУРАЦІЯ ===
-
 const SHEETS = {
   PRODUCT_EVENTS: 'ProductEvents',
   PAGE_VIEWS: 'PageViews', 
@@ -23,28 +42,28 @@ const CONFIG = {
   MAX_ROWS_PER_SHEET: 10000
 };
 
-// === ГОЛОВНІ ФУНКЦІЇ ОБРОБКИ ЗАПИТІВ ===
+// === ОСНОВНІ ФУНКЦІЇ ===
 
 /**
- * Головна функція для POST запитів (стандартний API)
+ * POST запити
  */
 function doPost(e) {
   return handleRequest(e, 'POST');
 }
 
 /**
- * Функція для GET запитів (JSONP fallback)
+ * GET запити (JSONP)
  */
 function doGet(e) {
   return handleRequest(e, 'GET');
 }
 
 /**
- * Функція для OPTIONS запитів (CORS preflight)
+ * OPTIONS (CORS preflight)
  */
 function doOptions(e) {
-  return ContentService
-    .createTextOutput('');
+  const output = ContentService.createTextOutput('');
+  return output;
 }
 
 /**
@@ -85,36 +104,19 @@ function handleRequest(e, method) {
       }
     } else {
       // GET запит
-      if (!e || !e.parameter) {
-        console.log('⚠️ GET без параметрів - створюємо тестові дані');
-        requestData = {
-          action: 'test',
-          sheet: 'ProductEvents',
-          data: [{
-            timestamp: Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            event_type: 'get_test',
-            product_id: 'test_product',
-            user_id: 'test_user',
-            source: 'jsonp',
-            extra_data: JSON.stringify({ test: true, method: 'GET' })
-          }]
-        };
-      } else {
-        requestData = {
-          action: e.parameter.action || 'test',
-          sheet: e.parameter.sheet || 'ProductEvents',
-          data: e.parameter.data ? JSON.parse(e.parameter.data) : [{
-            timestamp: Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            event_type: 'get_test',
-            product_id: 'test_product',
-            user_id: 'test_user',
-            source: 'jsonp',
-            extra_data: JSON.stringify({ test: true, method: 'GET' })
-          }]
-        };
-      }
+      requestData = {
+        action: e.parameter?.action || 'test',
+        sheet: e.parameter?.sheet || 'ProductEvents',
+        data: e.parameter?.data ? JSON.parse(e.parameter.data) : [{
+          timestamp: Date.now(),
+          date: new Date().toISOString().split('T')[0],
+          event_type: 'get_test',
+          product_id: 'test_product',
+          user_id: 'test_user',
+          source: 'jsonp',
+          extra_data: JSON.stringify({ test: true, method: 'GET' })
+        }]
+      };
     }
 
     console.log('📦 Дані запиту:', requestData);
@@ -140,10 +142,8 @@ function handleRequest(e, method) {
     response.error = error.message;
   }
 
-  return createResponse(response, method, e && e.parameter ? e.parameter.callback : null);
+  return createResponse(response, method, e?.parameter?.callback);
 }
-
-// === ОБРОБКА АНАЛІТИЧНИХ ДАНИХ ===
 
 /**
  * Обробка аналітичних даних
@@ -200,28 +200,6 @@ function processAnalytics(sheetName, data) {
   };
 }
 
-// === ОСНОВНІ ФУНКЦІЇ ===
-
-/**
- * Створення відповіді
- */
-function createResponse(responseData, method, callback) {
-  const jsonResponse = JSON.stringify(responseData, null, 2);
-  
-  if (method === 'GET' && callback) {
-    // JSONP відповідь
-    const jsonpResponse = `${callback}(${jsonResponse})`;
-    return ContentService.createTextOutput(jsonpResponse)
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  } else {
-    // JSON відповідь
-    return ContentService.createTextOutput(jsonResponse)
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// Спрощений код без зайвих функцій
-
 /**
  * Тестовий запит
  */
@@ -241,7 +219,23 @@ function processTest(sheet, data, method) {
   };
 }
 
-// === ОСНОВНІ ДОПОМІЖНІ ФУНКЦІЇ ===
+/**
+ * Створення відповіді
+ */
+function createResponse(responseData, method, callback) {
+  const jsonResponse = JSON.stringify(responseData, null, 2);
+  
+  if (method === 'GET' && callback) {
+    // JSONP відповідь
+    const jsonpResponse = `${callback}(${jsonResponse})`;
+    return ContentService.createTextOutput(jsonpResponse)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  } else {
+    // JSON відповідь
+    return ContentService.createTextOutput(jsonResponse)
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
 // === РУЧНЕ ТЕСТУВАННЯ ===
 
@@ -264,5 +258,70 @@ function manualTest() {
     return `Помилка: ${error.message}`;
   }
 }
+```
 
-// Кінець коду v2.3
+### 2. 🔧 ІНСТРУКЦІЇ З DEPLOYMENT:
+
+1. **Відкрийте Google Apps Script:** https://script.google.com
+2. **Знайдіть ваш проект аналітики**
+3. **Замініть ВЕСЬ КОД** новим кодом вище
+4. **Збережіть проект** (Ctrl+S)
+5. **КРИТИЧНО:** Створіть НОВИЙ deployment:
+   - Натисніть "Deploy" → "New deployment"
+   - Тип: "Web app"
+   - Description: `Analytics v2.3 - Fixed 302 redirect`
+   - Execute as: **Me (your email)**
+   - Who has access: **Anyone**
+6. **Скопіюйте НОВИЙ URL**
+
+### 3. 🧪 ОБОВ'ЯЗКОВЕ ТЕСТУВАННЯ В РЕДАКТОРІ:
+
+Перед deployment:
+1. Виберіть функцію `manualTest` в редакторі
+2. Натисніть "Run" 
+3. Переглянте логи - мають бути тільки зелені ✅
+
+### 4. 🔗 ОНОВЛЕННЯ URL В ПРОЕКТІ:
+
+Змініть URL в цих файлах:
+```javascript
+// public/config.js
+ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/YOUR_NEW_ID/exec',
+
+// .env.local (якщо є)
+REACT_APP_ANALYTICS_SCRIPT_URL=https://script.google.com/macros/s/YOUR_NEW_ID/exec
+```
+
+### 5. 📋 ПЕРЕВІРКА Google Sheets:
+
+Переконайтесь що:
+- ✅ Таблиця існує і доступна
+- ✅ Скрипт прив'язаний до правильної таблиці
+- ✅ У вас є права редагування
+
+### 6. 🧪 ТЕСТУВАННЯ ПІСЛЯ DEPLOYMENT:
+
+```bash
+# Тест через Node.js:
+node test-analytics-node.js
+
+# Очікуваний результат:
+📊 Status Code: 200
+📦 Response Body: {"success":true,"message":"Тест працює!"}
+```
+
+## ⚠️ ЯКЩО 302 ПРОБЛЕМА ЗАЛИШАЄТЬСЯ:
+
+### Варіант 1: Створити новий Google Apps Script
+1. Створіть абсолютно новий проект
+2. Прив'яжіть до нової Google Sheets таблиці
+3. Використайте код вище
+
+### Варіант 2: Перевірити права доступу
+1. Переконайтесь що скрипт має права до таблиці
+2. Спробуйте запустити `manualTest()` в редакторі
+3. Перевірте що deployment налаштований правильно
+
+---
+
+**🎯 МЕТА:** Виправити 302 редирект і отримати статус 200 з JSON відповіддю

@@ -4,11 +4,21 @@
 
 ```
 tests/
+├── analytics/              # Аналітика та Google Sheets тести
+│   ├── test-analytics.html # Базовий браузерний тест аналітики
+│   └── MINIMAL_GOOGLE_SCRIPT_TEST.md # Документація тестування
 ├── e2e/                    # E2E тести (end-to-end)
 ├── integration-manual/     # Тести з реальними API (gitignored)
 │   ├── google-services/    # Тести Google APIs  
 │   └── telegram/          # Тести Telegram Bot API
 ├── integration/           # Безпечні інтеграційні тести
+├── manual-browser/        # Мануальні браузерні тести
+│   ├── test-live-order.html     # Тест системи замовлень
+│   ├── test-new-analytics.html  # Розширений тест аналітики
+│   ├── test-popular-products.html # Тест популярних товарів
+│   └── test-real-analytics.html # Реальний тест production
+├── manual-node/           # Мануальні Node.js тести
+│   └── test-analytics-node.js   # Node.js тест Google Apps Script
 └── unit/                  # Unit тести
     ├── forms/             # Тести форм
     ├── telegram/          # Тести логіки Telegram (мокована)
@@ -16,6 +26,26 @@ tests/
 ```
 
 ## Типи тестів
+
+### Analytics тести (`tests/analytics/`)
+- Спеціалізовані тести системи аналітики
+- Тестування Google Sheets інтеграції
+- Документація по налаштуванню Google Apps Script
+- Базові браузерні тести без реальних API ключів
+
+### Мануальні браузерні тести (`tests/manual-browser/`)
+- HTML сторінки для тестування в браузері
+- Інтерактивні тести з UI
+- Тестування популярних товарів, замовлень, аналітики
+- Запускаються через локальний веб-сервер
+
+### Мануальні Node.js тести (`tests/manual-node/`)
+- Скрипти для запуску з командного рядка
+- Тестування HTTP/HTTPS з'єднань
+- Діагностика мережевих проблем
+- Тестування Google Apps Script API
+- Локальна симуляція аналітики через localStorage
+- HTTP сервер для браузерних тестів
 
 ### Unit тести (`tests/unit/`)
 - Тестують окремі функції та компоненти
@@ -55,6 +85,40 @@ const CHAT_ID = 'MOCK_CHAT_ID_FOR_UNIT_TESTS';
 ```
 
 ## 🚀 Запуск тестів
+
+### Analytics тести
+```bash
+# Базовий тест аналітики (браузер)
+# Відкрити: http://localhost:3000/comspec-website
+# Потім відкрити: tests/analytics/test-analytics.html
+```
+
+### Мануальні браузерні тести
+```bash
+# Запустити локальний сервер
+npm start
+
+# Відкрити в браузері:
+# http://localhost:3000/tests/manual-browser/test-live-order.html          # Тест замовлень
+# http://localhost:3000/tests/manual-browser/test-new-analytics.html       # Розширений тест аналітики  
+# http://localhost:3000/tests/manual-browser/test-popular-products.html    # Тест популярних товарів
+# http://localhost:3000/tests/manual-browser/test-real-analytics.html      # Production тест
+```
+
+### Мануальні Node.js тести  
+```bash
+# Тест Google Apps Script з командного рядка
+node tests/manual-node/test-analytics-node.js
+
+# Тестування локальної аналітики з симуляцією даних
+node tests/manual-node/test-local-analytics.js
+
+# Симуляція відправки подій в Google Sheets
+node tests/manual-node/simulate-analytics.js
+
+# HTTP сервер для браузерних тестів
+node tests/manual-node/serve-tests.js --open
+```
 
 ### Unit тести
 ```bash

@@ -2,7 +2,7 @@
 export const gravelData = {
   "category": "gravel",
   "categoryName": "Щебінь та нерудні матеріали", 
-  "description": "Гранітний щебінь, суміші, пісок та бутовий камінь з доставкою та самовивозом",
+  "description": "Гранітний щебінь, суміші, відсів та бутовий камінь з доставкою та самовивозом",
   "products": [
     {
       "id": "gravel-granite-5-10",
@@ -262,8 +262,8 @@ export const gravelData = {
     },
     {
       "id": "mixture-0-40",
-      "title": "Щебенево-піщана суміш 0,05-40",
-      "shortTitle": "Суміш 0,05-40",
+      "title": "Щебенево-піщана суміш 0,05-40 (С7)",
+      "shortTitle": "Суміш 0,05-40 С7",
       "category": "gravel",
       "categoryName": "Щебінь та нерудні матеріали",
       "subcategory": "gravel_sand_mixture",
@@ -298,8 +298,8 @@ export const gravelData = {
     },
     {
       "id": "mixture-0-70",
-      "title": "Щебенево-піщана суміш 0,05-70",
-      "shortTitle": "Суміш 0,05-70",
+      "title": "Щебенево-піщана суміш 0,05-70 (С5)",
+      "shortTitle": "Суміш 0,05-70 С5",
       "category": "gravel",
       "categoryName": "Щебінь та нерудні матеріали",
       "subcategory": "gravel_sand_mixture",

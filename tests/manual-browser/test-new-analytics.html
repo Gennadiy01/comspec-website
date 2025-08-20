@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Тест Нової Системи Аналітики</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #005a8b; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { border-left-color: #28a745; background: #f0fff4; }
+        .error { border-left-color: #dc3545; background: #fff5f5; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест Нової Системи Аналітики</h1>
+    
+    <div class="test-container">
+        <h2>📊 Налаштування</h2>
+        <p><strong>Analytics Script URL:</strong></p>
+        <code id="analytics-url">Завантаження...</code>
+        <br><br>
+        <button onclick="loadConfig()">🔄 Перезавантажити конфігурацію</button>
+        <div id="config-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔗 Тест Підключення</h2>
+        <p>Перевірка зв'язку з Google Apps Script:</p>
+        <button onclick="testConnection()">🧪 Тест Підключення</button>
+        <div id="connection-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📄 Тест Перегляду Сторінки</h2>
+        <button onclick="testPageView()">📄 Симулювати Перегляд Сторінки</button>
+        <div id="pageview-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🏷️ Тест Події Товару</h2>
+        <button onclick="testProductEvent()">🏷️ Симулювати Перегляд Товару</button>
+        <div id="product-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Статистика</h2>
+        <button onclick="showStats()">📊 Показати Статистику</button>
+        <button onclick="retryFailed()">🔄 Повторити Невдалі</button>
+        <button onclick="clearFailed()">🧹 Очистити Невдалі</button>
+        <div id="stats-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🚀 Комплексний Тест</h2>
+        <button onclick="runFullTest()" style="background: #28a745;">🚀 Запустити Повний Тест</button>
+        <div id="full-result" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Завантаження конфігурації
+        function loadConfig() {
+            const result = document.getElementById('config-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🔄 Завантаження конфігурації...';
+            
+            // Імітуємо завантаження config.js
+            const script = document.createElement('script');
+            script.src = './config.js';
+            script.onload = function() {
+                const analyticsUrl = window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL || 'НЕ ЗНАЙДЕНО';
+                document.getElementById('analytics-url').textContent = analyticsUrl;
+                
+                result.className = 'result success';
+                result.textContent = `✅ Конфігурація завантажена:\n${JSON.stringify(window.RUNTIME_CONFIG, null, 2)}`;
+            };
+            script.onerror = function() {
+                result.className = 'result error';
+                result.textContent = '❌ Помилка завантаження config.js';
+            };
+            document.head.appendChild(script);
+        }
+
+        // Пряме тестування через fetch
+        async function testConnection() {
+            const result = document.getElementById('connection-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🔄 Тестування підключення...';
+
+            const url = window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL;
+            if (!url) {
+                result.className = 'result error';
+                result.textContent = '❌ Analytics Script URL не знайдено в конфігурації';
+                return;
+            }
+
+            try {
+                const testData = {
+                    action: 'analytics',
+                    sheet: 'ProductEvents',
+                    data: [{
+                        timestamp: Date.now(),
+                        date: new Date().toISOString().split('T')[0],
+                        event_type: 'browser_test',
+                        product_id: 'TEST_' + Date.now(),
+                        user_id: 'test_browser_user',
+                        source: 'html_test_page',
+                        extra_data: JSON.stringify({ 
+                            test: true,
+                            browser: navigator.userAgent,
+                            timestamp: new Date().toISOString()
+                        })
+                    }]
+                };
+
+                console.log('🧪 Відправка POST запиту:', testData);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData),
+                    mode: 'cors'
+                });
+
+                console.log('📡 Response status:', response.status);
+                console.log('📋 Response headers:', response.headers);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📊 Response data:', data);
+                    
+                    result.className = 'result success';
+                    result.textContent = `✅ Підключення успішне!\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ HTTP Error:', errorText);
+                    
+                    result.className = 'result error';
+                    result.textContent = `❌ HTTP Error ${response.status}:\n${errorText}`;
+                }
+
+            } catch (error) {
+                console.error('❌ Fetch Error:', error);
+                
+                result.className = 'result error';
+                result.textContent = `❌ Помилка підключення:\n${error.message}\n\n🔄 Спробуємо JSONP fallback...`;
+                
+                // Спробуємо JSONP fallback
+                setTimeout(() => testWithJSONP(result), 1000);
+            }
+        }
+
+        // JSONP fallback тест
+        function testWithJSONP(resultElement) {
+            const url = window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL;
+            const callbackName = 'test_callback_' + Date.now();
+            
+            // Створюємо глобальний callback
+            window[callbackName] = function(response) {
+                console.log('📊 JSONP Response:', response);
+                
+                // Очищуємо ресурси
+                delete window[callbackName];
+                if (script && script.parentNode) {
+                    document.head.removeChild(script);
+                }
+                
+                if (response && response.success) {
+                    resultElement.className = 'result success';
+                    resultElement.textContent += `\n\n✅ JSONP fallback працює!\nResponse: ${JSON.stringify(response, null, 2)}`;
+                } else {
+                    resultElement.className = 'result error';
+                    resultElement.textContent += `\n\n❌ JSONP fallback також не спрацював:\n${JSON.stringify(response, null, 2)}`;
+                }
+            };
+
+            // Створюємо script tag для JSONP
+            const script = document.createElement('script');
+            const params = new URLSearchParams({
+                action: 'analytics',
+                sheet: 'ProductEvents',
+                data: JSON.stringify([{
+                    timestamp: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    event_type: 'jsonp_test',
+                    product_id: 'JSONP_TEST_' + Date.now(),
+                    user_id: 'test_jsonp_user',
+                    source: 'html_jsonp_test',
+                    extra_data: JSON.stringify({ test: true, method: 'JSONP' })
+                }]),
+                callback: callbackName
+            });
+            
+            script.src = `${url}?${params.toString()}`;
+            script.onerror = function() {
+                delete window[callbackName];
+                resultElement.className = 'result error';
+                resultElement.textContent += '\n\n❌ JSONP script loading failed';
+            };
+            
+            console.log('🔄 JSONP URL:', script.src);
+            document.head.appendChild(script);
+            
+            // Timeout після 10 секунд
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        document.head.removeChild(script);
+                    }
+                    resultElement.className = 'result error';
+                    resultElement.textContent += '\n\n⏰ JSONP timeout (10s)';
+                }
+            }, 10000);
+        }
+
+        // Симуляція перегляду сторінки
+        function testPageView() {
+            const result = document.getElementById('pageview-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '📄 Симуляція перегляду сторінки товару...';
+            
+            // Тут був би код аналогічний testConnection але для page view
+            setTimeout(() => {
+                result.className = 'result success';
+                result.textContent = '📄 Функція testPageView потребує реалізації після налаштування системи';
+            }, 500);
+        }
+
+        // Симуляція події товару  
+        function testProductEvent() {
+            const result = document.getElementById('product-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🏷️ Симуляція перегляду товару...';
+            
+            setTimeout(() => {
+                result.className = 'result success';
+                result.textContent = '🏷️ Функція testProductEvent потребує реалізації після налаштування системи';
+            }, 500);
+        }
+
+        // Статистика
+        function showStats() {
+            const result = document.getElementById('stats-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '📊 Статистика поки недоступна - потрібно налаштувати систему аналітики';
+        }
+
+        function retryFailed() {
+            const result = document.getElementById('stats-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🔄 Повтор невдалих запитів поки недоступний';
+        }
+
+        function clearFailed() {
+            const result = document.getElementById('stats-result');
+            result.style.display = 'block';
+            result.className = 'result success';
+            result.textContent = '🧹 Очищення виконано (симуляція)';
+        }
+
+        // Повний тест
+        async function runFullTest() {
+            const result = document.getElementById('full-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🚀 Запуск повного тесту системи аналітики...\n';
+
+            // 1. Конфігурація
+            result.textContent += '1️⃣ Перевірка конфігурації...\n';
+            const analyticsUrl = window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL;
+            if (!analyticsUrl) {
+                result.className = 'result error';
+                result.textContent += '❌ Analytics URL не знайдено в конфігурації!';
+                return;
+            }
+            result.textContent += `✅ URL знайдено: ${analyticsUrl}\n\n`;
+
+            // 2. Підключення (прямий виклик testConnection)
+            result.textContent += '2️⃣ Тестування підключення...\n';
+            result.textContent += 'ℹ️ Детальні результати дивіться в секції "Тест Підключення"\n\n';
+
+            // 3. Завершення
+            result.textContent += '✅ Базовий тест завершено! Для повних тестів використовуйте окремі кнопки.';
+            result.className = 'result success';
+        }
+
+        // Автоматичне завантаження конфігурації при завантаженні сторінки
+        window.onload = function() {
+            loadConfig();
+        };
+    </script>
+</body>
+</html>

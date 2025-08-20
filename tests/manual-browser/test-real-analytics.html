@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Реальний тест аналітики COMSPEC</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .log { padding: 10px; margin: 5px 0; border-left: 4px solid #007acc; background: #f0f8ff; }
+        .success { border-left-color: #28a745; background: #f0fff0; }
+        .error { border-left-color: #dc3545; background: #fff0f0; }
+        button { padding: 10px 20px; margin: 10px 5px; font-size: 16px; cursor: pointer; }
+        .btn-success { background: #28a745; color: white; border: none; }
+        .btn-primary { background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Реальний тест аналітики COMSPEC</h1>
+    <p>Цей тест безпосередньо викликає аналітику з правильними даними типу <code>analytics</code></p>
+    
+    <div>
+        <button class="btn-primary" onclick="testAnalytics()">📊 Тест відправки analytics</button>
+        <button class="btn-success" onclick="testProductView()">👁️ Тест перегляду товару</button>
+        <button onclick="clearLogs()" style="background: #6c757d; color: white; border: none;">🧹 Очистити логи</button>
+    </div>
+    
+    <div id="logs"></div>
+    
+    <script>
+        // Конфігурація
+        window.RUNTIME_CONFIG = {
+            ANALYTICS_ENABLED: true,
+            ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzXekrg8my4614350FMdw0gt5XIaHZYTY7ta5kdDmIfNnFKM0K4CIaAY8TBj77sdgKu/exec',
+            ANALYTICS_SAMPLING_RATE: 100,
+            ANALYTICS_DEBUG_MODE: true,
+            DISABLE_ANALYTICS_LOCALHOST: false
+        };
+        
+        const logsDiv = document.getElementById('logs');
+        
+        function log(message, type = 'log') {
+            const now = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'log ' + type;
+            div.innerHTML = `<strong>${now}:</strong> ${message}`;
+            logsDiv.appendChild(div);
+            console.log(`[${now}] ${message}`);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        function clearLogs() {
+            logsDiv.innerHTML = '';
+        }
+        
+        // Тестуємо відправку аналітичних даних
+        async function testAnalytics() {
+            log('🚀 Початок тестування відправки analytics...');
+            
+            const analyticsData = [{
+                timestamp: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                event_type: 'product_view',
+                product_id: 'sand-river',
+                user_id: 'test_user_' + Date.now(),
+                source: 'test_page',
+                extra_data: JSON.stringify({ 
+                    test: true, 
+                    page: 'test-real-analytics.html',
+                    product_title: 'Пісок річковий',
+                    category: 'sand'
+                })
+            }];
+            
+            try {
+                // Спочатку тестуємо POST
+                log('📡 Відправляємо POST запит з analytics даними...');
+                
+                const response = await fetch(window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'analytics',
+                        sheet: 'ProductEvents',
+                        data: analyticsData
+                    }),
+                    mode: 'cors'
+                });
+                
+                log(`📊 POST Response status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('✅ POST успішний! Результат:', 'success');
+                    log(JSON.stringify(result, null, 2), 'success');
+                    
+                    if (result.success && result.data && result.data.addedRows > 0) {
+                        log(`🎉 УСПІХ! Додано ${result.data.addedRows} записів в Google Sheets!`, 'success');
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                log(`❌ POST помилка: ${error.message}`, 'error');
+                log('🔄 Пробуємо JSONP fallback...', 'log');
+                
+                try {
+                    const jsonpResult = await testJSONPAnalytics(analyticsData);
+                    log('✅ JSONP fallback успішний!', 'success');
+                    log(JSON.stringify(jsonpResult, null, 2), 'success');
+                } catch (jsonpError) {
+                    log(`❌ JSONP також не спрацював: ${jsonpError.message}`, 'error');
+                }
+            }
+        }
+        
+        // JSONP тест
+        function testJSONPAnalytics(data) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'analytics_callback_' + Date.now();
+                
+                window[callbackName] = function(response) {
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    
+                    if (response && response.success) {
+                        resolve(response);
+                    } else {
+                        reject(new Error(response?.error || 'JSONP request failed'));
+                    }
+                };
+                
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    reject(new Error('JSONP script loading failed'));
+                };
+                
+                const params = new URLSearchParams({
+                    action: 'analytics',
+                    sheet: 'ProductEvents',
+                    data: JSON.stringify(data),
+                    callback: callbackName
+                });
+                
+                script.src = window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL + '?' + params.toString();
+                log('🔗 JSONP URL: ' + script.src);
+                
+                document.head.appendChild(script);
+                
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.head.removeChild(script);
+                        reject(new Error('JSONP timeout (10s)'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        // Тест конкретного перегляду товару
+        async function testProductView() {
+            log('👁️ Симуляція перегляду товару "Щебінь гранітний 5-10"...');
+            
+            const productViewData = [{
+                timestamp: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                event_type: 'product_view',
+                product_id: 'gravel-granite-5-10',
+                user_id: 'real_user_' + Math.random().toString(36).substr(2, 9),
+                source: 'direct',
+                extra_data: JSON.stringify({
+                    product_title: 'Щебінь гранітний 5-10',
+                    category: 'gravel',
+                    price: 850,
+                    page_url: '/products/gravel/gravel-granite-5-10',
+                    device_type: 'desktop',
+                    browser: navigator.userAgent.split(' ')[0]
+                })
+            }];
+            
+            try {
+                const response = await fetch(window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'analytics',
+                        sheet: 'ProductEvents',
+                        data: productViewData
+                    }),
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('✅ Перегляд товару записано успішно!', 'success');
+                    log(`📈 Додано ${result.data?.addedRows || 1} запис в ProductEvents`, 'success');
+                    
+                    // Тепер тестуємо оновлення Popular Products
+                    log('📊 Перевіряємо оновлення популярних товарів...', 'log');
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Помилка запису перегляду: ${error.message}`, 'error');
+            }
+        }
+        
+        // Автостарт
+        window.addEventListener('load', () => {
+            log('🚀 Тест аналітики готовий до запуску!', 'success');
+            log(`🔗 Analytics URL: ${window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL}`);
+        });
+    </script>
+</body>
+</html>

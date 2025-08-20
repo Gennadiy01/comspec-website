@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Тест Популярних Товарів - COMSPEC</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #005a8b; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left-color: #28a745; background: #f0fff4; }
+        .error { border-left-color: #dc3545; background: #fff5f5; }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            width: 200px;
+            vertical-align: top;
+        }
+        .product-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #e9ecef;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background: white;
+            border-bottom: 1px solid white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 8px 8px 8px;
+            background: white;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Тест Популярних Товарів - COMSPEC</h1>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(this, 'manual-test')">🧪 Ручне тестування</div>
+        <div class="tab" onclick="switchTab(this, 'analytics-debug')">🔍 Аналітика Debug</div>
+        <div class="tab" onclick="switchTab(this, 'simulate-views')">👀 Симуляція переглядів</div>
+    </div>
+
+    <!-- Ручне тестування -->
+    <div id="manual-test" class="tab-content active">
+        <h2>🧪 Ручне тестування популярних товарів</h2>
+        
+        <div class="test-container">
+            <h3>🔄 Завантаження даних</h3>
+            <p>Перевірка роботи популярних товарів на поточній сторінці:</p>
+            <button onclick="loadCurrentPopular()">📊 Завантажити поточні популярні товари</button>
+            <button onclick="visitMainSite()">🏠 Відкрити головну сторінку сайту</button>
+            <div id="current-popular" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>🎯 Результат тестування</h3>
+            <div id="popular-products-display"></div>
+        </div>
+    </div>
+
+    <!-- Analytics Debug -->
+    <div id="analytics-debug" class="tab-content">
+        <h2>🔍 Debug системи аналітики</h2>
+        
+        <div class="test-container">
+            <h3>📊 Стан аналітики</h3>
+            <button onclick="showAnalyticsStatus()">📈 Показати стан ProductAnalytics</button>
+            <button onclick="showLocalStorage()">💾 Показати localStorage</button>
+            <button onclick="clearAnalytics()">🧹 Очистити аналітику</button>
+            <div id="analytics-status" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>🔧 Google Sheets підключення</h3>
+            <button onclick="testGoogleSheets()">🧪 Тест Google Sheets</button>
+            <button onclick="showFailedRequests()">❌ Показати невдалі запити</button>
+            <button onclick="retryFailedRequests()">🔄 Повторити невдалі</button>
+            <div id="sheets-status" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Симуляція переглядів -->
+    <div id="simulate-views" class="tab-content">
+        <h2>👀 Симуляція переглядів товарів</h2>
+        
+        <div class="test-container">
+            <h3>🎯 Симуляція активності</h3>
+            <p>Створити фейкові перегляди для тестування системи популярних товарів:</p>
+            <button onclick="simulateRandomViews()">🎲 Симулювати 10 випадкових переглядів</button>
+            <button onclick="simulateSpecificProduct()">🎯 Симулювати перегляди конкретного товару</button>
+            <button onclick="simulateBurstViews()">💥 Симулювати багато переглядів (50)</button>
+            <div id="simulation-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-container">
+            <h3>📋 Доступні товари для тестування</h3>
+            <button onclick="showAvailableProducts()">📦 Показати всі товари</button>
+            <div id="available-products" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Переключення табів
+        function switchTab(tabElement, contentId) {
+            // Деактивуємо всі таби
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Активуємо поточний таб
+            tabElement.classList.add('active');
+            document.getElementById(contentId).classList.add('active');
+        }
+
+        // === РУЧНЕ ТЕСТУВАННЯ ===
+
+        function loadCurrentPopular() {
+            const result = document.getElementById('current-popular');
+            const display = document.getElementById('popular-products-display');
+            
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🔄 Завантаження популярних товарів...';
+            display.innerHTML = '';
+            
+            try {
+                // Імітуємо завантаження з головної сторінки
+                const iframe = document.createElement('iframe');
+                iframe.src = '/comspec-website';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                iframe.onload = function() {
+                    try {
+                        // Спробуємо отримати дані через postMessage
+                        iframe.contentWindow.postMessage({
+                            action: 'getPopularProducts'
+                        }, '*');
+                        
+                        result.className = 'result success';
+                        result.textContent = '✅ Iframe завантажено. Чекаємо відповіді від головної сторінки...';
+                        
+                        // Через 2 секунди видалимо iframe і покажемо результат
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            result.textContent += '\\n\\n⚠️ Для повного тестування відкрийте головну сторінку сайту і поверніться сюди.';
+                        }, 2000);
+                        
+                    } catch (error) {
+                        result.className = 'result error';
+                        result.textContent = `❌ Помилка доступу до iframe: ${error.message}`;
+                        document.body.removeChild(iframe);
+                    }
+                };
+                
+                iframe.onerror = function() {
+                    result.className = 'result error';
+                    result.textContent = '❌ Не вдалося завантажити головну сторінку';
+                    document.body.removeChild(iframe);
+                };
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function visitMainSite() {
+            window.open('/comspec-website', '_blank');
+        }
+
+        // === ANALYTICS DEBUG ===
+
+        function showAnalyticsStatus() {
+            const result = document.getElementById('analytics-status');
+            result.style.display = 'block';
+            result.className = 'result';
+            
+            try {
+                // Перевіряємо чи доступний ProductAnalytics через window
+                if (typeof window.analyticsDebug === 'function') {
+                    const debugInfo = window.analyticsDebug();
+                    result.className = 'result success';
+                    result.textContent = `✅ ProductAnalytics доступний:\\n${JSON.stringify(debugInfo, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ ProductAnalytics недоступний на цій сторінці.\\n\\nℹ️ Спочатку відкрийте головну сторінку сайту, потім поверніться сюди.';
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function showLocalStorage() {
+            const result = document.getElementById('analytics-status');
+            result.style.display = 'block';
+            result.className = 'result';
+            
+            try {
+                const analyticsKeys = [];
+                const otherKeys = [];
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('comspec') || key.includes('analytics') || key.includes('product')) {
+                        analyticsKeys.push({
+                            key: key,
+                            value: localStorage.getItem(key)
+                        });
+                    } else {
+                        otherKeys.push(key);
+                    }
+                }
+                
+                let output = '📊 ANALYTICS ДАНІ В LOCALSTORAGE:\\n\\n';
+                
+                if (analyticsKeys.length > 0) {
+                    analyticsKeys.forEach(item => {
+                        output += `🔑 ${item.key}:\\n`;
+                        try {
+                            const parsed = JSON.parse(item.value);
+                            output += JSON.stringify(parsed, null, 2) + '\\n\\n';
+                        } catch {
+                            output += item.value + '\\n\\n';
+                        }
+                    });
+                } else {
+                    output += '❌ Немає даних аналітики в localStorage\\n\\n';
+                }
+                
+                output += `ℹ️ Інших ключів: ${otherKeys.length}`;
+                
+                result.className = analyticsKeys.length > 0 ? 'result success' : 'result error';
+                result.textContent = output;
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка читання localStorage: ${error.message}`;
+            }
+        }
+
+        function clearAnalytics() {
+            const result = document.getElementById('analytics-status');
+            result.style.display = 'block';
+            
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes('comspec') || key.includes('analytics') || key.includes('product')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                result.className = 'result success';
+                result.textContent = `🧹 Очищено ${keysToRemove.length} ключів з localStorage:\\n${keysToRemove.join('\\n')}`;
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка очищення: ${error.message}`;
+            }
+        }
+
+        // === GOOGLE SHEETS ===
+
+        function testGoogleSheets() {
+            const result = document.getElementById('sheets-status');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🧪 Тестування Google Sheets підключення...';
+            
+            try {
+                if (typeof window.analyticsTest === 'function') {
+                    window.analyticsTest().then(response => {
+                        result.className = 'result success';
+                        result.textContent = `✅ Результат тесту:\\n${JSON.stringify(response, null, 2)}`;
+                    }).catch(error => {
+                        result.className = 'result error';
+                        result.textContent = `❌ Помилка тесту: ${error.message}`;
+                    });
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ window.analyticsTest недоступний.\\nСпочатку відкрийте головну сторінку сайту.';
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function showFailedRequests() {
+            const result = document.getElementById('sheets-status');
+            result.style.display = 'block';
+            
+            try {
+                if (typeof window.analyticsStats === 'function') {
+                    const stats = window.analyticsStats();
+                    result.className = stats.total > 0 ? 'result error' : 'result success';
+                    result.textContent = `📊 Статистика невдалих запитів:\\n${JSON.stringify(stats, null, 2)}`;
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ window.analyticsStats недоступний.';
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function retryFailedRequests() {
+            const result = document.getElementById('sheets-status');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🔄 Повторюємо невдалі запити...';
+            
+            try {
+                if (typeof window.analyticsRetry === 'function') {
+                    window.analyticsRetry().then(response => {
+                        result.className = 'result success';
+                        result.textContent = `✅ Результат повтору:\\n${JSON.stringify(response, null, 2)}`;
+                    }).catch(error => {
+                        result.className = 'result error';
+                        result.textContent = `❌ Помилка повтору: ${error.message}`;
+                    });
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ window.analyticsRetry недоступний.';
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        // === СИМУЛЯЦІЯ ПЕРЕГЛЯДІВ ===
+
+        function simulateRandomViews() {
+            const result = document.getElementById('simulation-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '🎲 Симуляція 10 випадкових переглядів...';
+            
+            // Список тестових товарів для симуляції
+            const testProducts = [
+                'gravel-0516', 'gravel-0820', 'gravel-1020', 'gravel-2040',
+                'sand-river', 'sand-construction', 'crushed-stone-5-20',
+                'concrete-m200', 'concrete-m300', 'asphalt-mix'
+            ];
+            
+            try {
+                let output = '🎯 Результати симуляції:\\n\\n';
+                
+                for (let i = 0; i < 10; i++) {
+                    const randomProduct = testProducts[Math.floor(Math.random() * testProducts.length)];
+                    const timestamp = Date.now() - Math.random() * 86400000; // Випадковий час за останню добу
+                    
+                    // Зберігаємо в localStorage (імітуємо ProductAnalytics.trackView)
+                    const viewsKey = 'comspec_analytics_product_views';
+                    let views = {};
+                    try {
+                        views = JSON.parse(localStorage.getItem(viewsKey) || '{}');
+                    } catch (e) {
+                        views = {};
+                    }
+                    
+                    if (!views[randomProduct]) {
+                        views[randomProduct] = { views: 0, lastViewed: 0 };
+                    }
+                    views[randomProduct].views++;
+                    views[randomProduct].lastViewed = Math.max(views[randomProduct].lastViewed, timestamp);
+                    
+                    localStorage.setItem(viewsKey, JSON.stringify(views));
+                    
+                    output += `✅ ${randomProduct}: ${views[randomProduct].views} переглядів\\n`;
+                }
+                
+                result.className = 'result success';
+                result.textContent = output;
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка симуляції: ${error.message}`;
+            }
+        }
+
+        function simulateSpecificProduct() {
+            const productId = prompt('Введіть ID товару для симуляції (наприклад: gravel-0516):');
+            if (!productId) return;
+            
+            const result = document.getElementById('simulation-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = `🎯 Симуляція 5 переглядів товару ${productId}...`;
+            
+            try {
+                const viewsKey = 'comspec_analytics_product_views';
+                let views = {};
+                try {
+                    views = JSON.parse(localStorage.getItem(viewsKey) || '{}');
+                } catch (e) {
+                    views = {};
+                }
+                
+                if (!views[productId]) {
+                    views[productId] = { views: 0, lastViewed: 0 };
+                }
+                
+                views[productId].views += 5;
+                views[productId].lastViewed = Date.now();
+                
+                localStorage.setItem(viewsKey, JSON.stringify(views));
+                
+                result.className = 'result success';
+                result.textContent = `✅ Товар ${productId} тепер має ${views[productId].views} переглядів`;
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function simulateBurstViews() {
+            const result = document.getElementById('simulation-result');
+            result.style.display = 'block';
+            result.className = 'result';
+            result.textContent = '💥 Симуляція великої кількості переглядів (50)...';
+            
+            const testProducts = [
+                'gravel-0516', 'gravel-0820', 'gravel-1020', 'gravel-2040',
+                'sand-river', 'sand-construction', 'crushed-stone-5-20',
+                'concrete-m200', 'concrete-m300', 'asphalt-mix'
+            ];
+            
+            try {
+                const viewsKey = 'comspec_analytics_product_views';
+                let views = {};
+                try {
+                    views = JSON.parse(localStorage.getItem(viewsKey) || '{}');
+                } catch (e) {
+                    views = {};
+                }
+                
+                let output = '💥 Результати burst симуляції:\\n\\n';
+                
+                for (let i = 0; i < 50; i++) {
+                    const randomProduct = testProducts[Math.floor(Math.random() * testProducts.length)];
+                    const timestamp = Date.now() - Math.random() * 3600000; // Випадковий час за останню годину
+                    
+                    if (!views[randomProduct]) {
+                        views[randomProduct] = { views: 0, lastViewed: 0 };
+                    }
+                    views[randomProduct].views++;
+                    views[randomProduct].lastViewed = Math.max(views[randomProduct].lastViewed, timestamp);
+                }
+                
+                localStorage.setItem(viewsKey, JSON.stringify(views));
+                
+                // Показуємо топ товари
+                const sortedProducts = Object.entries(views)
+                    .sort(([,a], [,b]) => b.views - a.views)
+                    .slice(0, 5);
+                
+                output += '🏆 ТОП-5 найпопулярніших товарів:\\n';
+                sortedProducts.forEach(([productId, data], index) => {
+                    output += `${index + 1}. ${productId}: ${data.views} переглядів\\n`;
+                });
+                
+                result.className = 'result success';
+                result.textContent = output;
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ Помилка: ${error.message}`;
+            }
+        }
+
+        function showAvailableProducts() {
+            const result = document.getElementById('available-products');
+            result.style.display = 'block';
+            result.className = 'result';
+            
+            const testProducts = [
+                'gravel-0516 - Щебінь фракції 0-5, 16 мм',
+                'gravel-0820 - Щебінь фракції 8-20 мм', 
+                'gravel-1020 - Щебінь фракції 10-20 мм',
+                'gravel-2040 - Щебінь фракції 20-40 мм',
+                'sand-river - Пісок річковий',
+                'sand-construction - Пісок будівельний',
+                'crushed-stone-5-20 - Бутовий камінь 5-20 мм',
+                'concrete-m200 - Бетон М200',
+                'concrete-m300 - Бетон М300',
+                'asphalt-mix - Асфальтобетонна суміш'
+            ];
+            
+            result.textContent = '📦 Доступні товари для тестування:\\n\\n' + testProducts.join('\\n');
+        }
+
+        // Автоматичне завантаження інформації при відкритті сторінки
+        window.onload = function() {
+            console.log('🔥 Тестова сторінка популярних товарів завантажена');
+            console.log('ℹ️ Для повного тестування спочатку відкрийте головну сторінку сайту: /comspec-website');
+        };
+    </script>
+</body>
+</html>
