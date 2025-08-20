@@ -190,6 +190,8 @@ class GoogleSheetsAnalytics {
    */
   async sendToSheet(sheetName, data) {
     if (!this.config.scriptUrl) {
+      console.error('❌ Analytics Script URL не налаштований');
+      console.log('🔧 Поточна конфігурація:', this.config);
       throw new Error('Analytics Script URL не налаштований');
     }
 
@@ -204,30 +206,49 @@ class GoogleSheetsAnalytics {
         data: data
       };
 
-      this.log(`📡 Відправка до ${sheetName}:`, data.length, 'записів');
+      console.log(`📡 Відправка до ${sheetName}:`, data.length, 'записів');
+      console.log('🔗 URL:', this.config.scriptUrl);
+      console.log('📦 Payload:', payload);
 
       const response = await fetch(this.config.scriptUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        mode: 'cors'  // Явно вказуємо CORS режим
       });
 
+      console.log('📡 Response status:', response.status, response.statusText);
+      
       if (!response.ok) {
+        const responseText = await response.text();
+        console.error('❌ HTTP Error Response:', responseText);
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
+      console.log('📊 Response data:', result);
 
       if (!result.success) {
+        console.error('❌ Google Apps Script Error:', result.error);
         throw new Error(result.error || 'Невідома помилка Google Apps Script');
       }
 
-      this.log(`✅ Успішно відправлено до ${sheetName}:`, result);
+      console.log(`✅ Успішно відправлено до ${sheetName}:`, result);
       return result;
 
     } catch (error) {
+      // Якщо CORS помилка - спробуємо JSONP fallback
+      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+        console.log('🔄 CORS помилка, спробуємо JSONP fallback...');
+        try {
+          return await this.sendToSheetViaJSONP(sheetName, data);
+        } catch (jsonpError) {
+          console.error('❌ JSONP fallback також не спрацював:', jsonpError);
+        }
+      }
+      
       this.logError(`❌ Помилка відправки до ${sheetName}:`, error);
       
       // Зберігаємо невдалий запит
@@ -235,6 +256,58 @@ class GoogleSheetsAnalytics {
       
       throw error;
     }
+  }
+
+  /**
+   * JSONP fallback для обходу CORS
+   */
+  async sendToSheetViaJSONP(sheetName, data) {
+    return new Promise((resolve, reject) => {
+      const callbackName = 'jsonp_callback_' + Math.random().toString(36).substr(2, 9);
+      
+      // Створюємо глобальний callback
+      window[callbackName] = function(response) {
+        console.log('📊 JSONP Response:', response);
+        delete window[callbackName];
+        document.head.removeChild(script);
+        
+        if (response && response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response?.error || 'JSONP request failed'));
+        }
+      };
+
+      // Створюємо script tag для JSONP
+      const script = document.createElement('script');
+      script.onerror = () => {
+        delete window[callbackName];
+        document.head.removeChild(script);
+        reject(new Error('JSONP script loading failed'));
+      };
+      
+      // Параметри для GET запиту
+      const params = new URLSearchParams({
+        action: 'analytics',
+        sheet: sheetName,
+        data: JSON.stringify(data),
+        callback: callbackName
+      });
+      
+      script.src = `${this.config.scriptUrl}?${params.toString()}`;
+      console.log('🔗 JSONP URL:', script.src);
+      
+      document.head.appendChild(script);
+      
+      // Timeout після 10 секунд
+      setTimeout(() => {
+        if (window[callbackName]) {
+          delete window[callbackName];
+          document.head.removeChild(script);
+          reject(new Error('JSONP request timeout'));
+        }
+      }, 10000);
+    });
   }
 
   /**
@@ -479,24 +552,33 @@ class GoogleSheetsAnalytics {
    * Інтеграція з існуючою системою environment.js
    */
   getAnalyticsScriptUrl() {
+    let url = null;
+    
     // Спробуємо через .env змінні
     if (process.env.REACT_APP_ANALYTICS_SCRIPT_URL) {
-      return process.env.REACT_APP_ANALYTICS_SCRIPT_URL;
+      url = process.env.REACT_APP_ANALYTICS_SCRIPT_URL;
+      console.log('🔧 Analytics URL з .env:', url);
+      return url;
     }
 
     // Через runtime конфігурацію (GitHub Pages)
     if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL) {
-      return window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL;
+      url = window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL;
+      console.log('🔧 Analytics URL з RUNTIME_CONFIG:', url);
+      return url;
     }
 
     // Через environment.js систему
     try {
       const config = require('../config/environment.js').default;
-      return config.ANALYTICS_SCRIPT_URL;
+      url = config.ANALYTICS_SCRIPT_URL;
+      console.log('🔧 Analytics URL з environment.js:', url);
+      return url;
     } catch (error) {
-      this.log('Не вдалося завантажити з environment.js');
+      console.log('⚠️ Не вдалося завантажити з environment.js:', error.message);
     }
 
+    console.error('❌ Analytics Script URL не знайдено в жодному джерелі конфігурації');
     return null;
   }
 
