@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductAnalytics from '../ProductAnalytics';
-import ProductsAPI, { formatProductPriceParts } from '../../data/products/productsAPI';
+import ProductsAPI, { formatProductPriceParts, getImageUrl } from '../../data/products/productsAPI';
 
 const PopularProducts = ({ 
   limit = 5, 
@@ -31,7 +31,8 @@ const PopularProducts = ({
       const products = [];
 
       // Спочатку додаємо товари з переглядами (якщо є)
-      for (let i = 0; i < Math.min(popularItems.length, limit); i++) {
+      // Проходимо по всіх популярних товарах доки не знайдемо потрібну кількість
+      for (let i = 0; i < popularItems.length && products.length < limit; i++) {
         const item = popularItems[i];
         const product = ProductsAPI.getProductById(item.productId);
         if (product) {
@@ -173,7 +174,7 @@ const PopularProducts = ({
                   >
                     {product.image ? (
                       <img 
-                        src={`${product.image}?_t=${Date.now()}`}
+                        src={getImageUrl(product.image)}
                         alt={product.title}
                         className="popular-product-img"
                       />

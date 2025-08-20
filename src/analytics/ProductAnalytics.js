@@ -136,7 +136,8 @@ class ProductAnalytics {
       instance[lastViewKey] = now;
 
       // Оновлюємо локальний кеш
-      instance.localCache.views[productId] = (instance.localCache.views[productId] || 0) + 1;
+      const oldCount = instance.localCache.views[productId] || 0;
+      instance.localCache.views[productId] = oldCount + 1;
       instance.localCache.lastViewTime[productId] = Date.now();
 
       // Створюємо подію для відправки
@@ -248,7 +249,9 @@ class ProductAnalytics {
     const instance = this.getInstance();
     
     try {
-      return Object.entries(instance.localCache.views)
+      const views = instance.localCache.views;
+      
+      const result = Object.entries(views)
         .sort(([,a], [,b]) => b - a)
         .slice(0, limit)
         .map(([productId, views]) => ({
@@ -256,6 +259,8 @@ class ProductAnalytics {
           views,
           lastViewed: instance.localCache.lastViewTime[productId]
         }));
+        
+      return result;
     } catch (error) {
       instance.logError('Помилка отримання популярних товарів:', error);
       return [];
@@ -601,6 +606,12 @@ class ProductAnalytics {
     // Через runtime config
     if (typeof window !== 'undefined' && window.RUNTIME_CONFIG?.ANALYTICS_DEBUG_MODE !== undefined) {
       return window.RUNTIME_CONFIG.ANALYTICS_DEBUG_MODE;
+    }
+
+    // На localhost завжди увімкнуто для відладки
+    if (typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return true;
     }
 
     return false;

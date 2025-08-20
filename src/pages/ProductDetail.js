@@ -4,6 +4,7 @@ import { useOrderModal } from '../context/OrderModalContext';
 import ProductsAPI, { formatProductPriceParts } from '../data/products/productsAPI.js';
 import ProductTitle from '../components/ProductTitle';
 import LazyImage from '../components/LazyImage/LazyImage.js';
+import ProductAnalytics from '../analytics/ProductAnalytics';
 
 const ProductDetail = () => {
   const { category, id } = useParams();
@@ -21,6 +22,13 @@ const ProductDetail = () => {
 
       if (foundProduct) {
         setProduct(foundProduct);
+        
+        // 📊 Відстежуємо перегляд товару
+        ProductAnalytics.trackProductView(foundProduct.id, {
+          title: foundProduct.title,
+          category: foundProduct.category,
+          price: foundProduct.price
+        });
         
         // Оновлюємо метадані для SEO
         if (foundProduct.seo) {

@@ -526,6 +526,12 @@ class GoogleSheetsAnalytics {
       return window.RUNTIME_CONFIG.DEBUG_MODE;
     }
 
+    // На localhost завжди увімкнуто для відладки
+    if (typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return true;
+    }
+
     // Через environment.js
     try {
       const config = require('../config/environment.js').default;
