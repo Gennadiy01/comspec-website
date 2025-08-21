@@ -118,6 +118,13 @@ const configs = {
     SHEETS_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
     SHEETS_API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU',
     
+    // 🆕 АНАЛІТИКА САЙТУ (окремий Google Apps Script)
+    ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec',
+    ANALYTICS_ENABLED: true,
+    ANALYTICS_DEBUG_MODE: true,
+    ANALYTICS_SAMPLING_RATE: 100,
+    DISABLE_ANALYTICS_LOCALHOST: false,
+    
     // 🆕 TELEGRAM КОНФІГУРАЦІЯ ДЛЯ GITHUB PAGES
     TELEGRAM_BOT_TOKEN: '8472229536:AAEquKfaV_nIa5opQAbb6Io2RSm3HRRFgO4',
     TELEGRAM_CHAT_ID: null,

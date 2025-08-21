@@ -19,6 +19,14 @@ export const initGitHubPagesConfig = () => {
             SPREADSHEET_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
             API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU'
         },
+        // ✅ ДОДАНО: Конфігурація аналітики сайту
+        ANALYTICS: {
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec',
+            ENABLED: true,
+            DEBUG_MODE: true,
+            SAMPLING_RATE: 100,
+            DISABLE_LOCALHOST: false
+        },
         GOOGLE_MAPS: {
             API_KEY: 'AIzaSyBge_xIIrIbmc9Y7hPG5Fqkgkd5H4y5EUI',
             LIBRARIES: ['places', 'geometry'],

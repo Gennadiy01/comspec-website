@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🧪 Простий тест redirect</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    button { padding: 10px 20px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Простий тест redirect підтримки</h1>
+  <button onclick="testRedirect()">Тест redirect: 'follow'</button>
+  <div id="results"></div>
+
+  <script>
+    async function testRedirect() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div>🔄 Тестування...</div>';
+      
+      try {
+        console.log('🧪 Тестування redirect підтримки...');
+        
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec?action=test', {
+          method: 'GET',
+          mode: 'cors',
+          redirect: 'follow'
+        });
+        
+        console.log('📊 Status:', response.status);
+        console.log('🔗 Final URL:', response.url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Data:', data);
+          
+          resultsDiv.innerHTML = `
+            <div class="result success">
+              <h3>✅ SUCCESS!</h3>
+              <p><strong>Status:</strong> ${response.status}</p>
+              <p><strong>Final URL:</strong> ${response.url}</p>
+              <p><strong>Version:</strong> ${data.version || 'не знайдено'}</p>
+              <p><strong>Response:</strong></p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error:', error);
+        resultsDiv.innerHTML = `
+          <div class="result error">
+            <h3>❌ FAILED</h3>
+            <p><strong>Error:</strong> ${error.message}</p>
+            <p>Можливо потрібно відкрити через HTTP сервер, а не file://</p>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

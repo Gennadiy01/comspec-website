@@ -155,6 +155,9 @@ class ProductAnalytics {
       // Додаємо подію до черги
       instance.addToQueue(event);
 
+      // Для product views також відправляємо негайно
+      instance.processQueue();
+
       // Зберігаємо в localStorage
       instance.saveLocalData();
 
@@ -235,6 +238,10 @@ class ProductAnalytics {
       };
 
       instance.addToQueue(event);
+      
+      // Для page views відправляємо негайно (не чекаємо batch)
+      instance.processQueue();
+      
       instance.log('📄 Відстежено перегляд сторінки:', pathname);
 
     } catch (error) {
@@ -399,8 +406,12 @@ class ProductAnalytics {
    */
   startQueueProcessor() {
     // Перевіряємо чи потрібно відключити аналітику на localhost
-    if (this.getDisableLocalhostAnalytics() && 
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    const isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const disableLocalhost = this.getDisableLocalhostAnalytics();
+    
+    this.log(`🔧 Localhost check: isLocalhost=${isLocalhost}, disableLocalhost=${disableLocalhost}`);
+    
+    if (disableLocalhost && isLocalhost) {
       this.log('🚫 Аналітика відключена для localhost');
       return;
     }
@@ -524,7 +535,7 @@ class ProductAnalytics {
    * Логування для відладки
    */
   log(message, ...args) {
-    if (this.config.debugMode) {
+    if (this.config.debugMode || message.includes('localhost') || message.includes('відключена')) {
       console.log(`[ProductAnalytics] ${message}`, ...args);
     }
   }

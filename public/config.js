@@ -11,7 +11,7 @@ window.RUNTIME_CONFIG = {
   
   // Аналітика сайту (використовуємо окремий скрипт для аналітики)
   ANALYTICS_ENABLED: true,
-  ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbx9bq9eW_d6zJHDKp67IIZ3Mo5HT-Nte2jAnXFfmUmIVqt-ydn4dwuS1cLkIaItGX5uFw/exec',
+  ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec',
   ANALYTICS_SAMPLING_RATE: 100,
   ANALYTICS_DEBUG_MODE: true,
   DISABLE_ANALYTICS_LOCALHOST: false,

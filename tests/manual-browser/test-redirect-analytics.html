@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Тест аналітики з redirect підтримкою</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    .loading { background: #fff3cd; border-color: #ffeaa7; color: #856404; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-warning { background: #ffc107; color: black; }
+    pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    #log { max-height: 400px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Тестування аналітики з redirect підтримкою</h1>
+    <p><strong>Google Apps Script v3.2:</strong> https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec</p>
+    
+    <!-- Статус конфігурації -->
+    <div id="configStatus" class="test-section">
+      <h3>📋 Статус конфігурації</h3>
+      <div id="configInfo">Завантаження...</div>
+    </div>
+    
+    <!-- Тести -->
+    <div class="test-section">
+      <h3>🔧 Доступні тести</h3>
+      <button id="testConnection" class="btn-primary">Тест підключення з redirect</button>
+      <button id="testPageView" class="btn-success">Тест перегляду сторінки</button>
+      <button id="testProductEvent" class="btn-success">Тест події товару</button>
+      <button id="testBatch" class="btn-warning">Тест batch відправки</button>
+      <button id="clearLog" class="btn-secondary" style="background: #6c757d; color: white;">Очистити лог</button>
+    </div>
+    
+    <!-- Результати -->
+    <div id="results" class="test-section">
+      <h3>📊 Результати тестів</h3>
+      <div id="resultContent">Натисніть кнопку тесту щоб побачити результати</div>
+    </div>
+    
+    <!-- Лог -->
+    <div class="test-section">
+      <h3>📝 Детальний лог</h3>
+      <pre id="log"></pre>
+    </div>
+  </div>
+
+  <script>
+    // Підключаємо аналітику
+    const analyticsScript = document.createElement('script');
+    analyticsScript.src = '../src/analytics/GoogleSheetsAnalytics.js';
+    analyticsScript.type = 'module';
+    document.head.appendChild(analyticsScript);
+
+    // Логування
+    const logElement = document.getElementById('log');
+    function addLog(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      logElement.textContent += `[${timestamp}] ${message}\n`;
+      logElement.scrollTop = logElement.scrollHeight;
+      console.log(message);
+    }
+
+    // Показ результатів
+    function showResult(title, data, isSuccess = true) {
+      const resultDiv = document.getElementById('resultContent');
+      const className = isSuccess ? 'success' : 'error';
+      resultDiv.innerHTML = `
+        <div class="${className}">
+          <h4>${title}</h4>
+          <pre>${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+    }
+
+    // Показ статусу конфігурації
+    function showConfigStatus() {
+      // Симуляція конфігурації (в реальності це буде через environment.js)
+      const config = {
+        scriptUrl: 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec',
+        enabled: true,
+        version: 'v3.2 with redirect support',
+        redirectSupport: true
+      };
+      
+      document.getElementById('configInfo').innerHTML = `
+        <div class="success">
+          <strong>URL:</strong> ${config.scriptUrl}<br>
+          <strong>Enabled:</strong> ${config.enabled ? '✅ Так' : '❌ Ні'}<br>
+          <strong>Version:</strong> ${config.version}<br>
+          <strong>Redirect Support:</strong> ${config.redirectSupport ? '✅ Увімкнено' : '❌ Вимкнено'}
+        </div>
+      `;
+    }
+
+    // Тест підключення
+    async function testConnection() {
+      addLog('🧪 Початок тесту підключення з redirect підтримкою...');
+      try {
+        // Імітуємо виклик GoogleSheetsAnalytics.testConnection()
+        // В реальності це буде працювати після правильного завантаження модуля
+        
+        addLog('📡 Відправка тестового запиту...');
+        
+        // Пряме тестування fetch з redirect: 'follow'
+        const testUrl = 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec';
+        
+        const response = await fetch(testUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'analytics',
+            sheet: 'ProductEvents',
+            data: [{
+              timestamp: Date.now(),
+              date: new Date().toISOString().split('T')[0],
+              event_type: 'browser_redirect_test',
+              product_id: 'test-redirect',
+              user_id: 'browser-user',
+              source: 'redirect-test',
+              extra_data: JSON.stringify({ 
+                test: true, 
+                redirectSupport: true,
+                userAgent: navigator.userAgent.substring(0, 50) + '...'
+              })
+            }]
+          }),
+          mode: 'cors',
+          redirect: 'follow'  // Ключове налаштування!
+        });
+        
+        addLog(`📊 Response status: ${response.status}`);
+        addLog(`🔗 Final URL: ${response.url}`);
+        
+        const result = await response.json();
+        addLog('✅ Отримано JSON відповідь');
+        
+        showResult('🎉 Тест підключення пройшов успішно!', {
+          originalStatus: response.status,
+          finalUrl: response.url,
+          redirectWorked: response.url !== testUrl,
+          result: result
+        }, true);
+        
+      } catch (error) {
+        addLog(`❌ Помилка тесту: ${error.message}`);
+        showResult('❌ Тест підключення не пройшов', {
+          error: error.message,
+          stack: error.stack
+        }, false);
+      }
+    }
+
+    // Тест перегляду сторінки  
+    async function testPageView() {
+      addLog('📄 Тестування відстеження перегляду сторінки...');
+      try {
+        // Імітація відстеження перегляду
+        const pageViewData = {
+          action: 'analytics',
+          sheet: 'PageViews', 
+          data: [{
+            timestamp: Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            page_url: window.location.pathname,
+            product_id: 'test-product',
+            user_id: 'test-user-' + Date.now(),
+            source: 'browser-test',
+            device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+          }]
+        };
+
+        addLog('📡 Відправка page view з redirect підтримкою...');
+        
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pageViewData),
+          mode: 'cors',
+          redirect: 'follow'
+        });
+        
+        const result = await response.json();
+        addLog('✅ Page view записано успішно');
+        
+        showResult('📄 Page View тест успішний', result, true);
+        
+      } catch (error) {
+        addLog(`❌ Помилка page view тесту: ${error.message}`);
+        showResult('❌ Page View тест не пройшов', { error: error.message }, false);
+      }
+    }
+
+    // Тест події товару
+    async function testProductEvent() {
+      addLog('🛍️ Тестування події товару...');
+      try {
+        const productEventData = {
+          action: 'analytics',
+          sheet: 'ProductEvents',
+          data: [{
+            timestamp: Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            event_type: 'product_view',
+            product_id: 'gravel-0516',
+            user_id: 'test-user-' + Date.now(),
+            source: 'product-test',
+            extra_data: JSON.stringify({
+              category: 'gravel',
+              price: '500',
+              inStock: true
+            })
+          }]
+        };
+
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productEventData),
+          mode: 'cors',
+          redirect: 'follow'
+        });
+        
+        const result = await response.json();
+        addLog('✅ Product event записано успішно');
+        
+        showResult('🛍️ Product Event тест успішний', result, true);
+        
+      } catch (error) {
+        addLog(`❌ Помилка product event тесту: ${error.message}`);
+        showResult('❌ Product Event тест не пройшов', { error: error.message }, false);
+      }
+    }
+
+    // Тест batch відправки
+    async function testBatch() {
+      addLog('📦 Тестування batch відправки...');
+      try {
+        const batchData = {
+          action: 'analytics', 
+          sheet: 'ProductEvents',
+          data: [
+            {
+              timestamp: Date.now(),
+              date: new Date().toISOString().split('T')[0],
+              event_type: 'batch_test_1',
+              product_id: 'batch-product-1',
+              user_id: 'batch-user',
+              source: 'batch-test',
+              extra_data: JSON.stringify({ batch: true, index: 1 })
+            },
+            {
+              timestamp: Date.now() + 1,
+              date: new Date().toISOString().split('T')[0], 
+              event_type: 'batch_test_2',
+              product_id: 'batch-product-2',
+              user_id: 'batch-user',
+              source: 'batch-test',
+              extra_data: JSON.stringify({ batch: true, index: 2 })
+            },
+            {
+              timestamp: Date.now() + 2,
+              date: new Date().toISOString().split('T')[0],
+              event_type: 'batch_test_3', 
+              product_id: 'batch-product-3',
+              user_id: 'batch-user',
+              source: 'batch-test',
+              extra_data: JSON.stringify({ batch: true, index: 3 })
+            }
+          ]
+        };
+
+        addLog(`📡 Відправка batch з ${batchData.data.length} подій...`);
+        
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(batchData),
+          mode: 'cors',
+          redirect: 'follow'
+        });
+        
+        const result = await response.json();
+        addLog(`✅ Batch з ${batchData.data.length} подій записано успішно`);
+        
+        showResult('📦 Batch тест успішний', result, true);
+        
+      } catch (error) {
+        addLog(`❌ Помилка batch тесту: ${error.message}`);
+        showResult('❌ Batch тест не пройшов', { error: error.message }, false);
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      showConfigStatus();
+      addLog('🚀 Тестова сторінка аналітики з redirect підтримкою завантажена');
+      addLog('✅ Redirect support: увімкнено в усіх fetch запитах');
+      
+      document.getElementById('testConnection').onclick = testConnection;
+      document.getElementById('testPageView').onclick = testPageView;
+      document.getElementById('testProductEvent').onclick = testProductEvent;
+      document.getElementById('testBatch').onclick = testBatch;
+      document.getElementById('clearLog').onclick = () => {
+        logElement.textContent = '';
+        addLog('📝 Лог очищено');
+      };
+    });
+  </script>
+</body>
+</html>

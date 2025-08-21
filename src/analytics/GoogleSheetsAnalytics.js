@@ -13,7 +13,10 @@ class GoogleSheetsAnalytics {
       enabled: this.getAnalyticsEnabled(),
       debugMode: this.getDebugMode(),
       retryLimit: 3,
-      retryDelay: 1000
+      retryDelay: 1000,
+      batchSize: 10,           // Максимум подій в одному batch
+      batchTimeout: 5000,      // Час очікування для збирання batch (5 сек)
+      maxQueueSize: 100        // Максимум подій в черзі
     };
 
     // Назви аркушів в таблиці аналітики
@@ -29,11 +32,143 @@ class GoogleSheetsAnalytics {
     // Кеш для failed requests
     this.failedRequests = this.loadFailedRequests();
 
-    this.log('GoogleSheetsAnalytics ініціалізовано');
+    // Черга для batch відправки
+    this.eventQueue = [];
+    this.batchTimeout = null;
+    this.isProcessingBatch = false;
+
+    this.log('GoogleSheetsAnalytics ініціалізовано з batch підтримкою');
   }
 
   /**
-   * Відправка масиву подій в Google Sheets
+   * 📦 Додавання події до batch черги (НОВИЙ МЕТОД)
+   */
+  static addEventToBatch(event) {
+    const instance = this.getInstance();
+    if (!instance.config.enabled) {
+      return { success: true, message: 'Analytics disabled' };
+    }
+
+    // Перевіряємо ліміт черги
+    if (instance.eventQueue.length >= instance.config.maxQueueSize) {
+      instance.log('⚠️ Черга переповнена, форсуємо відправку');
+      instance.processBatch();
+    }
+
+    // Додаємо подію до черги
+    instance.eventQueue.push({
+      ...event,
+      queuedAt: Date.now()
+    });
+
+    instance.log(`📥 Додано подію до черги (${instance.eventQueue.length}/${instance.config.maxQueueSize})`);
+
+    // Запускаємо або перезапускаємо таймер
+    instance.scheduleBatchProcessing();
+
+    // Якщо черга досягла batchSize - відправляємо негайно
+    if (instance.eventQueue.length >= instance.config.batchSize) {
+      instance.log('📦 Batch заповнено, відправляємо негайно');
+      instance.processBatch();
+    }
+
+    return { success: true, queued: true, queueSize: instance.eventQueue.length };
+  }
+
+  /**
+   * ⏰ Планування batch обробки
+   */
+  scheduleBatchProcessing() {
+    // Скасовуємо попередній таймер
+    if (this.batchTimeout) {
+      clearTimeout(this.batchTimeout);
+    }
+
+    // Встановлюємо новий таймер
+    this.batchTimeout = setTimeout(() => {
+      this.log('⏰ Batch timeout досягнуто, обробляємо чергу');
+      this.processBatch();
+    }, this.config.batchTimeout);
+  }
+
+  /**
+   * 🔄 Обробка batch черги
+   */
+  async processBatch() {
+    if (this.isProcessingBatch) {
+      this.log('⏳ Batch вже обробляється, пропускаємо');
+      return;
+    }
+
+    if (this.eventQueue.length === 0) {
+      this.log('📭 Черга порожня, нічого обробляти');
+      return;
+    }
+
+    this.isProcessingBatch = true;
+    
+    // Скасовуємо таймер
+    if (this.batchTimeout) {
+      clearTimeout(this.batchTimeout);
+      this.batchTimeout = null;
+    }
+
+    try {
+      const eventsToProcess = this.eventQueue.splice(0, this.config.batchSize);
+      this.log(`🔄 Обробляємо batch з ${eventsToProcess.length} подій`);
+
+      // Відправляємо через існуючий статичний метод
+      const result = await GoogleSheetsAnalytics.sendEvents(eventsToProcess);
+      
+      this.log(`✅ Batch успішно оброблено: ${eventsToProcess.length} подій`);
+      return result;
+
+    } catch (error) {
+      this.logError('❌ Помилка обробки batch:', error);
+      throw error;
+    } finally {
+      this.isProcessingBatch = false;
+
+      // Якщо в черзі залишились події, плануємо наступну обробку
+      if (this.eventQueue.length > 0) {
+        this.log(`📋 В черзі залишилось ${this.eventQueue.length} подій, плануємо наступну обробку`);
+        this.scheduleBatchProcessing();
+      }
+    }
+  }
+
+  /**
+   * 💥 Форсована відправка всіх подій у черзі
+   */
+  static async flushBatch() {
+    const instance = this.getInstance();
+    
+    if (instance.eventQueue.length === 0) {
+      instance.log('📭 Немає подій для форсованої відправки');
+      return { success: true, processed: 0 };
+    }
+
+    instance.log(`💥 Форсована відправка ${instance.eventQueue.length} подій`);
+    
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const result = await instance.processBatch();
+      
+      // Продовжуємо поки черга не стане порожньою
+      while (instance.eventQueue.length > 0 && !instance.isProcessingBatch) {
+        await instance.processBatch();
+      }
+      
+      return { success: true, processed: true };
+      
+    } catch (error) {
+      instance.logError('❌ Помилка форсованої відправки:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Відправка масиву подій в Google Sheets (ОНОВЛЕНИЙ)
    */
   static async sendEvents(events) {
     const instance = this.getInstance();
@@ -52,7 +187,7 @@ class GoogleSheetsAnalytics {
 
       // Відправляємо page views
       if (pageViews.length > 0) {
-        const pageViewResult = await instance.sendToSheet(
+        const pageViewResult = await instance.sendToSheetWithRetry(
           instance.sheets.PAGE_VIEWS, 
           instance.formatPageViews(pageViews)
         );
@@ -61,7 +196,7 @@ class GoogleSheetsAnalytics {
 
       // Відправляємо product events  
       if (productEvents.length > 0) {
-        const eventsResult = await instance.sendToSheet(
+        const eventsResult = await instance.sendToSheetWithRetry(
           instance.sheets.PRODUCT_EVENTS,
           instance.formatProductEvents(productEvents)
         );
@@ -186,6 +321,31 @@ class GoogleSheetsAnalytics {
   }
 
   /**
+   * 🔄 Відправка до аркуша з retry логікою (НОВИЙ МЕТОД)
+   */
+  async sendToSheetWithRetry(sheetName, data, retryCount = 0) {
+    try {
+      const result = await this.sendToSheet(sheetName, data);
+      this.log(`✅ Успішна відправка до ${sheetName} (спроба ${retryCount + 1})`);
+      return result;
+      
+    } catch (error) {
+      this.logError(`❌ Помилка відправки до ${sheetName} (спроба ${retryCount + 1}):`, error);
+      
+      if (retryCount < this.config.retryLimit) {
+        const delay = this.config.retryDelay * Math.pow(2, retryCount); // Exponential backoff
+        this.log(`⏳ Повторна спроба через ${delay}ms...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.sendToSheetWithRetry(sheetName, data, retryCount + 1);
+      } else {
+        this.logError(`❌ Досягнуто ліміт retry спроб (${this.config.retryLimit}) для ${sheetName}`);
+        throw error;
+      }
+    }
+  }
+
+  /**
    * Відправка даних до конкретного аркуша
    */
   async sendToSheet(sheetName, data) {
@@ -216,12 +376,15 @@ class GoogleSheetsAnalytics {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-        mode: 'cors'  // Явно вказуємо CORS режим
+        mode: 'cors',  // Явно вказуємо CORS режим
+        redirect: 'follow'  // ✅ ДОДАНО: автоматично слідувати за redirects
       });
 
       console.log('📡 Response status:', response.status, response.statusText);
+      console.log('🔗 Final URL after redirects:', response.url);
       
-      if (!response.ok) {
+      // ✅ ПОКРАЩЕНО: 302 redirects тепер не є помилкою
+      if (!response.ok && response.status !== 302) {
         const responseText = await response.text();
         console.error('❌ HTTP Error Response:', responseText);
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -267,10 +430,11 @@ class GoogleSheetsAnalytics {
   }
 
   /**
-   * JSONP fallback для обходу CORS
+   * JSONP fallback для обходу CORS з підтримкою redirects
    */
   async sendToSheetViaJSONP(sheetName, data) {
     console.log(`🔄 JSONP fallback для ${sheetName} з ${data.length} записами`);
+    console.log('ℹ️ JSONP автоматично підтримує redirects через браузер');
     
     return new Promise((resolve, reject) => {
       const callbackName = 'jsonp_callback_' + Math.random().toString(36).substr(2, 9);
@@ -502,16 +666,20 @@ class GoogleSheetsAnalytics {
         extra_data: JSON.stringify({ test: true })
       }];
 
-      // Використовуємо sendToSheet замість прямого fetch
-      // Це автоматично запустить JSONP fallback якщо CORS не спрацює
+      // Використовуємо sendToSheet з новою підтримкою redirects
+      // Це автоматично оброблює 302 redirects та використає JSONP fallback при потребі
       const result = await instance.sendToSheet(instance.sheets.PRODUCT_EVENTS, testData);
       
-      console.log('✅ Результат тестування:', result);
+      console.log('✅ Результат тестування з redirect підтримкою:', result);
+      console.log('🔗 Redirect handling працює!');
 
       return {
         success: result.success || true,
         data: result,
-        message: result.success ? 'Підключення успішне через sendToSheet' : 'Помилка sendToSheet'
+        version: result.version, // Показуємо версію скрипта
+        message: result.version === 'v3.2' ? 
+          '✅ Підключення до v3.2 успішне з redirect підтримкою!' : 
+          'Підключення успішне, але версія не підтверджена'
       };
 
     } catch (error) {
@@ -591,12 +759,22 @@ class GoogleSheetsAnalytics {
       return url;
     }
 
+    // ✅ ДОДАНО: Через GitHub Pages config
+    if (typeof window !== 'undefined' && window.COMSPEC_UNIVERSAL?.config?.ANALYTICS?.SCRIPT_URL) {
+      url = window.COMSPEC_UNIVERSAL.config.ANALYTICS.SCRIPT_URL;
+      console.log('🔧 Analytics URL з COMSPEC_UNIVERSAL:', url);
+      return url;
+    }
+
     // Через environment.js систему
     try {
-      const config = require('../config/environment.js').default;
-      url = config.ANALYTICS_SCRIPT_URL;
-      console.log('🔧 Analytics URL з environment.js:', url);
-      return url;
+      const { getConfig } = require('../config/environment.js');
+      const config = getConfig();
+      if (config.ANALYTICS_SCRIPT_URL) {
+        url = config.ANALYTICS_SCRIPT_URL;
+        console.log('🔧 Analytics URL з environment.js config:', url);
+        return url;
+      }
     } catch (error) {
       console.log('⚠️ Не вдалося завантажити з environment.js:', error.message);
     }
@@ -653,28 +831,117 @@ export default GoogleSheetsAnalytics;
 // Глобальний доступ для відладки
 if (typeof window !== 'undefined') {
   window.GoogleSheetsAnalytics = GoogleSheetsAnalytics;
+  
   window.analyticsTest = () => {
     console.log('🧪 Запускаємо тест підключення до Google Sheets...');
     return GoogleSheetsAnalytics.testConnection();
   };
+  
   window.analyticsRetry = () => {
     console.log('🔄 Повторюємо невдалі запити...');
     return GoogleSheetsAnalytics.retryFailedRequests();
   };
+  
   window.analyticsStats = () => {
     console.log('📊 Статистика невдалих запитів:');
     const stats = GoogleSheetsAnalytics.getFailedRequestsStats();
     console.table(stats);
     return stats;
   };
+  
   window.analyticsClear = () => {
     console.log('🧹 Очищуємо невдалі запити...');
     GoogleSheetsAnalytics.clearFailedRequests();
   };
+  
   window.analyticsConfig = () => {
     const instance = GoogleSheetsAnalytics.getInstance();
     console.log('⚙️ Конфігурація аналітики:');
     console.table(instance.config);
+    
+    // Детальна діагностика джерел URL
+    console.log('🔍 ДІАГНОСТИКА ДЖЕРЕЛ URL:');
+    console.log('1. process.env.REACT_APP_ANALYTICS_SCRIPT_URL:', process.env.REACT_APP_ANALYTICS_SCRIPT_URL || 'undefined');
+    console.log('2. RUNTIME_CONFIG:', window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL || 'undefined');
+    console.log('3. COMSPEC_UNIVERSAL:', window.COMSPEC_UNIVERSAL?.config?.ANALYTICS?.SCRIPT_URL || 'undefined');
+    
+    try {
+      const { getConfig } = require('../config/environment.js');
+      const envConfig = getConfig();
+      console.log('4. environment.js:', envConfig.ANALYTICS_SCRIPT_URL || 'undefined');
+    } catch (e) {
+      console.log('4. environment.js: не доступний');
+    }
+    
+    console.log('5. Поточний URL що використовується:', instance.config.scriptUrl);
+    
     return instance.config;
+  };
+
+  // === НОВІ BATCH ФУНКЦІЇ ===
+  
+  window.analyticsBatch = () => {
+    const instance = GoogleSheetsAnalytics.getInstance();
+    console.log('📦 Інформація про batch чергу:');
+    const info = {
+      queueSize: instance.eventQueue.length,
+      maxQueueSize: instance.config.maxQueueSize,
+      batchSize: instance.config.batchSize,
+      batchTimeout: instance.config.batchTimeout,
+      isProcessing: instance.isProcessingBatch,
+      hasTimeout: !!instance.batchTimeout
+    };
+    console.table(info);
+    return info;
+  };
+  
+  window.analyticsFlush = () => {
+    console.log('💥 Форсована відправка всіх подій у черзі...');
+    return GoogleSheetsAnalytics.flushBatch();
+  };
+  
+  window.analyticsAddTest = (count = 1) => {
+    console.log(`🧪 Додаємо ${count} тестових подій до batch черги...`);
+    
+    for (let i = 0; i < count; i++) {
+      const testEvent = {
+        type: 'product_view',
+        productId: `test-product-${Date.now()}-${i}`,
+        timestamp: Date.now(),
+        data: {
+          userId: 'test-user',
+          source: 'debug-console',
+          extra: { test: true, batch: true, index: i }
+        }
+      };
+      
+      GoogleSheetsAnalytics.addEventToBatch(testEvent);
+    }
+    
+    return window.analyticsBatch();
+  };
+  
+  window.analyticsHelp = () => {
+    console.log(`
+🔧 ДОСТУПНІ КОМАНДИ АНАЛІТИКИ:
+
+📊 Основні:
+analyticsTest()         - Тест підключення до Google Sheets
+analyticsConfig()       - Показати конфігурацію  
+analyticsStats()        - Статистика невдалих запитів
+analyticsRetry()        - Повторити невдалі запити
+analyticsClear()        - Очистити невдалі запити
+
+📦 Batch система:
+analyticsBatch()        - Інформація про чергу
+analyticsFlush()        - Форсована відправка черги
+analyticsAddTest(N)     - Додати N тестових подій
+analyticsHelp()         - Ця довідка
+
+🎯 Приклади використання:
+analyticsAddTest(5)     - Додати 5 тестових подій
+analyticsFlush()        - Відправити всі події негайно
+analyticsBatch()        - Перевірити стан черги
+    `);
   };
 }

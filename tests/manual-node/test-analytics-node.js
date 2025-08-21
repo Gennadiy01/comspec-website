@@ -4,7 +4,7 @@
 const https = require('https');
 const querystring = require('querystring');
 
-const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbx9bq9eW_d6zJHDKp67IIZ3Mo5HT-Nte2jAnXFfmUmIVqt-ydn4dwuS1cLkIaItGX5uFw/exec';
+const ANALYTICS_URL = 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec';
 
 console.log('🧪 Тестування Google Apps Script для аналітики...');
 console.log('🔗 URL:', ANALYTICS_URL);

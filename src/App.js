@@ -17,6 +17,12 @@ import RetailLocations from './pages/RetailLocations';
 import Certificates from './pages/Certificates';
 import ScrollToTop from './components/ScrollToTop';
 
+// 🧪 Тестовий компонент (тільки для development)
+import AnalyticsTest from './components/AnalyticsTest';
+
+// 📊 Глобальний трекер аналітики
+import AnalyticsTracker from './components/AnalyticsTracker';
+
 // 🔧 PRODUCTION OPTIMIZATION: Тестові інструменти завантажуються умовно  
 // Імпортуємо напряму - логіка контролю всередині файлів
 import './utils/testingTools';
@@ -38,6 +44,7 @@ function App() {
       <OrderModalProvider>
         <Router>
           <ScrollToTop />
+          <AnalyticsTracker />
           <div className="App">
             <SimpleErrorBoundary>
               <Header />
@@ -73,6 +80,10 @@ function App() {
                 } />
                 <Route path="/certificates/:category" element={
                   <SimpleErrorBoundary><Certificates /></SimpleErrorBoundary>
+                } />
+                {/* 🧪 Тестовий маршрут (тільки для development) */}
+                <Route path="/test-analytics" element={
+                  <SimpleErrorBoundary><AnalyticsTest /></SimpleErrorBoundary>
                 } />
               </Routes>
             </main>
