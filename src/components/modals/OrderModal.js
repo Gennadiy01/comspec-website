@@ -475,6 +475,33 @@ const handleNameInput = (e) => {
           data: result.data
         });
 
+        // 📊 Відстеження аналітики замовлення
+        try {
+          const ProductAnalytics = (await import('../../analytics/ProductAnalytics')).default;
+          
+          // Визначаємо productId з формових даних
+          const productId = orderData?.productId || formData.product || 'unknown';
+          
+          ProductAnalytics.trackEvent('product_order', {
+            productId: productId,
+            orderId: result.orderId,
+            orderType: isConsultationMode ? 'consultation' : 'order',
+            deliveryType: formData.deliveryType,
+            source: source,
+            manager: result.manager,
+            region: finalOrderData.region || '',
+            loadingPoint: finalOrderData.loadingPoint || ''
+          });
+
+          console.log('📊 Відстежено замовлення аналітикою:', {
+            event: 'product_order',
+            productId: productId,
+            orderId: result.orderId
+          });
+        } catch (analyticsError) {
+          console.error('❌ Помилка відстеження замовлення аналітикою:', analyticsError);
+        }
+
         // 🆕 ЕТАП 2: Відправка в Telegram після успішного збереження
         try {
           console.log('🔍 DEBUG: Перевірка Telegram сервісу...');

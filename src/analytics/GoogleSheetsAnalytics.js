@@ -22,7 +22,9 @@ class GoogleSheetsAnalytics {
     // Назви аркушів в таблиці аналітики
     this.sheets = {
       PAGE_VIEWS: 'PageViews',
+      PAGE_VIEWS_DETAILED: 'PageViewsDetailed',
       PRODUCT_EVENTS: 'ProductEvents', 
+      USER_SESSIONS: 'UserSessions',
       DAILY_SUMMARY: 'DailySummary',
       POPULAR_PRODUCTS: 'PopularProducts',
       TRAFFIC_SOURCES: 'TrafficSources',
@@ -117,11 +119,27 @@ class GoogleSheetsAnalytics {
       const eventsToProcess = this.eventQueue.splice(0, this.config.batchSize);
       this.log(`🔄 Обробляємо batch з ${eventsToProcess.length} подій`);
 
-      // Відправляємо через існуючий статичний метод
-      const result = await GoogleSheetsAnalytics.sendEvents(eventsToProcess);
+      // Групуємо події по аркушах
+      const sheetGroups = {};
+      
+      eventsToProcess.forEach(event => {
+        const sheetName = event.sheet || 'ProductEvents'; // Default sheet
+        if (!sheetGroups[sheetName]) {
+          sheetGroups[sheetName] = [];
+        }
+        sheetGroups[sheetName].push(...event.data);
+      });
+
+      // Відправляємо в кожен аркуш окремо
+      const results = [];
+      for (const [sheetName, data] of Object.entries(sheetGroups)) {
+        this.log(`📊 Відправляємо до ${sheetName}: ${data.length} записів`);
+        const result = await this.sendToSheetWithRetry(sheetName, data);
+        results.push(result);
+      }
       
       this.log(`✅ Batch успішно оброблено: ${eventsToProcess.length} подій`);
-      return result;
+      return { success: true, results };
 
     } catch (error) {
       this.logError('❌ Помилка обробки batch:', error);
@@ -504,30 +522,42 @@ class GoogleSheetsAnalytics {
    * Форматування page views для Google Sheets
    */
   formatPageViews(events) {
-    return events.map(event => ({
-      timestamp: event.timestamp,
-      date: new Date(event.timestamp).toISOString().split('T')[0],
-      page_url: event.data.pathname,
-      product_id: event.data.productId || '',
-      user_id: event.data.userId,
-      source: event.data.source,
-      device_type: event.data.deviceType
-    }));
+    return events.map(event => {
+      // ✅ ВИПРАВЛЕННЯ: Перевіряємо валідність timestamp
+      const timestamp = event.timestamp || Date.now();
+      const validTimestamp = (typeof timestamp === 'number' && timestamp > 0) ? timestamp : Date.now();
+      
+      return {
+        timestamp: validTimestamp,
+        date: new Date(validTimestamp).toISOString().split('T')[0],
+        page_url: event.data.pathname,
+        product_id: event.data.productId || '',
+        user_id: event.data.userId,
+        source: event.data.source,
+        device_type: event.data.deviceType
+      };
+    });
   }
 
   /**
    * Форматування product events для Google Sheets
    */
   formatProductEvents(events) {
-    return events.map(event => ({
-      timestamp: event.timestamp,
-      date: new Date(event.timestamp).toISOString().split('T')[0],
-      event_type: event.type,
-      product_id: event.productId || event.data?.productId || '',
-      user_id: event.data?.userId || '',
-      source: event.data?.source || '',
-      extra_data: JSON.stringify(event.data || {})
-    }));
+    return events.map(event => {
+      // ✅ ВИПРАВЛЕННЯ: Перевіряємо валідність timestamp
+      const timestamp = event.timestamp || Date.now();
+      const validTimestamp = (typeof timestamp === 'number' && timestamp > 0) ? timestamp : Date.now();
+      
+      return {
+        timestamp: validTimestamp,
+        date: new Date(validTimestamp).toISOString().split('T')[0],
+        event_type: event.type,
+        product_id: event.productId || event.data?.productId || '',
+        user_id: event.data?.userId || '',
+        source: event.data?.source || '',
+        extra_data: JSON.stringify(event.data || {})
+      };
+    });
   }
 
   /**

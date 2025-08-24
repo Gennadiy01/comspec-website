@@ -23,6 +23,9 @@ import AnalyticsTest from './components/AnalyticsTest';
 // 📊 Глобальний трекер аналітики
 import AnalyticsTracker from './components/AnalyticsTracker';
 
+// 📊 Session tracking система
+import SessionTracker from './components/SessionTracker';
+
 // 🔧 PRODUCTION OPTIMIZATION: Тестові інструменти завантажуються умовно  
 // Імпортуємо напряму - логіка контролю всередині файлів
 import './utils/testingTools';
@@ -45,6 +48,7 @@ function App() {
         <Router>
           <ScrollToTop />
           <AnalyticsTracker />
+          <SessionTracker />
           <div className="App">
             <SimpleErrorBoundary>
               <Header />

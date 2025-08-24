@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Тест міграції аналітики v4.0</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        .result { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .config-box {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Тест міграції аналітики v4.0 SESSION TRACKING</h1>
+        <p><strong>Мета:</strong> Перевірити що нова конфігурація працює та session tracking увімкнений</p>
+        
+        <h2>📊 Поточна конфігурація:</h2>
+        <div class="config-box" id="config-display">Завантаження конфігурації...</div>
+        
+        <h2>🧪 Тести:</h2>
+        
+        <button onclick="testBasicConfig()">1. Тест базової конфігурації</button>
+        <button onclick="testSessionTracking()">2. Тест Session Tracking</button>
+        <button onclick="testNewScript()">3. Тест нового Apps Script v4.0</button>
+        <button onclick="testIPDetection()">4. Тест IP Detection</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Завантажуємо конфігурацію -->
+    <script src="/comspec-website/config.js"></script>
+    
+    <script>
+        // Відображення поточної конфігурації
+        function displayConfig() {
+            const config = window.RUNTIME_CONFIG || {};
+            const display = document.getElementById('config-display');
+            
+            display.innerHTML = `
+🔧 RUNTIME_CONFIG (production):
+ANALYTICS_SCRIPT_URL: ${config.ANALYTICS_SCRIPT_URL || 'НЕ НАЛАШТОВАНО'}
+ANALYTICS_LEVEL: ${config.ANALYTICS_LEVEL || 'НЕ НАЛАШТОВАНО'}
+ANALYTICS_SAMPLING_RATE: ${config.ANALYTICS_SAMPLING_RATE || 'НЕ НАЛАШТОВАНО'}%
+ANALYTICS_DEBUG_MODE: ${config.ANALYTICS_DEBUG_MODE}
+ANALYTICS_ENABLED: ${config.ANALYTICS_ENABLED}
+
+🌐 Environment змінні (.env.local):
+Ці змінні будуть використані автоматично на localhost
+            `;
+        }
+        
+        function addResult(title, content, type = 'result') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}</strong>\n${content}`;
+            results.appendChild(div);
+        }
+        
+        // Тест 1: Базова конфігурація
+        function testBasicConfig() {
+            try {
+                const config = window.RUNTIME_CONFIG || {};
+                
+                let result = '✅ Конфігурація завантажена:\n';
+                result += `📊 Analytics URL: ${config.ANALYTICS_SCRIPT_URL}\n`;
+                result += `🎛️ Analytics Level: ${config.ANALYTICS_LEVEL}\n`;
+                result += `📈 Sampling Rate: ${config.ANALYTICS_SAMPLING_RATE}%\n`;
+                
+                // Перевірка чи це новий URL v4.0
+                if (config.ANALYTICS_SCRIPT_URL && config.ANALYTICS_SCRIPT_URL.includes('AKfycbxoVGsb41EeQ1KOixNhq9qK_fC5z5k7yG6DdpS83gn2hhFCOVOoWuQVyTArM0mLAEs')) {
+                    result += '🚀 НОВИЙ URL v4.0 підтверджено!\n';
+                    addResult('🔧 Тест конфігурації', result, 'success');
+                } else {
+                    result += '❌ СТАРИЙ URL - потрібно оновити!\n';
+                    addResult('🔧 Тест конфігурації', result, 'error');
+                }
+                
+            } catch (error) {
+                addResult('🔧 Тест конфігурації', `❌ Помилка: ${error.message}`, 'error');
+            }
+        }
+        
+        // Тест 2: Session Tracking (має працювати через React компоненти)
+        function testSessionTracking() {
+            addResult('👁️ Тест Session Tracking', 
+                '⚠️ Session Tracking тестується в React додатку.\n' +
+                'Перейдіть на http://localhost:3000 та виконайте:\n' +
+                '• window.sessionTest() - повний тест\n' +
+                '• window.sessionStats() - статистика\n' +
+                '• console.log("Session tracking:", window.isFeatureEnabled?.("sessionTracking"))', 
+                'result');
+        }
+        
+        // Тест 3: Новий Apps Script
+        async function testNewScript() {
+            try {
+                const scriptUrl = window.RUNTIME_CONFIG?.ANALYTICS_SCRIPT_URL;
+                if (!scriptUrl) {
+                    throw new Error('Analytics Script URL не налаштований');
+                }
+                
+                addResult('🔄 Тестування Apps Script v4.0', 'Відправка тестового запиту...', 'result');
+                
+                // Тестовий запит до нового скрипту
+                const testData = {
+                    sheet: 'ProductEvents',
+                    data: [{
+                        timestamp: Date.now(),
+                        date: new Date().toISOString().split('T')[0],
+                        event_type: 'migration_test_v4',
+                        product_id: 'test-migration',
+                        user_id: 'migration-tester',
+                        source: 'migration-test',
+                        extra_data: JSON.stringify({
+                            version: 'v4.0',
+                            test_type: 'migration',
+                            timestamp: new Date().toISOString()
+                        })
+                    }]
+                };
+                
+                // Використовуємо JSONP для обходу CORS
+                const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                
+                window[callbackName] = function(response) {
+                    console.log('📊 Відповідь v4.0 скрипта:', response);
+                    
+                    if (response && response.success) {
+                        let result = '✅ Apps Script v4.0 працює!\n';
+                        result += `📊 Sheet: ${response.sheet || 'ProductEvents'}\n`;
+                        result += `📈 Додано записів: ${response.addedRows || 1}\n`;
+                        result += `📅 Час: ${response.timestamp}\n`;
+                        result += `🔥 Версія: ${response.version || 'v4.0'}\n`;
+                        
+                        if (response.message) {
+                            result += `💬 Повідомлення: ${response.message}\n`;
+                        }
+                        
+                        addResult('🚀 Apps Script v4.0', result, 'success');
+                    } else {
+                        addResult('🚀 Apps Script v4.0', `❌ Неочікувана відповідь: ${JSON.stringify(response)}`, 'error');
+                    }
+                    
+                    // Очищення
+                    delete window[callbackName];
+                };
+                
+                // Створення JSONP запиту
+                const script = document.createElement('script');
+                const params = new URLSearchParams({
+                    data: JSON.stringify(testData),
+                    callback: callbackName
+                });
+                script.src = `${scriptUrl}?${params.toString()}`;
+                
+                // Timeout для запиту
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        addResult('🚀 Apps Script v4.0', '⏰ Timeout - скрипт не відповів протягом 10 секунд', 'error');
+                        delete window[callbackName];
+                    }
+                }, 10000);
+                
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                addResult('🚀 Apps Script v4.0', `❌ Помилка тестування: ${error.message}`, 'error');
+            }
+        }
+        
+        // Тест 4: IP Detection (через зовнішні сервіси)
+        async function testIPDetection() {
+            try {
+                addResult('🌐 IP Detection', 'Тестування отримання IP адреси...', 'result');
+                
+                const ipServices = [
+                    'https://api.ipify.org?format=json',
+                    'https://httpbin.org/ip'
+                ];
+                
+                for (const service of ipServices) {
+                    try {
+                        const response = await fetch(service);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const ip = data.ip || data.origin;
+                            
+                            if (ip) {
+                                addResult('🌐 IP Detection', 
+                                    `✅ IP отримано через ${service}:\n` +
+                                    `📍 IP адреса: ${ip}\n` +
+                                    `🔧 Це буде використовуватися в session tracking`, 
+                                    'success');
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`IP service ${service} failed:`, e);
+                        continue;
+                    }
+                }
+                
+                addResult('🌐 IP Detection', '❌ Не вдалося отримати IP через жоден сервіс', 'error');
+                
+            } catch (error) {
+                addResult('🌐 IP Detection', `❌ Помилка IP detection: ${error.message}`, 'error');
+            }
+        }
+        
+        // Ініціалізація при завантаженні
+        document.addEventListener('DOMContentLoaded', function() {
+            displayConfig();
+        });
+        
+        // Оновлення конфігурації кожні 2 секунди (якщо config.js завантажився пізніше)
+        setInterval(displayConfig, 2000);
+    </script>
+</body>
+</html>

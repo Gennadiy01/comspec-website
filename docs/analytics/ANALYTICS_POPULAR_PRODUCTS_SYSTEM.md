@@ -752,3 +752,144 @@ GoogleSheetsAnalytics.clearFailedRequests()
 **🌐 Працює на:** https://gennadiy01.github.io/comspec-website  
 **📅 Реалізовано:** 20.08.2025  
 **🎯 Статус:** Всі функції працюють, система стабільна
+
+---
+
+## 🔥 НОВЕ! SESSION TRACKING СИСТЕМА v4.0
+
+**📅 Оновлено:** 21.08.2025  
+**🚀 Версія:** 4.0 - SESSION TRACKING  
+
+### ✨ Нові можливості:
+
+#### 📊 **SessionTracker компонент**
+- ⏱️ **Відстеження часу на сторінці** - точний час перебування користувача
+- 🕐 **Загальна тривалість сесії** - повний час роботи з сайтом
+- 🖱️ **Моніторинг активності** - scroll, click, mousemove, touch, keydown
+- 📏 **Глибина прокрутки** - максимальний % прокрутки кожної сторінки
+- 😴 **Детекція неактивності** - автоматичне виявлення через 30 секунд
+- 👁️ **Переключення вкладок** - відстеження focus/blur браузера
+- 💾 **Періодичне збереження** - автосейв стану кожні 30 секунд
+
+#### 🌐 **SessionAnalytics модуль**  
+- 🌍 **IP Detection** - отримання IP через 4 сервіси з fallback
+- 📱 **Device Fingerprinting** - тип пристрою, розширення екрану, touch
+- 🌐 **Browser Detection** - назва та версія браузера
+- ⚡ **Bounce Rate аналіз** - виявлення швидких виходів без взаємодії
+- 🌍 **Геолокація** - мова, часовий пояс користувача
+- 🆔 **Унікальні Session ID** - для зв'язування всіх дій користувача
+
+#### 📊 **Нові Google Sheets аркуші:**
+
+**UserSessions** - повна інформація про сесії:
+```
+Session ID | IP Address | User Agent | Duration (sec) | Total Pages | 
+Total Interactions | Max Scroll Depth | Bounced | Device Type |
+Browser Name | Browser Version | Screen Resolution | Referrer
+```
+
+**PageViewsDetailed** - детальний аналіз сторінок:
+```  
+Session ID | Page Path | Page Title | Duration (sec) | Interactions |
+Scroll Depth (%) | Page Number | Start Time | End Time
+```
+
+#### 🔧 **Google Apps Script v4.0**
+- ✅ Підтримка нових форматів session даних
+- ✅ Автоматичне створення аркушів з заголовками  
+- ✅ Форматування таблиць та автоширина колонок
+- ✅ Київський час (UTC+3) для всіх timestamp
+
+### 🧪 **Тестові функції для Session Tracking:**
+
+```javascript
+// В консолі браузера:
+sessionTest()     // Повний тест системи session tracking
+sessionStats()    // Поточна статистика сесії
+```
+
+### 🎯 **Нові метрики що збираються:**
+
+**Про користувача:**
+- IP адреса та приблизна геолокація
+- Тип браузера, версія, User Agent
+- Розширення екрану, viewport, pixel ratio
+- Підтримка touch, мова, часовий пояс
+
+**Про поведінку:**
+- Час входу/виходу з кожної сторінки
+- Кількість взаємодій (клік, прокрутка, рух миші)
+- Максимальна глибина прокрутки (у відсотках)
+- Періоди активності/неактивності
+- Переключення між вкладками браузера
+
+**Про сесію:**
+- Загальна тривалість від входу до виходу
+- Кількість переглянутих сторінок
+- Bounce rate (швидкі виходи без взаємодій)
+- Джерело трафіку (referrer)
+- Часові мітки всіх подій
+
+### 📈 **Приклади даних Session Tracking:**
+
+```javascript
+// UserSessions запис
+{
+  session_id: 'session_1755772723828_abc123',
+  ip_address: '95.67.123.45',
+  user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)...',
+  duration_seconds: 247,
+  total_pages: 4,
+  total_interactions: 28,
+  max_scroll_depth: 85,
+  bounced: false,
+  device_type: 'desktop',
+  browser_name: 'Chrome',
+  browser_version: '118.0',
+  screen_resolution: '1920x1080'
+}
+
+// PageViewsDetailed запис  
+{
+  session_id: 'session_1755772723828_abc123',
+  page_path: '/products/gravel/gravel-5-20',
+  page_title: 'Щебінь гранітний 5-20мм',
+  duration_seconds: 67,
+  interactions: 12,
+  scroll_depth: 75,
+  page_number: 2
+}
+```
+
+### 🔄 **Інтеграція в додаток:**
+
+```javascript
+// src/App.js - автоматично додано
+import SessionTracker from './components/SessionTracker';
+
+<Router>
+  <AnalyticsTracker />    // Базове відстеження переглядів
+  <SessionTracker />      // НОВИЙ! Повний session tracking
+  // ... решта компонентів
+</Router>
+```
+
+### 📊 **Можливості аналізу:**
+
+З новими даними ви зможете:
+- 📈 Аналізувати conversion funnel по сторінках
+- ⏱️ Оптимізувати сторінки з низьким engagement  
+- 🌍 Розуміти географію та пристрої користувачів
+- 📱 Покращувати UX для конкретних браузерів
+- 🎯 Виявляти проблемні сторінки з високим bounce rate
+- 📊 Трекувати шлях користувача по сайту
+
+### 🚀 **Статус системи v4.0:**
+
+**✅ Базова аналітика (v3.3):** Працює повністю  
+**🔥 Session Tracking (v4.0):** Готовий до тестування  
+**📊 Google Sheets:** Підтримує всі нові аркуші  
+**🌐 IP Detection:** 4 сервіси з автоматичним fallback  
+**📱 Device Detection:** Повна інформація про пристрої  
+
+**🎯 СИСТЕМА ТЕПЕР НАДАЄ НАЙПОВНІШУ АНАЛІТИКУ** для розуміння поведінки користувачів! 🚀

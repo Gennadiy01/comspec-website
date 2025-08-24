@@ -161,6 +161,14 @@ class ProductAnalytics {
       // Зберігаємо в localStorage
       instance.saveLocalData();
 
+      // Синхронізуємо популярні товари кожні 5 переглядів
+      const totalViews = Object.values(instance.localCache.views).reduce((sum, views) => sum + views, 0);
+      if (totalViews % 5 === 0) {
+        instance.syncPopularProducts().catch(error => {
+          instance.logError('Помилка синхронізації популярних товарів:', error);
+        });
+      }
+
       instance.log('👁️ Відстежено перегляд товару:', productId);
 
     } catch (error) {
@@ -421,6 +429,13 @@ class ProductAnalytics {
       this.processQueue();
     }, 30000);
 
+    // Синхронізуємо популярні товари кожні 2 хвилини
+    setInterval(() => {
+      this.syncPopularProducts().catch(error => {
+        this.logError('Помилка періодичної синхронізації популярних товарів:', error);
+      });
+    }, 120000); // 2 хвилини
+
     // Обробляємо чергу при виході з сторінки
     window.addEventListener('beforeunload', () => {
       this.processQueue();
@@ -506,6 +521,38 @@ class ProductAnalytics {
       }
     } catch (error) {
       this.logError('Помилка завантаження локальних даних:', error);
+    }
+  }
+
+  /**
+   * Синхронізація популярних товарів з Google Sheets
+   */
+  async syncPopularProducts() {
+    try {
+      const popularProducts = ProductAnalytics.getPopularProducts(20);
+      
+      if (popularProducts.length === 0) {
+        this.log('📊 Немає популярних товарів для синхронізації');
+        return;
+      }
+
+      // Підготовуємо дані для Google Sheets
+      const sheetData = popularProducts.map(product => ({
+        product_id: product.productId,
+        views_count: product.views,
+        last_viewed: new Date(product.lastViewed).toISOString(),
+        updated_at: new Date().toISOString(),
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now()
+      }));
+
+      // Відправляємо через GoogleSheetsAnalytics
+      await GoogleSheetsAnalytics.sendToSheet('PopularProducts', sheetData);
+      
+      this.log(`📈 Синхронізовано ${popularProducts.length} популярних товарів з Google Sheets`);
+      
+    } catch (error) {
+      this.logError('❌ Помилка синхронізації популярних товарів:', error);
     }
   }
 

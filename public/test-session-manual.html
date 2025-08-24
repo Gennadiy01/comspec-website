@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Тест Session Tracking</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 30px auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        button { 
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            margin: 8px 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+        }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .warning { border-left-color: #ffc107; background: #fff3cd; }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; }
+        h2 { color: #764ba2; border-bottom: 2px solid #764ba2; padding-bottom: 5px; }
+        .stats-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .google-sheets-link {
+            display: inline-block;
+            background: #34a853;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        .google-sheets-link:hover { background: #2d8f46; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Тест Session Tracking v4.0</h1>
+        
+        <div class="stats-box">
+            <h3>📊 Поточна сесія:</h3>
+            <div id="current-session">Завантаження...</div>
+        </div>
+
+        <h2>🧪 Основні тести:</h2>
+        <button onclick="testSessionStats()">📊 Статистика сесії</button>
+        <button onclick="testSessionSave()">💾 Зберегти сесію</button>
+        <button onclick="testSessionEnd()">🏁 Завершити сесію (sendBeacon)</button>
+        <button onclick="testFullSession()">🚀 Повний тест session</button>
+        
+        <h2>🔧 Діагностичні тести:</h2>
+        <button onclick="testFeatureFlags()">🎛️ Перевірити feature flags</button>
+        <button onclick="testAnalyticsConfig()">⚙️ Конфігурація аналітики</button>
+        <button onclick="clearSessionData()">🗑️ Очистити дані сесії</button>
+        
+        <h2>🌐 Перевірити результати:</h2>
+        <a href="https://docs.google.com/spreadsheets/d/1SQg9vNBhIKzi288HjClKbatLoSqAdeC9CaFzYOA-nlM/edit?gid=0#gid=0" 
+           target="_blank" class="google-sheets-link">📊 Відкрити Google Sheets</a>
+        <button onclick="checkGoogleSheets()">🔍 Перевірити UserSessions аркуш</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let sessionUpdateInterval;
+        
+        function addResult(title, content, type = 'result') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}</strong>\n${content}`;
+            results.appendChild(div);
+            
+            // Scroll to new result
+            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function updateCurrentSession() {
+            const sessionDisplay = document.getElementById('current-session');
+            
+            try {
+                // Перевіряємо чи доступні window функції
+                if (typeof window.sessionStats === 'function') {
+                    const stats = window.sessionStats();
+                    sessionDisplay.innerHTML = `
+🆔 Session ID: ${stats?.sessionId || 'N/A'}
+⏱️ Тривалість: ${stats?.duration || 0}ms
+📄 Сторінок: ${stats?.totalPages || 0}
+🔄 Статус: ${stats?.isActive ? 'Активна' : 'Неактивна'}
+💾 localStorage: ${stats?.hasLocalStorage ? 'Є' : 'Немає'}
+                    `;
+                } else {
+                    sessionDisplay.innerHTML = `
+❌ Session functions не доступні
+ℹ️ Перейдіть на головну сторінку React
+🔗 http://localhost:3000/comspec-website/
+                    `;
+                }
+            } catch (error) {
+                sessionDisplay.innerHTML = `
+❌ Помилка отримання статистики
+📝 ${error.message}
+                `;
+            }
+        }
+        
+        function testSessionStats() {
+            try {
+                if (typeof window.sessionStats !== 'function') {
+                    addResult('📊 Session Stats', 
+                        '❌ window.sessionStats не доступна\n' +
+                        '💡 Рішення: відкрийте http://localhost:3000/comspec-website та поверніться сюди',
+                        'error');
+                    return;
+                }
+                
+                const stats = window.sessionStats();
+                
+                let result = '📊 Поточна статистика сесії:\n';
+                result += `🆔 Session ID: ${stats?.sessionId || 'Немає'}\n`;
+                result += `⏱️ Час початку: ${stats?.startTime ? new Date(stats.startTime).toLocaleString() : 'Невідомо'}\n`;
+                result += `📏 Тривалість: ${Math.round((stats?.duration || 0) / 1000)}с\n`;
+                result += `📄 Відвідано сторінок: ${stats?.totalPages || 0}\n`;
+                result += `🔄 Активна: ${stats?.isActive ? 'Так ✅' : 'Ні ❌'}\n`;
+                result += `💾 localStorage: ${stats?.hasLocalStorage ? 'Збережено ✅' : 'Відсутній ❌'}\n`;
+                result += `📍 Поточна сторінка: ${stats?.currentPage || 'Невідома'}\n`;
+                
+                addResult('📊 Session Stats', result, stats?.sessionId ? 'success' : 'warning');
+                
+            } catch (error) {
+                addResult('📊 Session Stats', `❌ Помилка: ${error.message}`, 'error');
+            }
+        }
+        
+        function testSessionSave() {
+            try {
+                if (typeof window.sessionSave !== 'function') {
+                    addResult('💾 Session Save', 
+                        '❌ window.sessionSave не доступна\n' +
+                        '💡 Рішення: відкрийте http://localhost:3000/comspec-website спочатку',
+                        'error');
+                    return;
+                }
+                
+                addResult('💾 Session Save', '🔄 Зберігаємо сесію...', 'result');
+                
+                const result = window.sessionSave();
+                
+                setTimeout(() => {
+                    addResult('💾 Session Save', 
+                        `✅ Сесія збережена!\n` +
+                        `📊 Результат: ${JSON.stringify(result, null, 2)}\n` +
+                        `🔍 Перевірте аркуш UserSessions в Google Sheets`,
+                        'success');
+                }, 1000);
+                
+            } catch (error) {
+                addResult('💾 Session Save', `❌ Помилка збереження: ${error.message}`, 'error');
+            }
+        }
+        
+        function testSessionEnd() {
+            try {
+                if (typeof window.sessionEndTest !== 'function') {
+                    addResult('🏁 Session End', 
+                        '❌ window.sessionEndTest не доступна\n' +
+                        '💡 Рішення: відкрийте http://localhost:3000/comspec-website спочатку',
+                        'error');
+                    return;
+                }
+                
+                addResult('🏁 Session End', '🔄 Тестуємо завершення сесії через sendBeacon...', 'result');
+                
+                const result = window.sessionEndTest();
+                
+                setTimeout(() => {
+                    addResult('🏁 Session End', 
+                        `🚀 Тест sendBeacon виконано!\n` +
+                        `📡 sendBeacon підтримується: ${navigator.sendBeacon ? 'Так ✅' : 'Ні ❌'}\n` +
+                        `📊 Результат: ${JSON.stringify(result, null, 2)}\n` +
+                        `🔍 Перевірте останній запис в UserSessions`,
+                        navigator.sendBeacon ? 'success' : 'warning');
+                }, 1500);
+                
+            } catch (error) {
+                addResult('🏁 Session End', `❌ Помилка тесту: ${error.message}`, 'error');
+            }
+        }
+        
+        function testFullSession() {
+            try {
+                if (typeof window.sessionTest !== 'function') {
+                    addResult('🚀 Full Session Test', 
+                        '❌ window.sessionTest не доступна\n' +
+                        '💡 Рішення: відкрийте http://localhost:3000/comspec-website спочатку',
+                        'error');
+                    return;
+                }
+                
+                addResult('🚀 Full Session Test', '🔄 Виконуємо повний тест session tracking...', 'result');
+                
+                const result = window.sessionTest();
+                
+                setTimeout(() => {
+                    addResult('🚀 Full Session Test', 
+                        `🎉 Повний тест завершено!\n` +
+                        `📊 Результат тестування:\n${JSON.stringify(result, null, 2)}\n` +
+                        `🔍 Перевірте всі записи в Google Sheets аркушах`,
+                        'success');
+                }, 2000);
+                
+            } catch (error) {
+                addResult('🚀 Full Session Test', `❌ Помилка повного тесту: ${error.message}`, 'error');
+            }
+        }
+        
+        function testFeatureFlags() {
+            try {
+                const features = [
+                    'sessionTracking',
+                    'ipDetection', 
+                    'detailedPageViews',
+                    'userSessions',
+                    'pageViews',
+                    'productEvents'
+                ];
+                
+                let result = '🎛️ Статус feature flags:\n';
+                
+                features.forEach(feature => {
+                    const enabled = typeof window.isFeatureEnabled === 'function' 
+                        ? window.isFeatureEnabled(feature) 
+                        : 'Функція недоступна';
+                    
+                    result += `• ${feature}: ${enabled ? '✅ Увімкнено' : '❌ Вимкнено'}\n`;
+                });
+                
+                // Додаткова інформація
+                result += '\n📊 Analytics Level: ';
+                if (window.location.hostname === 'localhost') {
+                    result += 'FULL (localhost)\n';
+                } else {
+                    result += 'PRODUCTION_FULL (production)\n';
+                }
+                
+                addResult('🎛️ Feature Flags', result, 'result');
+                
+            } catch (error) {
+                addResult('🎛️ Feature Flags', `❌ Помилка перевірки: ${error.message}`, 'error');
+            }
+        }
+        
+        function testAnalyticsConfig() {
+            try {
+                let result = '⚙️ Конфігурація аналітики:\n\n';
+                
+                // Runtime config
+                if (window.RUNTIME_CONFIG) {
+                    result += '🔧 RUNTIME_CONFIG (production):\n';
+                    result += `  ANALYTICS_LEVEL: ${window.RUNTIME_CONFIG.ANALYTICS_LEVEL}\n`;
+                    result += `  ANALYTICS_SAMPLING_RATE: ${window.RUNTIME_CONFIG.ANALYTICS_SAMPLING_RATE}%\n`;
+                    result += `  ANALYTICS_SCRIPT_URL: ${window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL ? 'Налаштовано ✅' : 'Відсутній ❌'}\n`;
+                    result += `  DEBUG_MODE: ${window.RUNTIME_CONFIG.ANALYTICS_DEBUG_MODE}\n\n`;
+                }
+                
+                // Environment info
+                result += '🌐 Environment:\n';
+                result += `  Hostname: ${window.location.hostname}\n`;
+                result += `  Протокол: ${window.location.protocol}\n`;
+                result += `  URL: ${window.location.href}\n\n`;
+                
+                // Browser features
+                result += '🔧 Browser features:\n';
+                result += `  sendBeacon: ${navigator.sendBeacon ? 'Підтримується ✅' : 'Не підтримується ❌'}\n`;
+                result += `  localStorage: ${typeof localStorage !== 'undefined' ? 'Доступний ✅' : 'Недоступний ❌'}\n`;
+                result += `  fetch API: ${typeof fetch !== 'undefined' ? 'Доступний ✅' : 'Недоступний ❌'}\n`;
+                
+                addResult('⚙️ Analytics Config', result, 'result');
+                
+            } catch (error) {
+                addResult('⚙️ Analytics Config', `❌ Помилка конфігурації: ${error.message}`, 'error');
+            }
+        }
+        
+        function clearSessionData() {
+            try {
+                const keysToRemove = [
+                    'comspec_session_state',
+                    'comspec_last_session_data',
+                    'comspec_analytics_user_id'
+                ];
+                
+                let result = '🗑️ Очищення даних сесії:\n';
+                
+                keysToRemove.forEach(key => {
+                    if (localStorage.getItem(key)) {
+                        localStorage.removeItem(key);
+                        result += `✅ ${key} - видалено\n`;
+                    } else {
+                        result += `ℹ️ ${key} - не знайдено\n`;
+                    }
+                });
+                
+                result += '\n🔄 Перезавантажте сторінку для нової сесії';
+                
+                addResult('🗑️ Clear Session Data', result, 'success');
+                
+            } catch (error) {
+                addResult('🗑️ Clear Session Data', `❌ Помилка очищення: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkGoogleSheets() {
+            addResult('🔍 Google Sheets Check', 
+                '📊 Перейдіть до Google Sheets та перевірте:\n\n' +
+                '1️⃣ Аркуш "UserSessions":\n' +
+                '   • Останні записи сесій\n' +
+                '   • sessionId, startTime, endTime\n' +
+                '   • totalPages, duration\n\n' +
+                '2️⃣ Аркуш "PageViewsDetailed":\n' +
+                '   • Детальні записи сторінок\n' +
+                '   • IP адреси, device info\n\n' +
+                '3️⃣ Сортування за timestamp ↓\n\n' +
+                '🔗 Посилання: https://docs.google.com/spreadsheets/d/1SQg9vNBhIKzi288HjClKbatLoSqAdeC9CaFzYOA-nlM/',
+                'warning');
+        }
+        
+        // Ініціалізація при завантаженні
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentSession();
+            
+            // Оновлюємо статистику кожні 3 секунди
+            sessionUpdateInterval = setInterval(updateCurrentSession, 3000);
+        });
+        
+        // Очищення при виході
+        window.addEventListener('beforeunload', function() {
+            if (sessionUpdateInterval) {
+                clearInterval(sessionUpdateInterval);
+            }
+        });
+    </script>
+</body>
+</html>
