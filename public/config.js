@@ -9,11 +9,15 @@ window.RUNTIME_CONFIG = {
   GOOGLE_SHEETS_ID: '1xJzmIKJ8vv7IY8Or5eiRmXbsfVbQL8ejZNqXP9OnTDY',
   GOOGLE_SHEETS_API_KEY: 'AIzaSyC9sM0GgS6XdzV2H5hqNXahzZ34Jfo58mU',
   
-  // Аналітика сайту (використовуємо окремий скрипт для аналітики)
+  // 🚀 АНАЛІТИКА v4.0 SESSION TRACKING - PRODUCTION НАЛАШТУВАННЯ (UPDATED)
   ANALYTICS_ENABLED: true,
-  ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwOpFp2GGUucDkVT_H8pV-C4VPReeXjkRD4PdNx2WJMiBadl6lzrqO4uQcTihIgY2pj3w/exec',
-  ANALYTICS_SAMPLING_RATE: 100,
-  ANALYTICS_DEBUG_MODE: true,
+  ANALYTICS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxoVGsb41EeQ1KOixNhq9qK_fC5z5k7yG6DdpS83gn2hhFCOVOoWuQVyTArM0mLAEs/exec',
+  ANALYTICS_FORCE_RELOAD: true,        // 🔄 Примусове оновлення cache
+  
+  // ⚙️ КОНФІГУРАЦІЯ v4.0 ДЛЯ PRODUCTION
+  ANALYTICS_LEVEL: 'PRODUCTION_FULL',      // 🚀 Повна аналітика + оптимізація
+  ANALYTICS_SAMPLING_RATE: 50,             // 📊 50% користувачів (баланс функцій/ресурсів)
+  ANALYTICS_DEBUG_MODE: false,             // ❌ Без debug на production
   DISABLE_ANALYTICS_LOCALHOST: false,
   
   // GitHub Pages налаштування
@@ -22,4 +26,6 @@ window.RUNTIME_CONFIG = {
   BASE_PATH: '/comspec-website'
 };
 
-console.log('📦 Runtime конфігурація завантажена для GitHub Pages');
+console.log('📦 Runtime конфігурація завантажена для GitHub Pages v4.0 (UPDATED)');
+console.log('🔧 ANALYTICS_SCRIPT_URL:', window.RUNTIME_CONFIG.ANALYTICS_SCRIPT_URL);
+console.log('🎛️ ANALYTICS_LEVEL:', window.RUNTIME_CONFIG.ANALYTICS_LEVEL);
