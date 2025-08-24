@@ -853,6 +853,15 @@ class GoogleSheetsAnalytics {
       return false;
     }
   }
+
+  /**
+   * 📊 Статичний метод для надсилання даних до конкретного аркуша
+   * (Потрібен для PopularProducts синхронізації)
+   */
+  static async sendToSheet(sheetName, data) {
+    const instance = this.getInstance();
+    return await instance.sendToSheet(sheetName, data);
+  }
 }
 
 // Експорт класу

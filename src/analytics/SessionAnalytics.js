@@ -566,6 +566,22 @@ if (typeof window !== 'undefined') {
     const lastSession = localStorage.getItem('comspec_last_session_data');
     console.log('Saved session state:', savedState ? JSON.parse(savedState) : 'none');
     console.log('Last completed session:', lastSession ? JSON.parse(lastSession) : 'none');
+    
+    // Повертаємо об'єкт для JS консолі
+    if (instance.currentSession) {
+      return {
+        sessionId: instance.currentSession.sessionId,
+        startTime: instance.currentSession.startTime,
+        duration: Date.now() - instance.currentSession.startTime,
+        totalPages: instance.currentSession.totalPages || 0,
+        isActive: true,
+        currentPage: window.location.pathname,
+        hasLocalStorage: !!savedState,
+        ipAddress: instance.currentSession.ipAddress
+      };
+    }
+    
+    return null;
   };
 
   window.sessionSave = () => {

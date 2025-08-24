@@ -9,8 +9,9 @@ const isTestingEnabled = () => {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isManuallyEnabled = typeof window !== 'undefined' && window.COMSPEC_TESTING_ENABLED === true;
   const isDebugMode = typeof window !== 'undefined' && window.location.search.includes('debug=true');
+  const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
   
-  return isDevelopment || isManuallyEnabled || isDebugMode;
+  return isDevelopment || isManuallyEnabled || isDebugMode || isGitHubPages;
 };
 
 // Заглушка для production

@@ -144,3 +144,11 @@ export function shouldTrackUser() {
   // Fallback - випадковий sampling
   return Math.random() * 100 < rate;
 }
+
+// Глобальний доступ для тестування
+if (typeof window !== 'undefined') {
+  window.isFeatureEnabled = isFeatureEnabled;
+  window.getAnalyticsConfig = getAnalyticsConfig;
+  window.getSamplingRate = getSamplingRate;
+  window.shouldTrackUser = shouldTrackUser;
+}
