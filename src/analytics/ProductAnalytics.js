@@ -529,6 +529,15 @@ class ProductAnalytics {
    */
   async syncPopularProducts() {
     try {
+      // Додаткова перевірка від дублювання
+      const now = Date.now();
+      const lastSyncTime = localStorage.getItem('comspec_last_sync_time');
+      
+      if (lastSyncTime && (now - parseInt(lastSyncTime)) < 300000) { // 5 хвилин мінімум
+        this.log('📊 Синхронізація була менше 5 хвилин тому, пропускаємо');
+        return;
+      }
+      
       const popularProducts = ProductAnalytics.getPopularProducts(20);
       
       if (popularProducts.length === 0) {
@@ -545,14 +554,16 @@ class ProductAnalytics {
         return;
       }
 
-      // Зберігаємо поточний стан для наступної перевірки
+      // Зберігаємо час та стан синхронізації
+      localStorage.setItem('comspec_last_sync_time', now.toString());
       localStorage.setItem('comspec_last_popular_sync', currentDataHash);
 
-      // Підготовуємо дані для Google Sheets у компактному форматі
-      const sheetData = popularProducts.map(product => ({
+      // Підготовуємо дані для Google Sheets у компактному форматі з рангом
+      const sheetData = popularProducts.map((product, index) => ({
         timestamp: Date.now(),
         date: new Date().toISOString().split('T')[0],
         time: new Date().toTimeString().split(' ')[0],
+        rank: index + 1,
         product_id: product.productId,
         views_count: product.views,
         last_viewed_date: new Date(product.lastViewed).toISOString().split('T')[0],
