@@ -378,10 +378,45 @@ class GoogleSheetsAnalytics {
     }
 
     try {
+      // ✅ ВИПРАВЛЕННЯ: Спеціальна обробка для PopularProducts
+      let processedData = data;
+      if (sheetName === 'PopularProducts') {
+        // Переконуємось що дані мають правильну структуру для PopularProducts
+        processedData = data.map(item => {
+          if (typeof item === 'object' && item.timestamp) {
+            // Дані вже у правильному форматі (окремі поля)
+            return {
+              timestamp: item.timestamp,
+              date: item.date,
+              time: item.time,
+              rank: item.rank,
+              product_id: item.product_id,
+              views_count: item.views_count,
+              last_viewed_date: item.last_viewed_date,
+              last_viewed_time: item.last_viewed_time
+            };
+          } else {
+            // Якщо дані у старому JSON форматі - перетворюємо
+            console.warn('⚠️ Отримано старий JSON формат для PopularProducts, конвертуємо');
+            const parsed = typeof item === 'string' ? JSON.parse(item) : item;
+            return {
+              timestamp: parsed.timestamp || Date.now(),
+              date: parsed.date || new Date().toISOString().split('T')[0],
+              time: parsed.time || new Date().toTimeString().split(' ')[0],
+              rank: parsed.rank || 0,
+              product_id: parsed.product_id || parsed.productId || '',
+              views_count: parsed.views_count || parsed.views || 0,
+              last_viewed_date: parsed.last_viewed_date || new Date().toISOString().split('T')[0],
+              last_viewed_time: parsed.last_viewed_time || new Date().toTimeString().split(' ')[0]
+            };
+          }
+        });
+      }
+
       const payload = {
         action: 'analytics',
         sheet: sheetName,
-        data: data
+        data: processedData
       };
 
       console.log(`📡 Відправка до ${sheetName}:`, data.length, 'записів');
