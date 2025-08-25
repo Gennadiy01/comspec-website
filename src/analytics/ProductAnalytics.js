@@ -161,9 +161,9 @@ class ProductAnalytics {
       // Зберігаємо в localStorage
       instance.saveLocalData();
 
-      // Синхронізуємо популярні товари кожні 5 переглядів
+      // Синхронізуємо популярні товари кожні 10 переглядів (оптимізовано)
       const totalViews = Object.values(instance.localCache.views).reduce((sum, views) => sum + views, 0);
-      if (totalViews % 5 === 0) {
+      if (totalViews % 10 === 0) {
         instance.syncPopularProducts().catch(error => {
           instance.logError('Помилка синхронізації популярних товарів:', error);
         });
@@ -429,12 +429,12 @@ class ProductAnalytics {
       this.processQueue();
     }, 30000);
 
-    // Синхронізуємо популярні товари кожні 2 хвилини
+    // Синхронізуємо популярні товари кожні 10 хвилин (менше навантаження)
     setInterval(() => {
       this.syncPopularProducts().catch(error => {
         this.logError('Помилка періодичної синхронізації популярних товарів:', error);
       });
-    }, 120000); // 2 хвилини
+    }, 600000); // 10 хвилин
 
     // Обробляємо чергу при виході з сторінки
     window.addEventListener('beforeunload', () => {
@@ -536,14 +536,27 @@ class ProductAnalytics {
         return;
       }
 
-      // Підготовуємо дані для Google Sheets
+      // Перевіряємо чи є зміни з останньої синхронізації
+      const lastSyncData = localStorage.getItem('comspec_last_popular_sync');
+      const currentDataHash = JSON.stringify(popularProducts.map(p => `${p.productId}:${p.views}`));
+      
+      if (lastSyncData && lastSyncData === currentDataHash) {
+        this.log('📊 Популярні товари без змін, пропускаємо синхронізацію');
+        return;
+      }
+
+      // Зберігаємо поточний стан для наступної перевірки
+      localStorage.setItem('comspec_last_popular_sync', currentDataHash);
+
+      // Підготовуємо дані для Google Sheets у компактному форматі
       const sheetData = popularProducts.map(product => ({
+        timestamp: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0],
         product_id: product.productId,
         views_count: product.views,
-        last_viewed: new Date(product.lastViewed).toISOString(),
-        updated_at: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0],
-        timestamp: Date.now()
+        last_viewed_date: new Date(product.lastViewed).toISOString().split('T')[0],
+        last_viewed_time: new Date(product.lastViewed).toTimeString().split(' ')[0]
       }));
 
       // Відправляємо через GoogleSheetsAnalytics
