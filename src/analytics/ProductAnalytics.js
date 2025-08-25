@@ -772,6 +772,35 @@ if (typeof window !== 'undefined') {
       const popular = ProductAnalytics.getPopularProducts(10);
       console.log('📊 Поточні популярні товари:', popular);
       console.log('📊 Debug info:', ProductAnalytics.getDebugInfo());
+    },
+
+    // ✅ ДОДАНО: Принудове тестування PopularProducts синхронізації
+    testSync: async () => {
+      console.log('🧪 ТЕСТУВАННЯ PopularProducts синхронізації...');
+      
+      const instance = ProductAnalytics.getInstance();
+      
+      // Додаємо тестові дані
+      instance.localCache.views = {
+        'gravel-5-10': 5,
+        'sand-river': 3,
+        'gravel-20-40': 2
+      };
+      instance.localCache.lastViewTime = {
+        'gravel-5-10': Date.now() - 1000,
+        'sand-river': Date.now() - 2000, 
+        'gravel-20-40': Date.now() - 3000
+      };
+      
+      console.log('✅ Тестові дані створено');
+      
+      // Примусово запускаємо синхронізацію
+      try {
+        await instance.syncPopularProducts();
+        console.log('✅ Синхронізація завершена успішно');
+      } catch (error) {
+        console.error('❌ Помилка синхронізації:', error);
+      }
     }
   };
   

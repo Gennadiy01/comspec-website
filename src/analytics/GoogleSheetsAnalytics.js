@@ -419,8 +419,19 @@ class GoogleSheetsAnalytics {
         data: processedData
       };
 
-      console.log(`📡 Відправка до ${sheetName}:`, data.length, 'записів');
+      console.log(`📡 Відправка до ${sheetName}:`, processedData.length, 'записів');
       console.log('🔗 URL:', this.config.scriptUrl);
+      
+      // ✅ ДОДАНО: Детальне логування для PopularProducts
+      if (sheetName === 'PopularProducts') {
+        console.log('🔍 ДЕТАЛЬНЕ ЛОГУВАННЯ PopularProducts:');
+        console.log('📊 Оригінальні дані:', data);
+        console.log('📊 Оброблені дані:', processedData);
+        console.log('📊 Структура першого елемента:', processedData[0]);
+        console.log('📊 Тип даних:', typeof processedData[0]);
+        console.log('📊 Ключі об\'єкта:', Object.keys(processedData[0]));
+      }
+      
       console.log('📦 Payload:', payload);
 
       const response = await fetch(this.config.scriptUrl, {

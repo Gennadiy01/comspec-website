@@ -110,7 +110,13 @@ class SessionAnalytics {
       referrer: document.referrer || 'direct'
     };
 
-    console.log('🎯 Розпочато нову сесію:', this.currentSession.sessionId);
+    console.log('🎯 Розпочано нову сесію:', this.currentSession.sessionId);
+
+    // ✅ ДОДАНО: Негайна відправка початкових даних сесії для кращого тестування
+    this.sendInitialSessionData();
+
+    // ✅ ДОДАНО: Періодичне оновлення активної сесії кожні 2 хвилини
+    this.startPeriodicSessionUpdates();
   }
 
   /**
@@ -208,10 +214,111 @@ class SessionAnalytics {
   }
 
   /**
-   * 📊 Відправка даних сесії в Google Sheets
+   * 📊 Відправка початкових даних сесії (для кращого тестування)
+   */
+  sendInitialSessionData() {
+    if (!this.currentSession) return;
+
+    const sessionData = {
+      timestamp: this.currentSession.startTime,
+      date: new Date(this.currentSession.startTime).toISOString().split('T')[0],
+      session_id: this.currentSession.sessionId,
+      ip_address: this.currentSession.ipAddress,
+      user_agent: this.currentSession.userAgent,
+      duration_seconds: 0, // Початкова тривалість
+      total_pages: 0, // Початкова кількість
+      total_interactions: 0,
+      max_scroll_depth: 0,
+      bounced: false, // Поки невідомо
+      device_type: this.currentSession.device.type,
+      browser_name: this.currentSession.browser.name,
+      browser_version: this.currentSession.browser.version,
+      screen_resolution: this.currentSession.device.screenResolution,
+      referrer: this.currentSession.referrer,
+      start_time: new Date(this.currentSession.startTime).toISOString(),
+      end_time: null, // Сесія ще активна
+      status: 'active' // Додаткове поле для розрізнення активних сесій
+    };
+
+    // Використовуємо прямий виклик для негайної відправки
+    GoogleSheetsAnalytics.sendToSheet('UserSessions', [sessionData])
+      .then(() => {
+        console.log('🚀 Початкові дані сесії відправлено негайно:', this.currentSession.sessionId);
+      })
+      .catch(error => {
+        console.error('❌ Помилка відправки початкових даних сесії:', error);
+      });
+  }
+
+  /**
+   * 🔄 Періодичне оновлення активної сесії
+   */
+  startPeriodicSessionUpdates() {
+    // Очищуємо попередній інтервал якщо є
+    if (this.periodicUpdateInterval) {
+      clearInterval(this.periodicUpdateInterval);
+    }
+
+    // Оновлюємо дані сесії кожні 2 хвилини
+    this.periodicUpdateInterval = setInterval(() => {
+      this.sendActiveSessionUpdate();
+    }, 120000); // 2 хвилини
+
+    console.log('🔄 Запущено періодичне оновлення сесії кожні 2 хвилини');
+  }
+
+  /**
+   * 📤 Відправка оновлених даних активної сесії
+   */
+  sendActiveSessionUpdate() {
+    if (!this.currentSession) return;
+
+    const currentTime = Date.now();
+    const duration = currentTime - this.currentSession.startTime;
+
+    const sessionData = {
+      timestamp: this.currentSession.startTime,
+      date: new Date(this.currentSession.startTime).toISOString().split('T')[0],
+      session_id: this.currentSession.sessionId,
+      ip_address: this.currentSession.ipAddress,
+      user_agent: this.currentSession.userAgent,
+      duration_seconds: Math.round(duration / 1000),
+      total_pages: this.currentSession.totalPages,
+      total_interactions: this.currentSession.totalInteractions,
+      max_scroll_depth: this.currentSession.maxScrollDepth,
+      bounced: duration < 30000 && this.currentSession.totalPages <= 1, // Динамічне визначення
+      device_type: this.currentSession.device.type,
+      browser_name: this.currentSession.browser.name,
+      browser_version: this.currentSession.browser.version,
+      screen_resolution: this.currentSession.device.screenResolution,
+      referrer: this.currentSession.referrer,
+      start_time: new Date(this.currentSession.startTime).toISOString(),
+      end_time: null, // Сесія ще активна
+      status: 'active', // Активна сесія
+      last_update: new Date(currentTime).toISOString()
+    };
+
+    // Використовуємо прямий виклик для негайної відправки
+    GoogleSheetsAnalytics.sendToSheet('UserSessions', [sessionData])
+      .then(() => {
+        console.log(`🔄 Оновлено активну сесію: ${Math.round(duration/1000)}с, ${this.currentSession.totalPages} сторінок`);
+      })
+      .catch(error => {
+        console.error('❌ Помилка оновлення активної сесії:', error);
+      });
+  }
+
+  /**
+   * 📊 Відправка фінальних даних сесії в Google Sheets
    */
   sendSessionData() {
     if (!this.currentSession) return;
+
+    // Зупиняємо періодичні оновлення
+    if (this.periodicUpdateInterval) {
+      clearInterval(this.periodicUpdateInterval);
+      this.periodicUpdateInterval = null;
+    }
 
     const sessionData = {
       timestamp: this.currentSession.startTime,
@@ -230,7 +337,8 @@ class SessionAnalytics {
       screen_resolution: this.currentSession.device.screenResolution,
       referrer: this.currentSession.referrer,
       start_time: new Date(this.currentSession.startTime).toISOString(),
-      end_time: new Date(this.currentSession.endTime).toISOString()
+      end_time: new Date(this.currentSession.endTime).toISOString(),
+      status: 'completed' // Завершена сесія
     };
 
     // Додаємо до batch черги для відправки
@@ -239,7 +347,7 @@ class SessionAnalytics {
       data: [sessionData]
     });
 
-    console.log('📊 Дані сесії відправлено:', sessionData);
+    console.log('📊 Фінальні дані сесії відправлено:', sessionData);
   }
 
   /**
@@ -487,6 +595,21 @@ class SessionAnalytics {
     console.log('✅ Сесія збережена принудительно');
     return true;
   }
+
+  /**
+   * 🚀 Негайне оновлення поточної сесії (для тестування)
+   */
+  static forceSessionUpdate() {
+    const instance = SessionAnalytics.getInstance();
+    if (!instance.currentSession) {
+      console.warn('⚠️ Немає активної сесії для оновлення');
+      return false;
+    }
+
+    console.log('🚀 Принудительне оновлення активної сесії...');
+    instance.sendActiveSessionUpdate();
+    return true;
+  }
 }
 
 // 🧪 Глобальні тестові функції для console
@@ -587,6 +710,11 @@ if (typeof window !== 'undefined') {
   window.sessionSave = () => {
     console.log('💾 Принудительне збереження сесії...');
     return SessionAnalytics.forceSessionSave();
+  };
+
+  window.sessionUpdate = () => {
+    console.log('🚀 Принудительне оновлення активної сесії...');
+    return SessionAnalytics.forceSessionUpdate();
   };
 
   window.sessionEndTest = () => {
